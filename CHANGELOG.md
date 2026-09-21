@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.0.0+zhdsmy.1 — 2026-09-21
+
+Based on upstream ZOOL 1.0.0, including upstream main through `5d7ffd5`.
+
+- Nezha sign-in now lists the configured OAuth providers, requests the selected provider's authorization URL and redirects to it.
+- Pending OAuth requests disable repeated attempts; failures show an error and allow retry. Password login and Komari OAuth remain supported.
+- Add 13 OAuth regression cases covering provider discovery, redirects, failures, unsafe URLs and existing login modes.
+
 ## 1.0.0 — 2026-09-17
 
 The theme is now called ZOOL, and a machine that is not reporting says why.

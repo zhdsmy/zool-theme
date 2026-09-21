@@ -36,7 +36,7 @@ Nezha only serves the frontend for `/` and `/server/:id`, which is exactly what 
    docker compose up -d
    ```
 
-4. Open the dashboard. `curl -s https://your-nezha/ | grep -o 'generator" content="zool v[0-9.]*'` should print the installed version.
+4. Open the dashboard. `curl -s https://your-nezha/ | grep -o 'generator" content="zool v[0-9A-Za-z.+-]*'` should print the installed version.
 
 ## Configuration
 

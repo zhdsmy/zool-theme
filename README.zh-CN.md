@@ -33,6 +33,12 @@
   <img src="docs/screenshots/home-light.png" alt="ZOOL 主题浅色模式" width="880" />
 </p>
 
+## Fork 版本约定
+
+本 fork 使用 `<上游版本>+zhdsmy.<修订号>`，当前为 `1.0.0+zhdsmy.1`。同一上游基线上仅递增末尾修订号；合入上游 `1.0.1` 后从 `1.0.1+zhdsmy.1` 开始。Git 标签加 `v` 前缀，构建包文件名包含完整版本号。
+
+此后缀属于 SemVer 构建标识，不影响版本优先级比较。部署时用完整 Git 标签和包 SHA256 确认 fork 修订。执行 `pnpm build && pnpm package` 会在 `release/` 生成对应构建包和 `SHA256SUMS`。
+
 ## 用 AI 安装
 
 把下面这段交给 Claude Code、Codex 或任何能访问你服务器的编码代理：

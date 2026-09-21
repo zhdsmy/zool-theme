@@ -33,6 +33,12 @@
   <img src="docs/screenshots/home-light.png" alt="ZOOL on a Komari fleet, light mode" width="880" />
 </p>
 
+## Fork versions
+
+This fork uses `<upstream-version>+zhdsmy.<revision>`, currently `1.0.0+zhdsmy.1`. Increment the revision for changes on the same upstream baseline; after adopting upstream `1.0.1`, start at `1.0.1+zhdsmy.1`. Git tags include the `v` prefix and packaged ZIP filenames include the complete version.
+
+The suffix is SemVer build metadata and does not change version precedence. Identify deployed fork revisions by their complete Git tag and artifact SHA256. `pnpm build && pnpm package` creates the fork packages and `SHA256SUMS` under `release/`.
+
 ## Install with an AI agent
 
 Give this to Claude Code, Codex or any coding agent that can reach your server:
