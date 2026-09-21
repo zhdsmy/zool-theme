@@ -17,7 +17,22 @@ function LoginForm() {
   const [needCode, setNeedCode] = useState(false)
   const [busy, setBusy] = useState(false)
   const [message, setMessage] = useState<{ kind: 'error' | 'info' | 'ok'; text: string } | null>(null)
-  const oauth = site ? adapter.oauthUrl(site) : null
+  const oauthProviders = site?.oauth ? site.oauthProviders ?? [site.oauthProvider || 'SSO'] : []
+
+  const startOAuth = async (provider: string) => {
+    if (busy || !site) return
+    setBusy(true)
+    setMessage(null)
+    try {
+      const url = await adapter.oauthUrl(site, provider)
+      if (!url) throw new Error('OAuth login unavailable')
+      window.location.assign(url)
+    } catch {
+      setMessage({ kind: 'error', text: t('auth.network') })
+    } finally {
+      setBusy(false)
+    }
+  }
 
   const submit = async (e: FormEvent) => {
     e.preventDefault()
@@ -83,21 +98,13 @@ function LoginForm() {
             />
           </label>
         )}
-        {message && (
-          <p
-            role={message.kind === 'error' ? 'alert' : 'status'}
-            className={`text-[13px] ${message.kind === 'error' ? 'text-danger' : message.kind === 'ok' ? 'text-sage-text' : 'text-muted'}`}
-          >
-            {message.text}
-          </p>
-        )}
         <button type="submit" className="btn-primary mt-2 w-full" disabled={busy}>
           {busy ? t('auth.submitting') : t('auth.submit')}
         </button>
       </form>
       )}
 
-      {oauth && (
+      {oauthProviders.length > 0 && (
         <>
           {site?.passwordLogin !== false ? (
             <div className="my-5 flex items-center gap-3 text-[12px] text-muted">
@@ -108,10 +115,22 @@ function LoginForm() {
           ) : (
             <div className="mt-7" />
           )}
-          <a href={oauth} className="btn-outline min-h-12 w-full">
-            {t('auth.oauth', { provider: site?.oauthProvider ? site.oauthProvider[0].toUpperCase() + site.oauthProvider.slice(1) : 'SSO' })}
-          </a>
+          <div className="space-y-3">
+            {oauthProviders.map((provider) => (
+              <button key={provider} type="button" className="btn-outline min-h-12 w-full" disabled={busy} onClick={() => startOAuth(provider)}>
+                {t('auth.oauth', { provider: provider[0].toUpperCase() + provider.slice(1) })}
+              </button>
+            ))}
+          </div>
         </>
+      )}
+      {message && (
+        <p
+          role={message.kind === 'error' ? 'alert' : 'status'}
+          className={`mt-4 text-[13px] ${message.kind === 'error' ? 'text-danger' : message.kind === 'ok' ? 'text-sage-text' : 'text-muted'}`}
+        >
+          {message.text}
+        </p>
       )}
       {adapter.target === 'nezha' && <p className="mt-5 text-[12px] leading-relaxed text-muted">{t('auth.wafHint')}</p>}
     </div>

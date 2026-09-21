@@ -30,6 +30,7 @@ export interface SiteInfo {
   recordHours: number
   oauth: boolean
   oauthProvider?: string
+  oauthProviders?: string[]
   /** False when the backend only allows OAuth sign-in. */
   passwordLogin: boolean
 }
@@ -174,7 +175,7 @@ export interface MonitorAdapter {
   loadHistory(id: string, hours: number): Promise<HistoryPoint[]>
   loadPing(id: string, hours: number): Promise<PingData>
   login(username: string, password: string, code?: string): Promise<LoginResult>
-  oauthUrl(site: SiteInfo): string | null
+  oauthUrl(site: SiteInfo, provider?: string): string | null | Promise<string | null>
   nodePath(id: string): string
   matchNodePath(pathname: string): string | null
 }

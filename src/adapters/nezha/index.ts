@@ -69,7 +69,7 @@ export interface NezhaGroup {
 }
 
 interface NezhaSetting {
-  config?: { site_name?: string; language?: string }
+  config?: { site_name?: string; language?: string; oauth2_providers?: string[] | null }
   tsdb_enabled?: boolean
 }
 
@@ -356,13 +356,15 @@ export const nezha: MonitorAdapter = {
   async loadSite(): Promise<SiteInfo> {
     const res = await request<Common<NezhaSetting>>('/api/v1/setting').catch(() => null)
     const cfg = res?.data?.config ?? {}
+    const oauthProviders = (cfg.oauth2_providers ?? []).filter((provider) => typeof provider === 'string' && provider.trim())
     return {
       name: (cfg.site_name ?? '').trim() || 'Nezha',
       description: '',
       language: cfg.language?.replace('_', '-'),
       settings: window.ZoolConfig ?? {},
       recordHours: 0,
-      oauth: false,
+      oauth: oauthProviders.length > 0,
+      oauthProviders,
       passwordLogin: true,
     }
   },
@@ -432,7 +434,14 @@ export const nezha: MonitorAdapter = {
     }
   },
 
-  oauthUrl: () => null,
+  async oauthUrl(site, provider = site.oauthProviders?.[0]) {
+    if (!site.oauth || !provider || !site.oauthProviders?.includes(provider)) return null
+    const res = await request<Common<{ redirect: string }>>(`/api/v1/oauth2/${encodeURIComponent(provider)}?type=1`)
+    if (!res.success) throw new Error('OAuth login failed')
+    const url = new URL(res.data?.redirect ?? '')
+    if (url.protocol !== 'https:' && url.protocol !== 'http:') throw new Error('Invalid OAuth redirect')
+    return url.href
+  },
   nodePath: (id) => `/server/${encodeURIComponent(id)}`,
   // Nezha only serves the SPA for `/` and `/server/:id`.
   matchNodePath: (pathname) => /^\/server\/(\d+)/.exec(pathname)?.[1] ?? null,
