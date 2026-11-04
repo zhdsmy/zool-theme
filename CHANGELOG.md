@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.0+zhdsmy.7 — 2026-11-05
+
+- Redesign the palette: cool mineral paper / deep navy slate with a single cobalt accent, distinct good / warn / danger signals with tinted status chips, and four separable chart colours; all text and instrument pairs meet WCAG contrast in light, dark and high-contrast modes. Favicon and `theme-color` follow the new tokens.
+- Raise phone information density: a 53px header with an untruncated title and a visible sign-in icon, a two-tier overview card, compact toolbar and region chips, and 66px ledger rows (about 12 nodes per iPhone screen, up from 7).
+- Tighten the node page on phones by about 48%: a 3 + 2 instrument grid, two-column info sections, shorter charts with matching skeletons, and a compact footer. Desktop layouts are unchanged.
+
 ## 1.0.0+zhdsmy.6 — 2026-11-04
 
 - Unify billing labels as plan fees and actual costs across the overview, card footer, node details and unavailable state in all four languages.
