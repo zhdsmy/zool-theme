@@ -177,7 +177,7 @@ export function NodeStrip({
         <StatusDot online={online} pending={pending || cond.kind === 'never'} />
         <OsGlyph os={node.os} tile={compact ? 14 : 16} size={compact ? 9 : 11} />
         <span className={`truncate font-medium md:font-normal ${compact ? 'text-[12.5px] leading-[17px] md:text-[13px] md:leading-normal' : 'text-[13px] leading-[18px] md:text-[14px] md:leading-normal'}`}>{stripFlag(node.name)}</span>
-        <RegionTag code={node.region} className="region-tag-strip shrink-0 hidden sm:inline-flex md:hidden lg:inline-flex" />
+        <RegionTag code={node.region} className="region-tag-strip shrink-0 md:hidden lg:inline-flex" />
         {expiry?.level && (
           <span className={`hidden shrink-0 text-[11px] whitespace-nowrap lg:inline ${expiry.level === 'danger' ? 'text-danger' : 'text-warn'}`}>{expiry.text}</span>
         )}
