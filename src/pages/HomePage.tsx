@@ -122,6 +122,7 @@ function Metric({
   tone = '',
   className = '',
   subOnPhone = false,
+  inlineOnPhone = false,
 }: {
   label: string
   value: ReactNode
@@ -130,17 +131,29 @@ function Metric({
   className?: string
   /** On a phone the band is three narrow columns; only a sub line that names something keeps its place. */
   subOnPhone?: boolean
+  /** On a phone, put the value beside its label on the first line so the sub line sits directly below. */
+  inlineOnPhone?: boolean
 }) {
   // Before the first live frame every total is zero, and "0 / 17 online" in red is a false
   // alarm; the band waits with dashes in the same places instead.
   const fed = useStore((s) => s.fed)
   return (
-    <div className={`min-w-0 py-3 md:py-4 lg:px-5 lg:py-5 lg:first:pl-0 ${className}`}>
-      <p className="truncate text-[11px] text-muted md:text-[12px]">{label}</p>
-      <p className={`num mt-1.5 truncate text-[20px] leading-none font-light tracking-[-0.025em] md:text-[24px] ${fed ? tone : 'text-faint'}`}>
-        {fed ? value : '—'}
-      </p>
-      {sub ? <p className={`num mt-2 truncate text-[11px] text-muted ${subOnPhone ? '' : 'hidden md:block'}`}>{fed ? sub : '—'}</p> : null}
+    <div className={`home-metric min-w-0 py-3 md:py-4 lg:px-5 lg:py-5 lg:first:pl-0 ${className}`}>
+      <div className={inlineOnPhone ? 'flex items-baseline justify-between gap-1.5 md:block' : ''}>
+        <p className="truncate text-[10.5px] leading-tight text-muted md:text-[12px] md:leading-normal">{label}</p>
+        <p
+          className={`num truncate text-[16px] leading-none font-medium tracking-[-0.025em] md:mt-1.5 md:text-[24px] md:font-light ${
+            inlineOnPhone ? 'shrink-0' : 'mt-1'
+          } ${fed ? tone : 'text-faint'}`}
+        >
+          {fed ? value : '—'}
+        </p>
+      </div>
+      {sub ? (
+        <p className={`num mt-1 truncate text-[10.5px] leading-tight text-muted md:mt-2 md:text-[11px] md:leading-normal ${subOnPhone ? '' : 'hidden md:block'}`}>
+          {fed ? sub : '—'}
+        </p>
+      ) : null}
     </div>
   )
 }
@@ -342,201 +355,93 @@ export function HomePage() {
         {/* The fleet at a glance. This is the top of the page, so it is the biggest type on
             it — but a band of figures, not one 52px sentence. */}
         {settings.showOverview && (
-          <>
-            {/* Mobile compact overview: two tight tiers inside a bordered surface card */}
-            <div className="home-overview-mobile mt-2.5 overflow-hidden rounded-[14px] border border-line bg-surface md:hidden">
-              <div className="grid grid-cols-3 divide-x divide-line">
-                <div className="min-w-0 px-2.5 py-2">
-                  <p className="truncate text-[10.5px] leading-tight text-muted">{t('overview.nodes')}</p>
-                  <div className="mt-1 flex items-baseline justify-between gap-1">
-                    <p className={`num truncate text-[16px] leading-none font-medium tracking-[-0.02em] ${!fed ? 'text-faint' : offline ? 'text-danger' : 'text-ink'}`}>
-                      {fed ? (
-                        <>
-                          {online}
-                          <span className="ml-0.5 text-[11px] font-normal text-muted">/ {nodes.length}</span>
-                        </>
-                      ) : (
-                        '—'
-                      )}
-                    </p>
-                    {fed && totals.regions > 0 && (
-                      <span className="num shrink-0 text-[10px] leading-none text-muted">{t('overview.regions', { count: totals.regions })}</span>
-                    )}
-                  </div>
-                </div>
-
-                <div className="min-w-0 px-2.5 py-2">
-                  <p className="truncate text-[10.5px] leading-tight text-muted">{t('overview.bandwidth')}</p>
-                  <p className={`num mt-1 truncate text-[16px] leading-none font-medium tracking-[-0.02em] ${fed ? 'text-ink' : 'text-faint'}`}>
-                    {fed ? (
-                      <>
-                        {splitSpeed(totals.up + totals.down).value}
-                        <span className="ml-0.5 text-[10.5px] font-normal text-muted">{splitSpeed(totals.up + totals.down).unit}</span>
-                      </>
-                    ) : (
-                      '—'
-                    )}
-                  </p>
-                </div>
-
-                <div className="min-w-0 px-2.5 py-2">
-                  <p className="truncate text-[10.5px] leading-tight text-muted">{t('overview.traffic')}</p>
-                  <p className={`num mt-1 truncate text-[16px] leading-none font-medium tracking-[-0.02em] ${fed ? 'text-ink' : 'text-faint'}`}>
-                    {fed ? (
-                      <>
-                        {splitBytes(totals.traffic).value}
-                        <span className="ml-0.5 text-[10.5px] font-normal text-muted">{splitBytes(totals.traffic).unit}</span>
-                      </>
-                    ) : (
-                      '—'
-                    )}
-                  </p>
-                </div>
-              </div>
-
-              <div className={`grid border-t border-line bg-surface-2 ${settings.showCost ? 'grid-cols-[1.15fr_0.85fr] divide-x divide-line' : 'grid-cols-1'}`}>
-                <div className="min-w-0 px-2.5 py-2">
-                  <div className="flex items-center justify-between gap-1.5">
-                    <p className="truncate text-[10.5px] leading-tight text-muted">{t('overview.attention')}</p>
-                    <span
-                      className={`num shrink-0 rounded-full px-1.5 py-0.5 text-[10.5px] leading-none font-semibold ${
-                        !fed
-                          ? 'text-faint'
-                          : totals.worst?.level === 'danger'
-                            ? 'bg-danger-wash text-danger'
-                            : totals.worst
-                              ? 'bg-warn-wash text-warn'
-                              : 'bg-good-wash text-good'
-                      }`}
-                    >
-                      {fed ? totals.attention : '—'}
-                    </span>
-                  </div>
-                  <p
-                    className={`num mt-1 truncate text-[11px] leading-tight ${
-                      !fed ? 'text-faint' : totals.worst?.level === 'danger' ? 'font-medium text-danger' : totals.worst ? 'font-medium text-warn' : 'text-muted'
-                    }`}
-                  >
-                    {!fed
-                      ? '—'
-                      : totals.worst
-                        ? `${stripFlag(totals.worst.name)} · ${t(`metric.${totals.worst.metric}`)} ${formatPercent(totals.worst.pct)}%`
-                        : t('overview.allClear')}
-                  </p>
-                </div>
-
-                {settings.showCost && (
-                  <div className="min-w-0 px-2.5 py-2">
-                    <div className="flex items-baseline justify-between gap-1">
-                      <p className="truncate text-[10.5px] leading-tight text-muted">{t(loggedIn ? 'overview.actualCost' : 'overview.cost')}</p>
-                      {fed && cost.amount !== null && (
-                        <span className="num shrink-0 truncate text-[10px] leading-tight text-muted" title={t('overview.costNodes', { count: cost.paid })}>
-                          {t('unit.nodes', { count: cost.paid })}
-                        </span>
-                      )}
-                    </div>
-                    <div className="num mt-1 flex items-baseline justify-between gap-1 leading-none">
-                      {!fed || cost.amount === null ? (
-                        <span className="truncate text-[11px] text-muted">
-                          {!fed
-                            ? '—'
-                            : t(loggedIn && actualCosts === null ? 'overview.actualCostUnavailable' : rateError ? 'overview.costUnavailable' : 'overview.costLoading')}
-                        </span>
-                      ) : (
-                        <span className="truncate text-[14px] font-medium tracking-[-0.02em] text-ink">
-                          {formatMoney(cost.amount, costCurrency)}
-                          <span className="ml-0.5 text-[10px] font-normal text-muted">{t('unit.perMonth')}</span>
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Desktop overview band (unchanged structure and spacing at ≥ 768px) */}
-            <div
-              className={`mt-4 hidden border-y border-line md:grid md:grid-cols-3 md:gap-x-4 lg:gap-x-0 lg:divide-x lg:divide-line ${
-                settings.showCost ? 'lg:grid-cols-5' : 'lg:grid-cols-4'
-              }`}
-            >
-              <Metric
-                label={t('overview.nodes')}
-                tone={offline ? 'text-danger' : ''}
-                value={
-                  <>
-                    {online}
-                    <span className="ml-1 text-[0.55em] text-muted">/ {nodes.length}</span>
-                  </>
-                }
-                sub={totals.regions > 0 ? t('overview.regions', { count: totals.regions }) : undefined}
-              />
-              <Metric
-                label={t('overview.bandwidth')}
-                value={
-                  <>
-                    {splitSpeed(totals.up + totals.down).value}
-                    <span className="ml-1 text-[0.55em] text-muted">{splitSpeed(totals.up + totals.down).unit}</span>
-                  </>
-                }
-                sub={
-                  <Pair
-                    up={`${splitSpeed(totals.up).value} ${splitSpeed(totals.up).unit}`}
-                    down={`${splitSpeed(totals.down).value} ${splitSpeed(totals.down).unit}`}
-                  />
-                }
-              />
-              <Metric
-                label={t('overview.traffic')}
-                value={
-                  <>
-                    {splitBytes(totals.traffic).value}
-                    <span className="ml-1 text-[0.55em] text-muted">{splitBytes(totals.traffic).unit}</span>
-                  </>
-                }
-                sub={
-                  <Pair
-                    up={`${splitBytes(totals.trafficUp).value} ${splitBytes(totals.trafficUp).unit}`}
-                    down={`${splitBytes(totals.trafficDown).value} ${splitBytes(totals.trafficDown).unit}`}
-                  />
-                }
-              />
-              {/* Not an average. A mean CPU across a one-core VPS and a sixteen-core box is
-                  arithmetic without meaning; this counts the machines with a reading past its own
-                  warning line, which is the question a summary actually owes the reader. */}
-              <Metric
-                label={t('overview.attention')}
-                className={settings.showCost ? 'col-span-2 lg:col-span-1' : 'col-span-3 lg:col-span-1'}
-                subOnPhone
-                tone={totals.worst?.level === 'danger' ? 'text-danger' : totals.worst ? 'text-warn' : ''}
-                value={totals.attention}
-                sub={
-                  totals.worst
-                    ? `${stripFlag(totals.worst.name)} · ${t(`metric.${totals.worst.metric}`)} ${formatPercent(totals.worst.pct)}%`
-                    : t('overview.allClear')
-                }
-              />
-              {settings.showCost && (
-                <Metric
-                  label={t(loggedIn ? 'overview.actualCost' : 'overview.cost')}
-                  subOnPhone
-                  value={
-                    <>
-                      {cost.amount === null ? '—' : formatMoney(cost.amount, costCurrency)}
-                      {cost.amount !== null && <span className="ml-1 text-[0.55em] text-muted">{t('unit.perMonth')}</span>}
-                    </>
-                  }
-                  sub={cost.amount === null ? t(loggedIn && actualCosts === null ? 'overview.actualCostUnavailable' : rateError ? 'overview.costUnavailable' : 'overview.costLoading') : <>
-                    {t('overview.costNodes', { count: cost.paid })}
-                    {rates && <span className="mt-1 block text-faint">
-                      {t(rates.stale ? 'overview.costCachedRates' : 'overview.costRates')}{' '}
-                      <time dateTime={rates.date} className="block md:inline">{rates.date}</time>
-                    </span>}
-                  </>}
+          <div
+            className={`home-overview mt-2.5 grid grid-cols-6 border-y border-line md:mt-4 md:grid-cols-3 md:gap-x-4 lg:gap-x-0 lg:divide-x lg:divide-line ${
+              settings.showCost ? 'lg:grid-cols-5' : 'lg:grid-cols-4'
+            }`}
+          >
+            <Metric
+              label={t('overview.nodes')}
+              className="col-span-2 md:col-span-1"
+              tone={offline ? 'text-danger' : ''}
+              value={
+                <>
+                  {online}
+                  <span className="ml-1 text-[0.55em] text-muted">/ {nodes.length}</span>
+                </>
+              }
+              sub={totals.regions > 0 ? t('overview.regions', { count: totals.regions }) : undefined}
+            />
+            <Metric
+              label={t('overview.bandwidth')}
+              className="col-span-2 md:col-span-1"
+              value={
+                <>
+                  {splitSpeed(totals.up + totals.down).value}
+                  <span className="ml-1 text-[0.55em] text-muted">{splitSpeed(totals.up + totals.down).unit}</span>
+                </>
+              }
+              sub={
+                <Pair
+                  up={`${splitSpeed(totals.up).value} ${splitSpeed(totals.up).unit}`}
+                  down={`${splitSpeed(totals.down).value} ${splitSpeed(totals.down).unit}`}
                 />
-              )}
-            </div>
-          </>
+              }
+            />
+            <Metric
+              label={t('overview.traffic')}
+              className="col-span-2 md:col-span-1"
+              value={
+                <>
+                  {splitBytes(totals.traffic).value}
+                  <span className="ml-1 text-[0.55em] text-muted">{splitBytes(totals.traffic).unit}</span>
+                </>
+              }
+              sub={
+                <Pair
+                  up={`${splitBytes(totals.trafficUp).value} ${splitBytes(totals.trafficUp).unit}`}
+                  down={`${splitBytes(totals.trafficDown).value} ${splitBytes(totals.trafficDown).unit}`}
+                />
+              }
+            />
+            {/* Not an average. A mean CPU across a one-core VPS and a sixteen-core box is
+                arithmetic without meaning; this counts the machines with a reading past its own
+                warning line, which is the question a summary actually owes the reader. */}
+            <Metric
+              label={t('overview.attention')}
+              className={settings.showCost ? 'col-span-3 md:col-span-2 lg:col-span-1' : 'col-span-6 md:col-span-3 lg:col-span-1'}
+              subOnPhone
+              inlineOnPhone
+              tone={totals.worst?.level === 'danger' ? 'text-danger' : totals.worst ? 'text-warn' : ''}
+              value={totals.attention}
+              sub={
+                totals.worst
+                  ? `${stripFlag(totals.worst.name)} · ${t(`metric.${totals.worst.metric}`)} ${formatPercent(totals.worst.pct)}%`
+                  : t('overview.allClear')
+              }
+            />
+            {settings.showCost && (
+              <Metric
+                label={t(loggedIn ? 'overview.actualCost' : 'overview.cost')}
+                className="col-span-3 md:col-span-1"
+                subOnPhone
+                inlineOnPhone
+                value={
+                  <>
+                    {cost.amount === null ? '—' : formatMoney(cost.amount, costCurrency)}
+                    {cost.amount !== null && <span className="ml-1 text-[0.55em] text-muted">{t('unit.perMonth')}</span>}
+                  </>
+                }
+                sub={cost.amount === null ? t(loggedIn && actualCosts === null ? 'overview.actualCostUnavailable' : rateError ? 'overview.costUnavailable' : 'overview.costLoading') : <>
+                  <span className="block truncate">{t('overview.costNodes', { count: cost.paid })}</span>
+                  {rates && <span className="mt-0.5 block truncate text-[10px] text-faint md:mt-1 md:text-[11px]">
+                    {t(rates.stale ? 'overview.costCachedRates' : 'overview.costRates')}{' '}
+                    <time dateTime={rates.date} className="inline">{rates.date}</time>
+                  </span>}
+                </>}
+              />
+            )}
+          </div>
         )}
         {description && description !== 'A simple server monitor tool.' && (
           <p className="mt-2.5 max-w-[60ch] text-[13px] leading-relaxed text-muted md:mt-3 md:text-[14px]">{description}</p>

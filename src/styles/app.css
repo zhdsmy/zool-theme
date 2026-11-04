@@ -644,36 +644,34 @@
 
 /* ===== home-mobile: owned by the home package (HomePage / ledger / Header). ===== */
 @media (width < 768px) {
-  header.home-header .icon-btn {
-    width: 40px;
-    height: 40px;
+  .home-overview {
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: var(--surface);
+    overflow: hidden;
   }
 
-  .home-toolbar button {
-    min-height: 40px;
-    min-width: 40px;
+  .home-metric {
+    padding: 8px 9px;
   }
 
-  .home-toolbar .segmented {
-    padding: 2px;
+  .home-metric:nth-child(2),
+  .home-metric:nth-child(3),
+  .home-metric:nth-child(5) {
+    border-left: 1px solid var(--line);
   }
 
-  .home-toolbar .segmented > button,
-  .home-toolbar .segmented > .relative > button {
-    height: 36px;
-    min-height: 40px;
-    min-width: 40px;
+  .home-metric:nth-child(n + 4) {
+    border-top: 1px solid var(--line);
+    background: var(--surface-2);
   }
 
   .home-toolbar .sort-pill {
-    min-height: 40px;
     padding-inline: 11px;
     gap: 5px;
   }
 
   .home-toolbar .region-pill {
-    min-height: 40px;
-    min-width: 40px;
     padding: 6px 0;
     border-color: transparent;
     background: transparent;

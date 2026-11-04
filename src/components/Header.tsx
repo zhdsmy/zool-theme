@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ArrowUpRight, Check, Monitor, Moon, RefreshCw, Search, Sun } from 'lucide-react'
+import { ArrowUpRight, Check, LogIn, Monitor, Moon, RefreshCw, Search, Sun } from 'lucide-react'
 import { adapter, refresh, useStore } from '@/app/store'
 import { Link } from '@/app/router'
 import { openDialog } from '@/app/ui'
@@ -21,11 +21,8 @@ const APPEARANCE_ICON = { light: Sun, dark: Moon, system: Monitor } as const
 function PrefsMenu() {
   const { t, i18n } = useTranslation()
   const appearance = useAppearance()
-  const session = useStore((s) => s.session)
-  const settings = useStore((s) => s.settings)
   const Icon = APPEARANCE_ICON[appearance]
   const options: Appearance[] = ['light', 'dark', 'system']
-  const showAuth = session.loggedIn || !settings.hideAdminEntry
 
   return (
     <Popover label={`${t('prefs.appearance')} · ${t('prefs.language')}`} button={<Icon size={18} strokeWidth={1.6} />} panelClassName="w-[248px] p-2">
@@ -72,32 +69,6 @@ function PrefsMenu() {
               </li>
             ))}
           </ul>
-          {showAuth && (
-            <div className="md:hidden">
-              <div className="my-2 h-px bg-line" />
-              {session.loggedIn ? (
-                <a
-                  href={adapter.adminUrl}
-                  onClick={close}
-                  className="flex h-10 w-full items-center justify-between rounded-[10px] px-3 text-[14px] font-medium text-accent-text hover:bg-wash"
-                >
-                  <span>{t('auth.dashboard')}</span>
-                  <ArrowUpRight size={15} strokeWidth={1.7} aria-hidden />
-                </a>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => {
-                    close()
-                    openDialog('login')
-                  }}
-                  className="flex h-10 w-full items-center justify-between rounded-[10px] px-3 text-[14px] font-medium text-accent-text hover:bg-wash"
-                >
-                  <span>{t('auth.signIn')}</span>
-                </button>
-              )}
-            </div>
-          )}
         </div>
       )}
     </Popover>
@@ -125,9 +96,9 @@ export function Header() {
   }, [])
 
   return (
-    <header className="home-header sticky top-0 z-30 border-b border-line bg-paper/85 backdrop-blur-md">
-      <div className="wrap flex h-13 items-center gap-1 md:h-16 md:gap-2">
-        <Link href="/" className="mr-auto min-w-0 truncate rounded-md pr-2 text-[17px] font-medium tracking-[-0.02em] md:pr-0 md:text-[19px] md:font-[450]">
+    <header className="sticky top-0 z-30 border-b border-line bg-paper/80 backdrop-blur-md">
+      <div className="wrap flex h-13 items-center gap-0.5 md:h-16 md:gap-2">
+        <Link href="/" className="mr-auto min-w-0 truncate rounded-md pr-1 text-[16.5px] font-medium tracking-[-0.02em] md:pr-0 md:text-[19px] md:font-[450]">
           {title}
         </Link>
 
@@ -167,15 +138,36 @@ export function Header() {
         <PrefsMenu />
 
         {session.loggedIn ? (
-          <a href={adapter.adminUrl} className="btn-outline ml-1 hidden md:inline-flex">
-            {t('auth.dashboard')}
-            <ArrowUpRight size={15} strokeWidth={1.7} aria-hidden />
-          </a>
+          <>
+            <a
+              href={adapter.adminUrl}
+              className="icon-btn md:hidden"
+              aria-label={t('auth.dashboard')}
+              title={t('auth.dashboard')}
+            >
+              <ArrowUpRight size={18} strokeWidth={1.6} aria-hidden />
+            </a>
+            <a href={adapter.adminUrl} className="btn-outline ml-1 hidden md:inline-flex">
+              {t('auth.dashboard')}
+              <ArrowUpRight size={15} strokeWidth={1.7} aria-hidden />
+            </a>
+          </>
         ) : (
           !settings.hideAdminEntry && (
-            <button type="button" className="btn-outline ml-1 hidden md:inline-flex" onClick={() => openDialog('login')}>
-              {t('auth.signIn')}
-            </button>
+            <>
+              <button
+                type="button"
+                className="icon-btn md:hidden"
+                aria-label={t('auth.signIn')}
+                title={t('auth.signIn')}
+                onClick={() => openDialog('login')}
+              >
+                <LogIn size={18} strokeWidth={1.6} aria-hidden />
+              </button>
+              <button type="button" className="btn-outline ml-1 hidden md:inline-flex" onClick={() => openDialog('login')}>
+                {t('auth.signIn')}
+              </button>
+            </>
           )
         )}
       </div>

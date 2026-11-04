@@ -30,6 +30,7 @@ const RUN_CELLS = 12
  * cells like a card; the desktop ledger keeps one tick per core and one block per gigabyte.
  */
 const PHONE_CELLS = 12
+const PHONE_BAR_HEIGHT = 9
 
 /**
  * The desktop ledger's columns say what each figure is; a phone row has no columns to lean on.
@@ -176,7 +177,7 @@ export function NodeStrip({
         <StatusDot online={online} pending={pending || cond.kind === 'never'} />
         <OsGlyph os={node.os} tile={compact ? 14 : 16} size={compact ? 9 : 11} />
         <span className={`truncate font-medium md:font-normal ${compact ? 'text-[12.5px] leading-[17px] md:text-[13px] md:leading-normal' : 'text-[13px] leading-[18px] md:text-[14px] md:leading-normal'}`}>{stripFlag(node.name)}</span>
-        <RegionTag code={node.region} className="region-tag-strip shrink-0" />
+        <RegionTag code={node.region} className="region-tag-strip shrink-0 hidden sm:inline-flex md:hidden lg:inline-flex" />
         {expiry?.level && (
           <span className={`hidden shrink-0 text-[11px] whitespace-nowrap lg:inline ${expiry.level === 'danger' ? 'text-danger' : 'text-warn'}`}>{expiry.text}</span>
         )}
@@ -200,7 +201,7 @@ export function NodeStrip({
               <TickBar
                 filled={(cpu / 100) * PHONE_CELLS}
                 ticks={PHONE_CELLS}
-                height={9}
+                height={PHONE_BAR_HEIGHT}
                 stretch
                 level={cpuLevel}
                 label={`${t('metric.cpu')} ${formatPercent(cpu)}%`}
@@ -231,7 +232,7 @@ export function NodeStrip({
               <BlockGrid
                 filled={(memPct / 100) * PHONE_CELLS}
                 blocks={PHONE_CELLS}
-                height={10}
+                height={PHONE_BAR_HEIGHT}
                 stretch
                 level={memLevel}
                 label={`${t('metric.memory')} ${formatPercent(memPct)}%`}
@@ -459,7 +460,7 @@ export function NodeCard({ node, snap, tick, pending }: { node: NodeInfo; snap?:
       href={adapter.nodePath(node.id)}
       data-pending={pending ? '' : undefined}
       data-stale={shown && cond.kind !== 'online' ? '' : undefined}
-      className="card @container block transition-[border-color,box-shadow] duration-200 hover:border-line-strong hover:shadow-pop"
+      className="card @container block transition-[border-color,box-shadow] duration-200 hover:border-line-strong hover:shadow-[0_12px_32px_-16px_rgb(24_37_27/0.18)]"
     >
       {/* Below 320px — four cards to a row — the card tightens its padding and gaps rather than
           its type: the numbers still lead, and the labels stay above them. */}
