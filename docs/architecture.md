@@ -91,8 +91,8 @@ Only the resolved theme is stored on `<html>`; the visitor's choice lives in `lo
 | `--warn-wash` | Tinted background for `warn` status chips | `#fff0d4` | `#2b1f0b` |
 | `--danger` | Critical / offline status text and instrument fill | `#bf1b30` | `#fb7185` |
 | `--danger-wash` | Tinted background for `danger` status chips | `#ffe4e8` | `#31141f` |
-| `--sage` | Legacy soft viridian tint | `#a3e4c7` | `#1c5240` |
-| `--sage-text` | Legacy viridian text / fill alias | `#0a7246` | `#34d399` |
+| `--sage` | Legacy soft viridian tint (`var(--good-wash)`) | `#dcf5ea` | `#0d2b22` |
+| `--sage-text` | Legacy viridian text / fill alias (`var(--good)`) | `#0a7246` | `#34d399` |
 | `--chart-1` | Chart series 1 (Cobalt) | `#1849c6` | `#5b92ff` |
 | `--chart-2` | Chart series 2 (Teal) | `#0b877d` | `#2dd4bf` |
 | `--chart-3` | Chart series 3 (Amber) | `#c86400` | `#fbbf24` |
