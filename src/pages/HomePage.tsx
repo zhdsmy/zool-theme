@@ -347,22 +347,22 @@ export function HomePage() {
             <div className="home-overview-mobile mt-2.5 overflow-hidden rounded-[14px] border border-line bg-surface md:hidden">
               <div className="grid grid-cols-3 divide-x divide-line">
                 <div className="min-w-0 px-2.5 py-2">
-                  <div className="flex items-baseline justify-between gap-1">
-                    <p className="truncate text-[10.5px] leading-tight text-muted">{t('overview.nodes')}</p>
+                  <p className="truncate text-[10.5px] leading-tight text-muted">{t('overview.nodes')}</p>
+                  <div className="mt-1 flex items-baseline justify-between gap-1">
+                    <p className={`num truncate text-[16px] leading-none font-medium tracking-[-0.02em] ${!fed ? 'text-faint' : offline ? 'text-danger' : 'text-ink'}`}>
+                      {fed ? (
+                        <>
+                          {online}
+                          <span className="ml-0.5 text-[11px] font-normal text-muted">/ {nodes.length}</span>
+                        </>
+                      ) : (
+                        '—'
+                      )}
+                    </p>
                     {fed && totals.regions > 0 && (
-                      <span className="num shrink-0 text-[10px] leading-tight text-faint">{t('overview.regions', { count: totals.regions })}</span>
+                      <span className="num shrink-0 text-[10px] leading-none text-muted">{t('overview.regions', { count: totals.regions })}</span>
                     )}
                   </div>
-                  <p className={`num mt-1 truncate text-[16px] leading-none font-medium tracking-[-0.02em] ${!fed ? 'text-faint' : offline ? 'text-danger' : 'text-ink'}`}>
-                    {fed ? (
-                      <>
-                        {online}
-                        <span className="ml-0.5 text-[11px] font-normal text-muted">/ {nodes.length}</span>
-                      </>
-                    ) : (
-                      '—'
-                    )}
-                  </p>
                 </div>
 
                 <div className="min-w-0 px-2.5 py-2">
