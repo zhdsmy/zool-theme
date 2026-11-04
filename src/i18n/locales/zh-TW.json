@@ -29,7 +29,7 @@
     "nodes": "在線節點",
     "bandwidth": "即時頻寬",
     "traffic": "累計流量",
-    "cost": "線上展示月費",
+    "cost": "月度費用",
     "attention": "需要注意",
     "allClear": "均未接近上限",
     "costNodes_other": "{{count}} 台線上付費節點",
@@ -38,8 +38,8 @@
     "costLoading": "正在取得匯率…",
     "costUnavailable": "匯率無法使用，暫無法合計",
     "regions_other": "{{count}} 個地區",
-    "actualCost": "線上實際月支出",
-    "actualCostUnavailable": "實際支出暫不可用"
+    "actualCost": "月度成本",
+    "actualCostUnavailable": "實際成本暫不可用"
   },
   "toolbar": {
     "all": "全部",
@@ -91,16 +91,16 @@
     "udp": "UDP",
     "quota": "流量配額",
     "expiry": "到期",
-    "price": "價格",
+    "price": "套餐費用",
     "free": "免費",
     "autoRenew": "自動續約",
     "unlimited": "不限",
     "cores_other": "{{count}} 核",
     "payAsYouGo": "隨用隨付",
     "unknown": "未知",
-    "actualCost": "實際支出",
-    "listPriceShort": "標價",
-    "actualCostShort": "實付"
+    "actualCost": "實際成本",
+    "listPriceShort": "費用",
+    "actualCostShort": "成本"
   },
   "unit": {
     "days_other": "{{count}} 天",

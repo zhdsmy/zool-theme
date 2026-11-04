@@ -29,7 +29,7 @@
     "nodes": "在线节点",
     "bandwidth": "实时带宽",
     "traffic": "累计流量",
-    "cost": "在线展示月费",
+    "cost": "月度费用",
     "attention": "需要注意",
     "allClear": "均未接近上限",
     "costNodes_other": "{{count}} 台在线付费节点",
@@ -38,8 +38,8 @@
     "costLoading": "正在获取汇率…",
     "costUnavailable": "汇率不可用，暂无法合计",
     "regions_other": "{{count}} 个地区",
-    "actualCost": "在线实际月支出",
-    "actualCostUnavailable": "实际支出暂不可用"
+    "actualCost": "月度成本",
+    "actualCostUnavailable": "实际成本暂不可用"
   },
   "toolbar": {
     "all": "全部",
@@ -91,16 +91,16 @@
     "udp": "UDP",
     "quota": "流量配额",
     "expiry": "到期",
-    "price": "价格",
+    "price": "套餐费用",
     "free": "免费",
     "autoRenew": "自动续费",
     "unlimited": "不限",
     "cores_other": "{{count}} 核",
     "payAsYouGo": "按量计费",
     "unknown": "未知",
-    "actualCost": "实际支出",
-    "listPriceShort": "标价",
-    "actualCostShort": "实付"
+    "actualCost": "实际成本",
+    "listPriceShort": "费用",
+    "actualCostShort": "成本"
   },
   "unit": {
     "days_other": "{{count}} 天",

@@ -32,7 +32,7 @@
     "nodes": "Nodes online",
     "bandwidth": "Bandwidth",
     "traffic": "Total traffic",
-    "cost": "Online displayed monthly cost",
+    "cost": "Monthly fees",
     "attention": "Needs attention",
     "allClear": "Nothing near a limit",
     "costNodes_one": "across {{count}} online paid node",
@@ -43,8 +43,8 @@
     "costUnavailable": "Exchange rates unavailable",
     "regions_one": "{{count}} region",
     "regions_other": "{{count}} regions",
-    "actualCost": "Online actual monthly expense",
-    "actualCostUnavailable": "Actual expenses are unavailable"
+    "actualCost": "Monthly cost",
+    "actualCostUnavailable": "Actual costs are unavailable"
   },
   "toolbar": {
     "all": "All",
@@ -96,7 +96,7 @@
     "udp": "UDP",
     "quota": "Quota",
     "expiry": "Expires",
-    "price": "Price",
+    "price": "Plan fee",
     "free": "Free",
     "autoRenew": "Auto-renew",
     "unlimited": "Unlimited",
@@ -104,9 +104,9 @@
     "cores_other": "{{count}} cores",
     "payAsYouGo": "Pay as you go",
     "unknown": "Unknown",
-    "actualCost": "Actual expense",
-    "listPriceShort": "Listed",
-    "actualCostShort": "Paid"
+    "actualCost": "Actual cost",
+    "listPriceShort": "Fee",
+    "actualCostShort": "Cost"
   },
   "unit": {
     "days_one": "{{count}} day",

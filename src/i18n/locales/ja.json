@@ -29,7 +29,7 @@
     "nodes": "オンラインのノード",
     "bandwidth": "帯域幅",
     "traffic": "累計トラフィック",
-    "cost": "オンライン表示月額",
+    "cost": "月額料金",
     "attention": "要注意",
     "allClear": "上限に近いものなし",
     "costNodes_other": "オンライン有料ノード {{count}} 台",
@@ -38,8 +38,8 @@
     "costLoading": "為替レートを取得中…",
     "costUnavailable": "為替レートを取得できません",
     "regions_other": "{{count}} 地域",
-    "actualCost": "オンライン実際の月額支出",
-    "actualCostUnavailable": "実際の支出を取得できません"
+    "actualCost": "月額コスト",
+    "actualCostUnavailable": "実際のコストを取得できません"
   },
   "toolbar": {
     "all": "すべて",
@@ -91,16 +91,16 @@
     "udp": "UDP",
     "quota": "転送量上限",
     "expiry": "期限",
-    "price": "料金",
+    "price": "プラン料金",
     "free": "無料",
     "autoRenew": "自動更新",
     "unlimited": "無制限",
     "cores_other": "{{count}} コア",
     "payAsYouGo": "従量課金",
     "unknown": "不明",
-    "actualCost": "実際の支出",
-    "listPriceShort": "表示",
-    "actualCostShort": "実費"
+    "actualCost": "実際のコスト",
+    "listPriceShort": "料金",
+    "actualCostShort": "コスト"
   },
   "unit": {
     "days_other": "{{count}} 日",

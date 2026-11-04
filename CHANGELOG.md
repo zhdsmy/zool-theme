@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.0+zhdsmy.6 — 2026-11-04
+
+- Unify billing labels as plan fees and actual costs across the overview, card footer, node details and unavailable state in all four languages.
+
 ## 1.0.0+zhdsmy.5 — 2026-11-04
 
 - Group listed and actual card expenses in the bottom footer, with compact labels, accessible uptime/expiry icons and wrapping that keeps both amounts visible.
