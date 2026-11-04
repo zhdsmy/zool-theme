@@ -21,10 +21,12 @@ interface Props {
   formatTooltipTime?: (t: number) => string
   yMax?: number
   height?: number
+  mobileHeight?: number
   label?: string
 }
 
 const PAD = { l: 48, r: 6, t: 10, b: 24 }
+const MOBILE_PAD = { l: 46, r: 4, t: 6, b: 18 }
 
 function niceMax(v: number) {
   if (!(v > 0)) return 1
@@ -68,23 +70,38 @@ function nearest(points: ChartPoint[], t: number) {
  * A small, dependency-free SVG time-series chart: hairline grid, 1.5px lines,
  * a soft area under the first series, and a crosshair tooltip.
  */
-export function Chart({ series, format, formatTime, formatTooltipTime = formatTime, yMax, height = 150, label }: Props) {
+export function Chart({ series, format, formatTime, formatTooltipTime = formatTime, yMax, height = 150, mobileHeight, label }: Props) {
   const box = useRef<HTMLDivElement>(null)
   const [width, setWidth] = useState(0)
+  const [isMobile, setIsMobile] = useState(() => (typeof window !== 'undefined' ? window.matchMedia('(width < 768px)').matches : false))
   const [hoverT, setHoverT] = useState<number | null>(null)
   const uid = useId().replace(/:/g, '')
 
   useLayoutEffect(() => {
     const el = box.current
     if (!el) return
-    setWidth(el.clientWidth)
-    const ro = new ResizeObserver(([entry]) => setWidth(entry.contentRect.width))
+    const mq = window.matchMedia('(width < 768px)')
+    const sync = () => {
+      setWidth(el.clientWidth)
+      setIsMobile(mq.matches)
+    }
+    sync()
+    const ro = new ResizeObserver(([entry]) => {
+      setWidth(entry.contentRect.width)
+      setIsMobile(mq.matches)
+    })
     ro.observe(el)
-    return () => ro.disconnect()
+    mq.addEventListener('change', sync)
+    return () => {
+      ro.disconnect()
+      mq.removeEventListener('change', sync)
+    }
   }, [])
 
-  const plotW = Math.max(0, width - PAD.l - PAD.r)
-  const plotH = height - PAD.t - PAD.b
+  const pad = isMobile ? MOBILE_PAD : PAD
+  const actualHeight = isMobile ? (mobileHeight ?? Math.round(height * 0.58)) : height
+  const plotW = Math.max(0, width - pad.l - pad.r)
+  const plotH = actualHeight - pad.t - pad.b
 
   const prepared = useMemo(
     () => series.map((s) => ({ ...s, points: downsample(s.points, Math.max(40, Math.floor(plotW / 2))) })),
@@ -98,8 +115,8 @@ export function Chart({ series, format, formatTime, formatTooltipTime = formatTi
   const dataMax = Math.max(0, ...all.map((p) => p.v ?? 0))
   const max = yMax && yMax > 0 ? yMax : niceMax(dataMax * 1.1)
 
-  const x = (t: number) => PAD.l + ((t - t0) / span) * plotW
-  const y = (v: number) => PAD.t + plotH - (Math.min(v, max) / max) * plotH
+  const x = (t: number) => pad.l + ((t - t0) / span) * plotW
+  const y = (v: number) => pad.t + plotH - (Math.min(v, max) / max) * plotH
 
   const paths = prepared.map((s) => {
     const gap = medianStep(s.points) * 4
@@ -110,7 +127,7 @@ export function Chart({ series, format, formatTime, formatTooltipTime = formatTi
     let lastX = 0
     for (const p of s.points) {
       if (p.v === null || p.t - prevT > gap) {
-        if (segStart !== null) area += `L${lastX},${PAD.t + plotH}L${segStart},${PAD.t + plotH}Z`
+        if (segStart !== null) area += `L${lastX},${pad.t + plotH}L${segStart},${pad.t + plotH}Z`
         segStart = null
       }
       if (p.v !== null) {
@@ -128,12 +145,14 @@ export function Chart({ series, format, formatTime, formatTooltipTime = formatTi
       }
       prevT = p.t
     }
-    if (segStart !== null) area += `L${lastX},${PAD.t + plotH}L${segStart},${PAD.t + plotH}Z`
+    if (segStart !== null) area += `L${lastX},${pad.t + plotH}L${segStart},${pad.t + plotH}Z`
     return { key: s.key, color: s.color, line, area: s.area ? area : '' }
   })
 
   const yTicks = [0, max / 2, max]
-  const xTicks = width > 0 && all.length ? [0, 1, 2, 3].map((i) => t0 + (span * i) / 3) : []
+  const tickCount = plotW > 0 && plotW < 210 ? 3 : 4
+  const xTicks = width > 0 && all.length ? Array.from({ length: tickCount }, (_, i) => t0 + (span * i) / (tickCount - 1)) : []
+  const tickTextClass = isMobile ? 'num fill-muted text-[10px]' : 'num fill-muted text-[11px]'
 
   const hover =
     hoverT === null
@@ -147,16 +166,16 @@ export function Chart({ series, format, formatTime, formatTooltipTime = formatTi
   const onMove = (e: PointerEvent<SVGSVGElement>) => {
     const rect = e.currentTarget.getBoundingClientRect()
     const px = e.clientX - rect.left
-    if (px < PAD.l || !all.length) return setHoverT(null)
-    setHoverT(t0 + ((px - PAD.l) / plotW) * span)
+    if (px < pad.l || !all.length) return setHoverT(null)
+    setHoverT(t0 + ((px - pad.l) / plotW) * span)
   }
 
   const empty = all.every((p) => p.v === null)
 
   return (
-    <div ref={box} className="relative select-none" style={{ height }} role="img" aria-label={label}>
+    <div ref={box} className="relative select-none" style={{ height: actualHeight }} role="img" aria-label={label}>
       {width > 0 && (
-        <svg width={width} height={height} className="block touch-pan-y overflow-visible" onPointerMove={onMove} onPointerLeave={() => setHoverT(null)}>
+        <svg width={width} height={actualHeight} className="block touch-pan-y overflow-visible" onPointerMove={onMove} onPointerLeave={() => setHoverT(null)}>
           <defs>
             {prepared.map((s) => (
               <linearGradient key={s.key} id={`${uid}-${s.key}`} x1="0" x2="0" y1="0" y2="1">
@@ -167,8 +186,8 @@ export function Chart({ series, format, formatTime, formatTooltipTime = formatTi
           </defs>
           {yTicks.map((v, i) => (
             <g key={i}>
-              <line x1={PAD.l} x2={width - PAD.r} y1={y(v)} y2={y(v)} style={{ stroke: 'var(--line)' }} strokeDasharray={i === 0 ? undefined : '2 4'} />
-              <text x={PAD.l - 8} y={y(v)} dy="0.32em" textAnchor="end" className="num fill-muted text-[11px]">
+              <line x1={pad.l} x2={width - pad.r} y1={y(v)} y2={y(v)} style={{ stroke: 'var(--line)' }} strokeDasharray={i === 0 ? undefined : '2 4'} />
+              <text x={pad.l - (isMobile ? 6 : 8)} y={y(v)} dy="0.32em" textAnchor="end" className={tickTextClass}>
                 {format(v)}
               </text>
             </g>
@@ -177,9 +196,9 @@ export function Chart({ series, format, formatTime, formatTooltipTime = formatTi
             <text
               key={i}
               x={x(t)}
-              y={height - 6}
+              y={actualHeight - (isMobile ? 3 : 6)}
               textAnchor={i === 0 ? 'start' : i === xTicks.length - 1 ? 'end' : 'middle'}
-              className="num fill-muted text-[11px]"
+              className={tickTextClass}
             >
               {formatTime(t)}
             </text>
@@ -199,7 +218,7 @@ export function Chart({ series, format, formatTime, formatTooltipTime = formatTi
           ))}
           {hover && (
             <g>
-              <line x1={hoverX} x2={hoverX} y1={PAD.t} y2={PAD.t + plotH} style={{ stroke: 'var(--line-strong)' }} />
+              <line x1={hoverX} x2={hoverX} y1={pad.t} y2={pad.t + plotH} style={{ stroke: 'var(--line-strong)' }} />
               {hover.map(({ s, p }) =>
                 p && p.v !== null ? (
                   <circle key={s.key} cx={x(p.t)} cy={y(p.v)} r={3.5} style={{ fill: 'var(--surface)', stroke: s.color }} strokeWidth={1.5} />
