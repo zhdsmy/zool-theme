@@ -1,4 +1,5 @@
 import { useId, useLayoutEffect, useMemo, useRef, useState, type PointerEvent } from 'react'
+import { useIsMobile } from '@/app/ui'
 
 export interface ChartPoint {
   t: number
@@ -21,7 +22,6 @@ interface Props {
   formatTooltipTime?: (t: number) => string
   yMax?: number
   height?: number
-  mobileHeight?: number
   label?: string
 }
 
@@ -70,38 +70,25 @@ function nearest(points: ChartPoint[], t: number) {
  * A small, dependency-free SVG time-series chart: hairline grid, 1.5px lines,
  * a soft area under the first series, and a crosshair tooltip.
  */
-export function Chart({ series, format, formatTime, formatTooltipTime = formatTime, yMax, height = 150, mobileHeight, label }: Props) {
+export function Chart({ series, format, formatTime, formatTooltipTime = formatTime, yMax, height = 150, label }: Props) {
   const box = useRef<HTMLDivElement>(null)
   const [width, setWidth] = useState(0)
-  const [isMobile, setIsMobile] = useState(() => (typeof window !== 'undefined' ? window.matchMedia('(width < 768px)').matches : false))
+  const isMobile = useIsMobile()
   const [hoverT, setHoverT] = useState<number | null>(null)
   const uid = useId().replace(/:/g, '')
 
   useLayoutEffect(() => {
     const el = box.current
     if (!el) return
-    const mq = window.matchMedia('(width < 768px)')
-    const sync = () => {
-      setWidth(el.clientWidth)
-      setIsMobile(mq.matches)
-    }
-    sync()
-    const ro = new ResizeObserver(([entry]) => {
-      setWidth(entry.contentRect.width)
-      setIsMobile(mq.matches)
-    })
+    setWidth(el.clientWidth)
+    const ro = new ResizeObserver(([entry]) => setWidth(entry.contentRect.width))
     ro.observe(el)
-    mq.addEventListener('change', sync)
-    return () => {
-      ro.disconnect()
-      mq.removeEventListener('change', sync)
-    }
+    return () => ro.disconnect()
   }, [])
 
   const pad = isMobile ? MOBILE_PAD : PAD
-  const actualHeight = isMobile ? (mobileHeight ?? Math.round(height * 0.58)) : height
   const plotW = Math.max(0, width - pad.l - pad.r)
-  const plotH = actualHeight - pad.t - pad.b
+  const plotH = height - pad.t - pad.b
 
   const prepared = useMemo(
     () => series.map((s) => ({ ...s, points: downsample(s.points, Math.max(40, Math.floor(plotW / 2))) })),
@@ -173,9 +160,9 @@ export function Chart({ series, format, formatTime, formatTooltipTime = formatTi
   const empty = all.every((p) => p.v === null)
 
   return (
-    <div ref={box} className="relative select-none" style={{ height: actualHeight }} role="img" aria-label={label}>
+    <div ref={box} className="relative select-none" style={{ height }} role="img" aria-label={label}>
       {width > 0 && (
-        <svg width={width} height={actualHeight} className="block touch-pan-y overflow-visible" onPointerMove={onMove} onPointerLeave={() => setHoverT(null)}>
+        <svg width={width} height={height} className="block touch-pan-y overflow-visible" onPointerMove={onMove} onPointerLeave={() => setHoverT(null)}>
           <defs>
             {prepared.map((s) => (
               <linearGradient key={s.key} id={`${uid}-${s.key}`} x1="0" x2="0" y1="0" y2="1">
@@ -196,7 +183,7 @@ export function Chart({ series, format, formatTime, formatTooltipTime = formatTi
             <text
               key={i}
               x={x(t)}
-              y={actualHeight - (isMobile ? 3 : 6)}
+              y={height - (isMobile ? 3 : 6)}
               textAnchor={i === 0 ? 'start' : i === xTicks.length - 1 ? 'end' : 'middle'}
               className={tickTextClass}
             >
