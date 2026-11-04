@@ -42,7 +42,7 @@ export function HourGrid({ points, days = 7, now = Date.now() }: { points: reado
         <h2 className="eyebrow">{t('node.uptimeGrid')}</h2>
         <p className="num text-[12px] text-muted">{t('node.reportedHours', { count: seen, total: elapsed })}</p>
       </div>
-      <div className="mt-3 space-y-[3px]">
+      <div className="mt-2 space-y-[2px] md:mt-3 md:space-y-[3px]">
         {rows.map((row, d) => (
           <div key={d} className="flex items-center gap-2">
             <span className="num w-10 shrink-0 text-right text-[10px] text-muted">{dayLabel(d)}</span>
@@ -58,7 +58,7 @@ export function HourGrid({ points, days = 7, now = Date.now() }: { points: reado
                     key={h}
                     // Hours that have not happened carry no reading, so they carry no tooltip either.
                     title={at > lastHour ? undefined : stamp}
-                    className={`h-[10px] flex-1 rounded-[1px] ${state === 'up' ? 'bg-sage-text' : state === 'down' ? 'bg-danger' : 'cell-empty'}`}
+                    className={`h-[8px] flex-1 rounded-[1px] md:h-[10px] ${state === 'up' ? 'bg-good' : state === 'down' ? 'bg-danger' : 'cell-empty'}`}
                   />
                 )
               })}

@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ArrowUpRight, Check, Monitor, Moon, RefreshCw, Search, Sun } from 'lucide-react'
+import { ArrowUpRight, Check, LogIn, Monitor, Moon, RefreshCw, Search, Sun } from 'lucide-react'
 import { adapter, refresh, useStore } from '@/app/store'
 import { Link } from '@/app/router'
 import { openDialog } from '@/app/ui'
@@ -29,7 +29,7 @@ function PrefsMenu() {
       {(close) => (
         <div>
           <p className="eyebrow px-3 pt-2 pb-2">{t('prefs.appearance')}</p>
-          <div className="grid grid-cols-3 gap-1 rounded-[12px] bg-wash p-1">
+          <div className="grid grid-cols-3 gap-1 rounded-[12px] bg-surface-2 p-1">
             {options.map((mode) => {
               const I = APPEARANCE_ICON[mode]
               const active = appearance === mode
@@ -40,7 +40,7 @@ function PrefsMenu() {
                   aria-pressed={active}
                   onClick={() => setAppearance(mode)}
                   className={`flex flex-col items-center gap-1 rounded-[9px] py-2 text-[12px] transition-colors ${
-                    active ? 'bg-surface text-ink shadow-[0_1px_2px_rgb(0_0_0/0.08)]' : 'text-muted hover:text-ink'
+                    active ? 'border border-line bg-surface text-ink font-medium' : 'text-muted hover:text-ink'
                   }`}
                 >
                   <I size={16} strokeWidth={1.6} />
@@ -64,7 +64,7 @@ function PrefsMenu() {
                   className="flex h-10 w-full items-center justify-between rounded-[10px] px-3 text-[14px] hover:bg-wash"
                 >
                   {l.label}
-                  {i18n.language === l.code && <Check size={16} strokeWidth={1.8} aria-hidden />}
+                  {i18n.language === l.code && <Check size={16} strokeWidth={1.8} className="text-accent-text" aria-hidden />}
                 </button>
               </li>
             ))}
@@ -97,8 +97,8 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-30 border-b border-line bg-paper/80 backdrop-blur-md">
-      <div className="wrap flex h-16 items-center gap-2">
-        <Link href="/" className="mr-auto min-w-0 truncate rounded-md text-[19px] font-[450] tracking-[-0.02em]">
+      <div className="wrap flex h-13 items-center gap-0.5 md:h-16 md:gap-2">
+        <Link href="/" className="mr-auto min-w-0 truncate rounded-md pr-1 text-[16.5px] font-medium tracking-[-0.02em] md:pr-0 md:text-[19px] md:font-[450]">
           {title}
         </Link>
 
@@ -138,15 +138,36 @@ export function Header() {
         <PrefsMenu />
 
         {session.loggedIn ? (
-          <a href={adapter.adminUrl} className="btn-outline ml-1">
-            {t('auth.dashboard')}
-            <ArrowUpRight size={15} strokeWidth={1.7} aria-hidden />
-          </a>
+          <>
+            <a
+              href={adapter.adminUrl}
+              className="icon-btn md:hidden"
+              aria-label={t('auth.dashboard')}
+              title={t('auth.dashboard')}
+            >
+              <ArrowUpRight size={18} strokeWidth={1.6} aria-hidden />
+            </a>
+            <a href={adapter.adminUrl} className="btn-outline ml-1 hidden md:inline-flex">
+              {t('auth.dashboard')}
+              <ArrowUpRight size={15} strokeWidth={1.7} aria-hidden />
+            </a>
+          </>
         ) : (
           !settings.hideAdminEntry && (
-            <button type="button" className="btn-outline ml-1" onClick={() => openDialog('login')}>
-              {t('auth.signIn')}
-            </button>
+            <>
+              <button
+                type="button"
+                className="icon-btn md:hidden"
+                aria-label={t('auth.signIn')}
+                title={t('auth.signIn')}
+                onClick={() => openDialog('login')}
+              >
+                <LogIn size={18} strokeWidth={1.6} aria-hidden />
+              </button>
+              <button type="button" className="btn-outline ml-1 hidden md:inline-flex" onClick={() => openDialog('login')}>
+                {t('auth.signIn')}
+              </button>
+            </>
           )
         )}
       </div>
