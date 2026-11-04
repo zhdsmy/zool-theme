@@ -4,76 +4,103 @@
 @custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
 
 /*
- * ZOOL design tokens — from the ZOOL brand kit (visual-guidelines.md).
- * paper / ink / muted / line / wash / sage / sage-text are the brand palette;
- * surface, faint, warn and danger are dashboard additions tuned to it.
+ * Telemetry design tokens — mineral paper & deep avionics slate with a single
+ * ultramarine cobalt accent and distinct viridian / amber / crimson signals.
  */
 :root {
-  --paper: #fafaf8;
+  --paper: #f3f5f8;
   --surface: #ffffff;
-  --ink: #191b1a;
-  --muted: #666e68;
-  --faint: #a3aba5;
-  --line: #dde1dc;
-  --line-strong: #c9cfc9;
-  --wash: #eff1ed;
-  --sage: #b8c8be;
-  --sage-text: #53695a;
-  --good: #3F7D5A;
-  --warn: #9a5b0b;
-  --warn-fill: #B07316;
-  --danger: #b3261e;
-  --overlay: rgb(17 20 18 / 0.36);
-  --shadow-pop: 0 24px 48px -12px rgb(24 37 27 / 0.18), 0 0 0 1px rgb(24 37 27 / 0.06);
-  --chart-1: #191b1a;
-  --chart-2: #6f8f7a;
-  --chart-3: #b08a4a;
-  --chart-4: #8a8fb8;
+  --ink: #0d1526;
+  --muted: #45546a;
+  --faint: #61718a;
+  --line: #d4dce8;
+  --line-strong: #b5c2d4;
+  --wash: #e5ebf3;
+  --sage: #a3e4c7;
+  --sage-text: #0a7246;
+  --good: #0a7246;
+  --warn: #8f4b00;
+  --warn-fill: #a85800;
+  --danger: #bf1b30;
+  --overlay: rgb(10 15 26 / 0.44);
+  --shadow-pop: 0 24px 48px -12px rgb(13 21 38 / 0.18), 0 0 0 1px rgb(13 21 38 / 0.06);
+  --chart-1: #1849c6;
+  --chart-2: #0b877d;
+  --chart-3: #c86400;
+  --chart-4: #8e2de2;
   /* dispatch contract: semantic tokens added for the mobile redesign. Values are owned by the
      palette package; names are fixed. */
-  --surface-2: var(--wash);
-  --accent: var(--sage-text);
-  --accent-text: var(--sage-text);
-  --accent-wash: var(--wash);
-  --on-accent: var(--paper);
-  --good-wash: var(--wash);
-  --warn-wash: var(--wash);
-  --danger-wash: var(--wash);
+  --surface-2: #e8edf4;
+  --accent: #1849c6;
+  --accent-text: #1643b8;
+  --accent-wash: #e3ecff;
+  --on-accent: #ffffff;
+  --good-wash: #dcf5ea;
+  --warn-wash: #fff0d4;
+  --danger-wash: #ffe4e8;
   color-scheme: light;
 }
 
 :root[data-theme='dark'] {
-  --paper: #111412;
-  --surface: #161a17;
-  --ink: #f4f6f3;
-  --muted: #a6b0a8;
-  --faint: #5f6962;
-  --line: #2b322d;
-  --line-strong: #3c453e;
-  --wash: #1b221d;
-  --sage: #728c7b;
-  --sage-text: #b8c8be;
-  --good: #7FB894;
-  --warn: #e0a54a;
-  --warn-fill: #E0A54A;
-  --danger: #f2837a;
-  --overlay: rgb(0 0 0 / 0.6);
-  --shadow-pop: 0 24px 64px -12px rgb(0 0 0 / 0.6), 0 0 0 1px rgb(255 255 255 / 0.06);
-  --chart-1: #f4f6f3;
-  --chart-2: #9fbba8;
-  --chart-3: #d9b36f;
-  --chart-4: #aab0dc;
+  --paper: #0a0f1a;
+  --surface: #111827;
+  --ink: #f0f4fa;
+  --muted: #97a8c2;
+  --faint: #6a7d9b;
+  --line: #23314a;
+  --line-strong: #354868;
+  --wash: #1a263b;
+  --sage: #1c5240;
+  --sage-text: #34d399;
+  --good: #34d399;
+  --warn: #fbbf24;
+  --warn-fill: #f59e0b;
+  --danger: #fb7185;
+  --overlay: rgb(3 6 12 / 0.68);
+  --shadow-pop: 0 24px 64px -12px rgb(0 0 0 / 0.68), 0 0 0 1px rgb(255 255 255 / 0.07);
+  --chart-1: #5b92ff;
+  --chart-2: #2dd4bf;
+  --chart-3: #fbbf24;
+  --chart-4: #e879f9;
+  --surface-2: #172133;
+  --accent: #4e86f7;
+  --accent-text: #78a6ff;
+  --accent-wash: #142442;
+  --on-accent: #070e1b;
+  --good-wash: #0d2b22;
+  --warn-wash: #2b1f0b;
+  --danger-wash: #31141f;
   color-scheme: dark;
 }
 
 @media (prefers-contrast: more) {
   :root {
-    --muted: #464c48;
-    --line: #9aa29c;
+    --ink: #070b14;
+    --muted: #2c3748;
+    --faint: #4a586e;
+    --line: #9aa8bc;
+    --line-strong: #8494ac;
+    --accent: #1038a3;
+    --accent-text: #0f3290;
+    --good: #065735;
+    --sage-text: #065735;
+    --warn: #703a00;
+    --warn-fill: #7a4000;
+    --danger: #961223;
   }
   :root[data-theme='dark'] {
-    --muted: #d4dad5;
-    --line: #6f7871;
+    --ink: #ffffff;
+    --muted: #ccd6e6;
+    --faint: #8fa1bd;
+    --line: #3b4e6e;
+    --line-strong: #4a6084;
+    --accent: #6ea0ff;
+    --accent-text: #9ec0ff;
+    --good: #6ee7b7;
+    --sage-text: #6ee7b7;
+    --warn: #fde68a;
+    --warn-fill: #fde047;
+    --danger: #fda4af;
   }
 }
 
@@ -130,11 +157,11 @@
     background: var(--paper);
   }
   ::selection {
-    background: var(--sage);
-    color: #111412;
+    background: var(--accent-wash);
+    color: var(--ink);
   }
   :focus-visible {
-    outline: 2px solid var(--ink);
+    outline: 2px solid var(--accent);
     outline-offset: 3px;
     border-radius: 6px;
   }
@@ -187,7 +214,7 @@
     letter-spacing: 0.08em;
   }
 
-  /* Pill controls, after the ZOOL site: outline marks the active choice. */
+  /* Pill controls: tinted accent fill and border mark the active choice. */
   .pill {
     display: inline-flex;
     align-items: center;
@@ -206,11 +233,14 @@
   }
   .pill:hover {
     color: var(--ink);
+    background: var(--wash);
   }
   .pill[aria-pressed='true'],
   .pill[aria-selected='true'] {
-    border-color: var(--ink);
-    color: var(--ink);
+    background: var(--accent-wash);
+    border-color: color-mix(in srgb, var(--accent) 42%, var(--line));
+    color: var(--accent-text);
+    font-weight: 500;
   }
 
   /* A 4:3 flag. The hairline keeps white-field flags (Japan, Korea) from dissolving into the
@@ -266,15 +296,17 @@
     min-height: 48px;
     padding: 0 22px;
     border-radius: 999px;
-    background: var(--ink);
-    color: var(--paper);
+    background: var(--accent);
+    color: var(--on-accent);
     font-size: 14px;
+    font-weight: 500;
     transition:
       opacity 0.15s,
-      transform 0.15s;
+      transform 0.15s,
+      background-color 0.15s;
   }
   .btn-primary:hover {
-    opacity: 0.86;
+    opacity: 0.9;
   }
   .btn-primary:active {
     transform: translateY(1px);
@@ -291,13 +323,20 @@
     min-height: 36px;
     padding: 0 16px;
     border-radius: 999px;
-    border: 1px solid var(--ink);
+    border: 1px solid var(--line-strong);
+    background: var(--surface);
+    color: var(--ink);
     font-size: 13px;
     white-space: nowrap;
-    transition: background-color 0.15s;
+    transition:
+      background-color 0.15s,
+      border-color 0.15s,
+      color 0.15s;
   }
   .btn-outline:hover {
-    background: var(--wash);
+    background: var(--accent-wash);
+    border-color: var(--accent);
+    color: var(--accent-text);
   }
 
   .field {
@@ -306,11 +345,12 @@
     padding: 0 16px;
     border-radius: 12px;
     border: 1px solid var(--line-strong);
-    background: var(--surface);
+    background: var(--surface-2);
     color: var(--ink);
     font-size: 15px;
     transition:
       border-color 0.15s,
+      background-color 0.15s,
       box-shadow 0.15s;
   }
   .field::placeholder {
@@ -318,8 +358,9 @@
   }
   .field:focus {
     outline: none;
-    border-color: var(--ink);
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--ink) 10%, transparent);
+    background: var(--surface);
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-wash);
   }
 
   .card {
@@ -330,16 +371,12 @@
 
   /* Usage bar: a hairline track with an ink fill that turns amber / red near the limit. */
 
-  /* Empty instrument cells: a wash fill on paper, an outline in the dark where wash and
-     paper sit too close together to tell apart. */
-  /* An empty cell has to be countable, not just present: at 1.2:1 against paper the eye
-     cannot tell four empty blocks from five. These land near 1.9:1, still quiet enough to
-     stay behind the filled cells. */
+  /* Empty instrument cells: a crisp cool-steel track on paper/surface in light mode, and an
+     inset outline in dark mode, keeping >= 3:1 contrast against all three instrument fills. */
   .cell-empty {
     position: relative;
     overflow: hidden;
-    /* line-strong alone reads 1.5:1 on paper; a touch of ink brings it to ~1.9:1 */
-    background: color-mix(in srgb, var(--ink) 12%, var(--line-strong));
+    background: color-mix(in srgb, var(--line-strong) 45%, var(--surface-2));
   }
   :root[data-theme='dark'] .cell-empty {
     background: transparent;
@@ -366,11 +403,11 @@
     width: 8px;
     height: 8px;
     border-radius: 999px;
-    background: var(--sage-text);
+    background: var(--good);
     flex: none;
   }
   .status-dot[data-online='false'] {
-    background: transparent;
+    background: var(--danger-wash);
     box-shadow: inset 0 0 0 1.5px var(--danger);
   }
   .status-dot[data-pending] {
@@ -383,7 +420,7 @@
       position: absolute;
       inset: -3px;
       border-radius: inherit;
-      border: 1px solid var(--sage-text);
+      border: 1px solid var(--good);
       opacity: 0;
       animation: zool-ping 2.6s var(--ease-out-soft) infinite;
     }
@@ -405,6 +442,24 @@
     display: none;
   }
   @media (width < 768px) {
+    .wrap {
+      width: min(1200px, 100% - 28px);
+    }
+    .pill {
+      min-height: 32px;
+      padding: 0 11px;
+      font-size: 12px;
+    }
+    .btn-outline {
+      padding: 0 13px;
+      font-size: 12px;
+    }
+    .card {
+      border-radius: 14px;
+    }
+    .popover {
+      border-radius: 14px;
+    }
     .home-toolbar .scroll-x {
       mask-image: linear-gradient(to right, black calc(100% - 20px), transparent);
     }
@@ -575,20 +630,22 @@
   }
 }
 
-/* Keep touch targets above utility-sized controls without changing mouse layouts. */
+/* Keep touch targets at or above 40px without changing mouse layouts. */
 @media (pointer: coarse) {
   header .icon-btn {
-    width: 44px;
-    height: 44px;
+    width: 40px;
+    height: 40px;
+  }
+  header .btn-outline {
+    min-height: 40px;
   }
   .home-toolbar button {
-    min-height: 44px;
-    min-width: 44px;
+    min-height: 40px;
+    min-width: 40px;
   }
 
-  /* A segmented control keeps its buttons the same shape as its frame: 40px tall pills, 44px
-     wide, inside a 2px inset. Forcing 44px of height into a 32px-tall frame had stretched the
-     pressed button into an upright oval that spilled past the frame's curve. */
+  /* A segmented control keeps its buttons the same shape as its frame: 40px tall pills
+     inside a 2px inset. */
   .home-toolbar .segmented {
     padding: 2px;
   }
@@ -596,7 +653,7 @@
   .home-toolbar .segmented > .relative > button {
     height: 40px;
     min-height: 40px;
-    min-width: 44px;
+    min-width: 40px;
   }
 }
 
