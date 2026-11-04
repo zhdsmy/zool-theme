@@ -36,7 +36,7 @@ const PHONE_CELLS = 12
  * Without a word in front, up sat under CPU and down under memory and read as their figures.
  */
 const PhoneLabel = ({ children }: { children: ReactNode }) => (
-  <span className="shrink-0 text-[11px] text-muted md:hidden">{children}</span>
+  <span className="shrink-0 text-[10.5px] leading-[14px] text-muted md:hidden">{children}</span>
 )
 
 /** Match the live reading slots without inventing values before the first snapshot. */
@@ -76,9 +76,16 @@ function ConditionNote({ cond, short = false }: { cond: Condition; short?: boole
             : t('status.offlineSince', { time })
   const tone = cond.kind === 'recent' ? 'text-warn' : cond.kind === 'offline' ? 'text-danger' : 'text-muted'
   return (
-    <span className={`truncate ${tone}`} title={!time ? undefined : cond.kind === 'stale' ? t('status.reportedAt', { time }) : t('status.offlineSince', { time })}>
-      {text}
-      {!short && cond.expired && <span className="text-danger"> · {t('status.expired')}</span>}
+    <span className={`inline-flex items-center gap-1.5 truncate ${tone}`} title={!time ? undefined : cond.kind === 'stale' ? t('status.reportedAt', { time }) : t('status.offlineSince', { time })}>
+      <span className="truncate">{text}</span>
+      {!short && cond.expired && (
+        <>
+          <span className="hidden text-danger md:inline">·</span>
+          <span className="shrink-0 rounded-full bg-danger-wash px-1.5 py-0.5 text-[10px] leading-none font-medium text-danger md:rounded-none md:bg-transparent md:p-0 md:text-[12px] md:font-normal">
+            {t('status.expired')}
+          </span>
+        </>
+      )}
     </span>
   )
 }
@@ -93,10 +100,13 @@ const Value = ({ parts, className = '' }: { parts: { value: string; unit: string
 export function GroupHeading({ id, name, count, up, down }: { id: string; name: string; count: number; up: number; down: number }) {
   const { t } = useTranslation()
   return (
-    <div id={id} className="mt-10 flex items-baseline gap-3 border-t border-line pt-3 first:mt-0 scroll-mt-20">
-      <h2 className="text-[13px] font-medium tracking-[-0.01em]">{name}</h2>
-      <span className="num text-[12px] text-muted">{t('unit.nodes', { count })}</span>
-      <span className="num ml-auto text-[12px] text-muted">
+    <div
+      id={id}
+      className="group-heading mt-4 flex items-baseline gap-2.5 rounded-[8px] bg-surface-2 px-2.5 py-1.5 first:mt-0 scroll-mt-20 md:mt-10 md:gap-3 md:rounded-none md:border-t md:border-line md:bg-transparent md:px-0 md:pt-3 md:pb-0"
+    >
+      <h2 className="text-[12.5px] font-semibold tracking-[-0.01em] md:text-[13px] md:font-medium">{name}</h2>
+      <span className="num text-[11px] text-muted md:text-[12px]">{t('unit.nodes', { count })}</span>
+      <span className="num ml-auto text-[11px] text-muted md:text-[12px]">
         ↑ {splitSpeed(up).value} {splitSpeed(up).unit} · ↓ {splitSpeed(down).value} {splitSpeed(down).unit}
       </span>
     </div>
@@ -140,6 +150,8 @@ export function NodeStrip({
   const memTotal = snap?.memTotal || node.memTotal
   const cpu = shown ? (snap?.cpu ?? 0) : 0
   const memPct = shown ? ratio(snap?.memUsed ?? 0, memTotal) : 0
+  const cpuLevel = levelFor('cpu', cpu)
+  const memLevel = levelFor('memory', memPct)
   const cores = coreTicks(cpu, node.cpuCores)
   const mem = memoryBlocks(snap?.memUsed ?? 0, memTotal, node.swapTotal)
   const memUsedParts = compactBytes(snap?.memUsed ?? 0)
@@ -155,21 +167,21 @@ export function NodeStrip({
       data-pending={pending ? '' : undefined}
       data-stale={shown && cond.kind !== 'online' ? '' : undefined}
       data-density={density}
-      className={`block border-b border-line transition-colors hover:bg-wash md:grid md:grid-cols-[minmax(0,1fr)_126px_172px_62px_92px] md:items-center md:gap-x-4 lg:grid-cols-[minmax(0,1fr)_126px_172px_188px_92px] lg:gap-x-6 xl:grid-cols-[minmax(0,1fr)_126px_172px_228px_186px] ${
-        compact ? 'px-1 py-2 md:px-2 md:py-1.5' : 'px-1 py-2.5 md:px-2 md:py-3'
+      className={`node-strip block border-b border-line transition-colors hover:bg-wash md:grid md:grid-cols-[minmax(0,1fr)_126px_172px_62px_92px] md:items-center md:gap-x-4 lg:grid-cols-[minmax(0,1fr)_126px_172px_188px_92px] lg:gap-x-6 xl:grid-cols-[minmax(0,1fr)_126px_172px_228px_186px] ${
+        compact ? 'px-1 py-1 md:px-2 md:py-1.5' : 'px-1 py-1.5 md:px-2 md:py-3'
       }`}
     >
       {/* identity */}
-      <span className="flex min-w-0 items-center gap-2.5">
+      <span className="flex min-w-0 items-center gap-1.5 md:gap-2.5">
         <StatusDot online={online} pending={pending || cond.kind === 'never'} />
         <OsGlyph os={node.os} tile={compact ? 14 : 16} size={compact ? 9 : 11} />
-        <span className={`truncate ${compact ? 'text-[13px]' : 'text-[14px]'}`}>{stripFlag(node.name)}</span>
-        <RegionTag code={node.region} className="hidden sm:inline-flex md:hidden lg:inline-flex" />
+        <span className={`truncate font-medium md:font-normal ${compact ? 'text-[12.5px] leading-[17px] md:text-[13px] md:leading-normal' : 'text-[13px] leading-[18px] md:text-[14px] md:leading-normal'}`}>{stripFlag(node.name)}</span>
+        <RegionTag code={node.region} className="region-tag-strip shrink-0" />
         {expiry?.level && (
           <span className={`hidden shrink-0 text-[11px] whitespace-nowrap lg:inline ${expiry.level === 'danger' ? 'text-danger' : 'text-warn'}`}>{expiry.text}</span>
         )}
         {/* on phones only the uptime rides along with the name; the run needs room */}
-        <span className="num ml-auto shrink-0 pl-2 text-[11px] whitespace-nowrap text-muted md:hidden">
+        <span className="num ml-auto shrink-0 pl-1.5 text-[11px] leading-[18px] whitespace-nowrap text-muted md:hidden">
           {pending || !shown ? null : cond.kind === 'online' ? uptime(snap!.uptime) : <ConditionNote cond={cond} short />}
         </span>
       </span>
@@ -181,16 +193,16 @@ export function NodeStrip({
            CPU | memory, then up | down under them — with the graphics stretched to fill their
            half. A rate cell sized to its text made every other cell slide sideways each time a
            figure changed length. */
-        <span className="mt-2 grid grid-cols-2 gap-x-3 gap-y-1.5 pl-[26px] md:mt-0 md:contents md:pl-0">
-          <span className="flex w-full min-w-0 items-center gap-1.5 md:w-auto md:justify-end md:gap-2">
+        <span className="mt-1 grid grid-cols-2 gap-x-3 gap-y-[2px] pl-[22px] md:mt-0 md:contents md:pl-0">
+          <span className="flex w-full min-w-0 items-center gap-1.5 leading-[14px] md:w-auto md:justify-end md:gap-2 md:leading-normal">
             <PhoneLabel>{t('metric.cpu')}</PhoneLabel>
             <span className="flex min-w-0 flex-1 md:hidden">
               <TickBar
                 filled={(cpu / 100) * PHONE_CELLS}
                 ticks={PHONE_CELLS}
-                height={height}
+                height={9}
                 stretch
-                level={levelFor('cpu', cpu)}
+                level={cpuLevel}
                 label={`${t('metric.cpu')} ${formatPercent(cpu)}%`}
               />
             </span>
@@ -200,22 +212,28 @@ export function NodeStrip({
                 ticks={cores.ticks}
                 notch={notch}
                 height={height}
-                level={levelFor('cpu', cpu)}
+                level={cpuLevel}
                 label={`${t('metric.cpu')} ${formatPercent(cpu)}%`}
               />
             </span>
-            <span className="num w-8 shrink-0 text-right text-[11px] md:w-10 md:text-[12px]">{formatPercent(cpu)}%</span>
+            <span
+              className={`num w-8 shrink-0 text-right text-[11px] leading-[14px] md:w-10 md:text-[12px] md:leading-normal ${
+                cpuLevel === 'danger' ? 'font-medium text-danger md:font-normal md:text-ink' : cpuLevel === 'warn' ? 'font-medium text-warn md:font-normal md:text-ink' : ''
+              }`}
+            >
+              {formatPercent(cpu)}%
+            </span>
           </span>
 
-          <span className="flex w-full min-w-0 items-center gap-1.5 md:w-auto md:justify-end md:gap-2">
+          <span className="flex w-full min-w-0 items-center gap-1.5 leading-[14px] md:w-auto md:justify-end md:gap-2 md:leading-normal">
             <PhoneLabel>{t('metric.memory')}</PhoneLabel>
             <span className="flex min-w-0 flex-1 md:hidden">
               <BlockGrid
                 filled={(memPct / 100) * PHONE_CELLS}
                 blocks={PHONE_CELLS}
-                height={height}
+                height={10}
                 stretch
-                level={levelFor('memory', memPct)}
+                level={memLevel}
                 label={`${t('metric.memory')} ${formatPercent(memPct)}%`}
               />
             </span>
@@ -228,11 +246,15 @@ export function NodeStrip({
                 /* The box this sits in. Without it a 64 GB node with swap drew 143px into a
                    76px slot and landed on the CPU percentage two columns over. */
                 box={76}
-                level={levelFor('memory', memPct)}
+                level={memLevel}
                 label={`${t('metric.memory')} ${formatPercent(memPct)}%`}
               />
             </span>
-            <span className="num w-[48px] shrink-0 text-right text-[11px] whitespace-nowrap text-muted md:w-[84px] md:text-[12px]">
+            <span
+              className={`num w-[46px] shrink-0 text-right text-[11px] leading-[14px] whitespace-nowrap md:w-[84px] md:text-[12px] md:leading-normal ${
+                memLevel === 'danger' ? 'font-medium text-danger md:font-normal md:text-muted' : memLevel === 'warn' ? 'font-medium text-warn md:font-normal md:text-muted' : 'text-muted'
+              }`}
+            >
               {memUsedParts.value}
               {/* The unit is dropped only when both sides share it: "904.4/4GB" read as 904 GB. */}
               <span className={memUsedParts.unit === splitBytes(memTotal, 0).unit ? 'md:hidden' : ''}>{memUsedParts.unit}</span>
@@ -243,8 +265,7 @@ export function NodeStrip({
             </span>
           </span>
 
-          <span className="col-span-2 flex items-center gap-1.5 md:col-span-1 md:w-auto md:justify-end md:gap-2">
-            <PhoneLabel>{t('metric.network')}</PhoneLabel>
+          <span className="col-span-2 flex items-center gap-1.5 leading-[14px] md:col-span-1 md:w-auto md:justify-end md:gap-2 md:leading-normal">
             {/* between md and lg the spark and the run give their width to the name column */}
             <span className="hidden w-12 lg:block xl:w-[88px]">
               <MirrorSpark up={live.up} down={live.down} width={88} height={compact ? 20 : 26} stretch label={t('metric.network')} />
@@ -252,10 +273,13 @@ export function NodeStrip({
             {/* Up and down are one reading, so they sit side by side: on a phone, each under the
                 half above it, and from lg, where the column was widened for it. Between md and lg
                 the name column cannot give up 60px, so there they stack. */}
-            <span className="num grid w-full grid-cols-2 gap-x-3 text-[11px] leading-tight whitespace-nowrap md:flex md:w-[62px] md:flex-col md:items-end md:gap-0 md:text-right lg:w-[132px] lg:flex-row lg:items-center lg:gap-2">
-              <span>
-                <span className="mr-0.5 text-muted">↑</span>
-                <Value parts={splitSpeed(snap?.netUp ?? 0)} />
+            <span className="num grid w-full grid-cols-2 gap-x-3 text-[11px] leading-[14px] whitespace-nowrap md:flex md:w-[62px] md:flex-col md:items-end md:gap-0 md:text-right md:leading-tight lg:w-[132px] lg:flex-row lg:items-center lg:gap-2">
+              <span className="flex min-w-0 items-center gap-1.5 md:inline">
+                <PhoneLabel>{t('metric.network')}</PhoneLabel>
+                <span>
+                  <span className="mr-0.5 text-muted">↑</span>
+                  <Value parts={splitSpeed(snap?.netUp ?? 0)} />
+                </span>
               </span>
               <span>
                 <span className="mr-0.5 text-muted">↓</span>
@@ -280,7 +304,7 @@ export function NodeStrip({
           </span>
         </span>
       ) : (
-        <span className="mt-1 flex min-w-0 items-center gap-2 pl-[26px] text-[12px] md:col-span-4 md:mt-0 md:justify-end md:pl-0">
+        <span className="mt-0.5 flex min-w-0 items-center gap-2 pl-[22px] text-[11.5px] leading-[16px] md:col-span-4 md:mt-0 md:justify-end md:pl-0 md:text-[12px] md:leading-normal">
           <ConditionNote cond={cond} />
         </span>
       )}
@@ -337,18 +361,18 @@ function CardReading({
 }) {
   return (
     <span className="min-w-0">
-      <span className="block truncate text-[12px] text-muted @max-xs:text-[11px]">{label}</span>
+      <span className="block truncate text-[11.5px] text-muted md:text-[12px] @max-xs:text-[11px]">{label}</span>
       {/* The number takes the warning colour too. The instrument alone is easy to skim past,
           and the number is where the eye already is — colouring only the bar buries the alarm
           in the quietest part of the reading. */}
       <Percent
         value={percent}
-        className={`mt-1 block text-[20px] leading-tight font-light tracking-[-0.02em] @max-xs:text-[18px] ${
+        className={`mt-0.5 block text-[18px] leading-tight font-light tracking-[-0.02em] md:mt-1 md:text-[20px] @max-xs:text-[18px] ${
           level === 'danger' ? 'text-danger' : level === 'warn' ? 'text-warn' : ''
         }`}
       />
-      <span className="mt-2.5 block">{instrument}</span>
-      {sub && <span className="num mt-2 block truncate text-[11px] text-muted">{sub}</span>}
+      <span className="mt-1.5 block md:mt-2.5">{instrument}</span>
+      {sub && <span className="num mt-1.5 block truncate text-[11px] text-muted md:mt-2">{sub}</span>}
     </span>
   )
 }
@@ -435,20 +459,20 @@ export function NodeCard({ node, snap, tick, pending }: { node: NodeInfo; snap?:
       href={adapter.nodePath(node.id)}
       data-pending={pending ? '' : undefined}
       data-stale={shown && cond.kind !== 'online' ? '' : undefined}
-      className="card @container block transition-[border-color,box-shadow] duration-200 hover:border-line-strong hover:shadow-[0_12px_32px_-16px_rgb(24_37_27/0.18)]"
+      className="card @container block transition-[border-color,box-shadow] duration-200 hover:border-line-strong hover:shadow-pop"
     >
       {/* Below 320px — four cards to a row — the card tightens its padding and gaps rather than
           its type: the numbers still lead, and the labels stay above them. */}
-      <span className="flex flex-col p-5 @max-xs:p-4">
+      <span className="flex flex-col p-3.5 md:p-5 @max-xs:p-4">
         {/* who the machine is */}
-        <span className="flex items-start gap-3">
-          <StatusDot online={online} pending={pending || cond.kind === 'never'} className="mt-[7px]" />
+        <span className="flex items-start gap-2.5 md:gap-3">
+          <StatusDot online={online} pending={pending || cond.kind === 'never'} className="mt-[6px] md:mt-[7px]" />
           <span className="min-w-0 flex-1">
             <span className="flex min-w-0 items-center gap-2">
               <OsGlyph os={node.os} tile={20} size={13} />
-              <span className="truncate text-[16px] font-medium tracking-[-0.01em]">{stripFlag(node.name)}</span>
+              <span className="truncate text-[15px] font-medium tracking-[-0.01em] md:text-[16px]">{stripFlag(node.name)}</span>
             </span>
-            <span className="mt-1 block truncate text-[12px] text-muted">{spec || '—'}</span>
+            <span className="mt-0.5 block truncate text-[11.5px] text-muted md:mt-1 md:text-[12px]">{spec || '—'}</span>
           </span>
           <RegionTag code={node.region} className="shrink-0" />
         </span>
@@ -458,7 +482,7 @@ export function NodeCard({ node, snap, tick, pending }: { node: NodeInfo; snap?:
         <>
             {!shown ? <PendingReadings card /> : <>
             {/* how busy it is */}
-            <span className="mt-5 grid grid-cols-3 gap-4 @max-xs:mt-4 @max-xs:gap-3">
+            <span className="mt-3.5 grid grid-cols-3 gap-3 md:mt-5 md:gap-4 @max-xs:mt-4 @max-xs:gap-3">
               <CardReading
                 label={t('metric.cpu')}
                 percent={cpu}
@@ -515,10 +539,10 @@ export function NodeCard({ node, snap, tick, pending }: { node: NodeInfo; snap?:
             </span>
 
             {/* what it is moving */}
-            <span className="mt-5 flex min-w-0 flex-col gap-2 border-t border-line pt-4 @max-xs:mt-4">
-              <span className="text-[12px] text-muted">{t('node.speed')}</span>
+            <span className="mt-3.5 flex min-w-0 flex-col gap-1.5 border-t border-line pt-3 md:mt-5 md:gap-2 md:pt-4 @max-xs:mt-4">
+              <span className="text-[11.5px] text-muted md:text-[12px]">{t('node.speed')}</span>
               <MirrorSpark up={live.up} down={live.down} width={CARD_BOX} height={32} stretch label={t('metric.network')} />
-              <span className="grid grid-cols-2 gap-3 text-[20px] leading-6 font-light tracking-[-0.02em] text-ink @max-xs:text-[18px]">
+              <span className="grid grid-cols-2 gap-3 text-[18px] leading-6 font-light tracking-[-0.02em] text-ink md:text-[20px] @max-xs:text-[18px]">
                 <span className="flex h-[24px] min-w-0 items-center gap-1.5">
                   <ArrowUp size={14} className="shrink-0 text-muted" aria-hidden />
                   <Speed value={snap!.netUp} />
@@ -528,7 +552,7 @@ export function NodeCard({ node, snap, tick, pending }: { node: NodeInfo; snap?:
                   <Speed value={snap!.netDown} />
                 </span>
               </span>
-              <span className="flex min-w-0 items-center gap-1 text-[13px] leading-5 whitespace-nowrap">
+              <span className="flex min-w-0 items-center gap-1 text-[12.5px] leading-5 whitespace-nowrap md:text-[13px]">
                 {/* the label gives way first when a long locale, a quota and five-digit totals meet */}
                 <span className="min-w-0 truncate text-muted">{t('metric.traffic')}</span>
                 <ArrowUp size={12} className="shrink-0 text-muted" aria-hidden />
@@ -543,12 +567,12 @@ export function NodeCard({ node, snap, tick, pending }: { node: NodeInfo; snap?:
                 )}
               </span>
               {Boolean(node.trafficLimitPeriod) && node.trafficLimit > 0 && (
-                <span className="text-[12px] text-muted">{t('metric.quota')} <span className="num">{billing.quota(node)}</span></span>
+                <span className="text-[11.5px] text-muted md:text-[12px]">{t('metric.quota')} <span className="num">{billing.quota(node)}</span></span>
               )}
             </span>
 
             </>}
-            <span className="mt-4 grid gap-2 border-t border-line pt-3 text-[12px]">
+            <span className="mt-3 grid gap-1.5 border-t border-line pt-2.5 text-[12px] md:mt-4 md:gap-2 md:pt-3">
               <span className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1 text-muted">
                 {pending ? <span className="skeleton h-3 flex-1" aria-hidden="true" /> : cond.kind === 'online' ? (
                   <span className="inline-flex items-center gap-1.5" title={t('metric.uptime')}>
@@ -558,7 +582,16 @@ export function NodeCard({ node, snap, tick, pending }: { node: NodeInfo; snap?:
                   </span>
                 ) : <ConditionNote cond={cond} />}
                 {cond.kind === 'online' && expiry && (
-                  <span className={`inline-flex items-center gap-1.5 ${expiry.level === 'danger' ? 'text-danger' : expiry.level === 'warn' ? 'text-warn' : ''}`} title={t('metric.expiry')}>
+                  <span
+                    className={`inline-flex items-center gap-1.5 ${
+                      expiry.level === 'danger'
+                        ? 'rounded-full bg-danger-wash px-1.5 py-0.5 font-medium text-danger md:rounded-none md:bg-transparent md:p-0 md:font-normal'
+                        : expiry.level === 'warn'
+                          ? 'rounded-full bg-warn-wash px-1.5 py-0.5 font-medium text-warn md:rounded-none md:bg-transparent md:p-0 md:font-normal'
+                          : ''
+                    }`}
+                    title={t('metric.expiry')}
+                  >
                     <CalendarClock size={12} strokeWidth={1.7} aria-hidden />
                     <span className="sr-only">{t('metric.expiry')}: </span>
                     <span>{expiry.text}</span>
