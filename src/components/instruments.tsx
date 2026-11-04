@@ -378,7 +378,7 @@ export function DotRun({ run, size = 3, gap = 2, label }: { run: readonly (boole
         // A gap inside the run still shows as absence, not as a cell.
         if (state === null) return <circle key={i} cx={cx} cy={height / 2} r={0.6} style={{ fill: 'var(--line)' }} />
         return state ? (
-          <rect key={i} x={cx - size / 2} y={1} width={size} height={height - 2} rx={size / 2} style={{ fill: 'var(--sage-text)' }} />
+          <rect key={i} x={cx - size / 2} y={1} width={size} height={height - 2} rx={size / 2} style={{ fill: 'var(--good)' }} />
         ) : (
           <rect
             key={i}

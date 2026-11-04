@@ -43,8 +43,8 @@ function SearchPanel() {
 
   return (
     <div onKeyDown={onKeyDown}>
-      <div className="flex h-14 items-center gap-3 border-b border-line px-5">
-        <Search size={18} strokeWidth={1.6} className="text-muted" aria-hidden />
+      <div className="flex h-13 items-center gap-3 border-b border-line px-4 md:h-14 md:px-5">
+        <Search size={18} strokeWidth={1.6} className="text-accent-text" aria-hidden />
         <input
           autoFocus
           value={query}
@@ -60,7 +60,7 @@ function SearchPanel() {
           aria-activedescendant={results[active] ? `search-option-${active}` : undefined}
           className="h-full flex-1 bg-transparent text-[16px] outline-none placeholder:text-muted"
         />
-        <kbd className="rounded-[6px] border border-line px-1.5 py-0.5 font-mono text-[11px] text-muted">Esc</kbd>
+        <kbd className="rounded-[6px] border border-line bg-surface-2 px-1.5 py-0.5 font-mono text-[11px] text-muted">Esc</kbd>
       </div>
       <ul id="search-results" role="listbox" className="max-h-[min(420px,60dvh)] overflow-y-auto p-2">
         {results.map((n, i) => {
@@ -72,10 +72,10 @@ function SearchPanel() {
                 tabIndex={-1}
                 onMouseMove={() => setActive(i)}
                 onClick={() => open(n.id)}
-                className={`flex h-12 w-full items-center gap-3 rounded-[12px] px-3 text-left ${i === active ? 'bg-wash' : ''}`}
+                className={`flex h-11 w-full items-center gap-3 rounded-[10px] px-3 text-left transition-colors md:h-12 md:rounded-[12px] ${i === active ? 'bg-accent-wash text-ink' : ''}`}
               >
                 <StatusDot online={Boolean(s?.online)} pending={!fed && !s} />
-                <span className="min-w-0 flex-1 truncate text-[14px]">{stripFlag(n.name)}</span>
+                <span className={`min-w-0 flex-1 truncate text-[14px] ${i === active ? 'font-medium text-accent-text' : ''}`}>{stripFlag(n.name)}</span>
                 <span className="hidden truncate text-[12px] text-muted sm:block">{n.groups[0]}</span>
                 <RegionTag code={n.region} />
                 <span className="num w-12 text-right text-[12px] text-muted">{s?.online ? `${formatPercent(s.cpu)}%` : '—'}</span>
@@ -85,7 +85,7 @@ function SearchPanel() {
         })}
         {results.length === 0 && <li className="px-3 py-10 text-center text-[14px] text-muted">{t('toolbar.noResults')}</li>}
       </ul>
-      <div className="flex items-center justify-end gap-2 border-t border-line px-5 py-3 text-[12px] text-muted">
+      <div className="flex items-center justify-end gap-2 border-t border-line bg-surface-2/60 px-4 py-2.5 text-[12px] text-muted md:px-5 md:py-3">
         <CornerDownLeft size={13} aria-hidden />
         {t('toolbar.searchHint')}
       </div>

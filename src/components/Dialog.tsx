@@ -44,7 +44,7 @@ export function Dialog({
         if (e.target === ref.current) onClose()
       }}
       // Tailwind's preflight zeroes <dialog> margins; `m-auto` restores centring.
-      className={`m-auto max-h-[calc(100dvh-40px)] w-[min(440px,calc(100%-40px))] overflow-visible rounded-[24px] border border-line bg-surface p-0 text-ink shadow-pop ${className}`}
+      className={`m-auto max-h-[calc(100dvh-40px)] w-[min(440px,calc(100%-40px))] overflow-visible rounded-[24px] border border-line bg-surface p-0 text-ink shadow-pop max-md:w-[min(440px,calc(100%-28px))] max-md:rounded-[18px] ${className}`}
     >
       {open && children}
     </dialog>

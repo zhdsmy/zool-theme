@@ -55,11 +55,11 @@ function LoginForm() {
   }
 
   return (
-    <div className="relative p-7 sm:p-9" aria-labelledby={titleId}>
+    <div className="relative p-6 sm:p-9" aria-labelledby={titleId}>
       <button type="button" className="icon-btn absolute top-4 right-4" aria-label={t('auth.close')} onClick={() => closeDialog('login')}>
         <X size={18} strokeWidth={1.6} />
       </button>
-      <Symbol className="h-[18px] w-auto text-ink" />
+      <Symbol className="h-[18px] w-auto text-accent-text" />
       <h2 id={titleId} className="mt-6 text-[28px] leading-tight font-light tracking-[-0.02em]">
         {t('auth.title')}
       </h2>
@@ -127,7 +127,7 @@ function LoginForm() {
       {message && (
         <p
           role={message.kind === 'error' ? 'alert' : 'status'}
-          className={`mt-4 text-[13px] ${message.kind === 'error' ? 'text-danger' : message.kind === 'ok' ? 'text-sage-text' : 'text-muted'}`}
+          className={`mt-4 rounded-[10px] px-3 py-2 text-[13px] ${message.kind === 'error' ? 'bg-danger-wash text-danger' : message.kind === 'ok' ? 'bg-good-wash text-good' : 'bg-accent-wash text-accent-text'}`}
         >
           {message.text}
         </p>

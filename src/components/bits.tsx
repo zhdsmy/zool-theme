@@ -127,7 +127,7 @@ export function RegionTag({ code, className = '' }: { code: string; className?: 
   if (!code) return null
   return (
     <span
-      className={`inline-flex h-[20px] items-center gap-1 rounded-[6px] border border-line px-1.5 font-mono text-[11px] leading-none tracking-wide text-muted ${className}`}
+      className={`inline-flex h-[20px] items-center gap-1 rounded-[6px] border border-line bg-surface-2 px-1.5 font-mono text-[11px] leading-none tracking-wide text-muted ${className}`}
     >
       <RegionFlag code={code} />
       {code}
