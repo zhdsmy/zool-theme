@@ -64,11 +64,39 @@ history, latency). Features without data are hidden rather than shown empty.
 
 ## Design tokens
 
-Colours come from the ZOOL brand palette and are defined once as CSS variables in `src/styles/app.css`
-(`--paper`, `--ink`, `--muted`, `--line`, `--wash`, `--sage`, `--sage-text`, plus `--surface`, `--good`,
-`--warn`, `--warn-fill`, `--danger` and chart colours). Tailwind utilities such as `bg-paper` or `text-muted` map to them, and
-`[data-theme=dark]` swaps the values. Only the resolved theme is stored on `<html>`; the visitor's choice
-lives in `localStorage.appearance`, a key shared with other Komari themes.
+Colours are defined once as CSS variables in `src/styles/app.css` and exposed as Tailwind utilities
+(`bg-paper`, `bg-surface-2`, `text-accent-text`, `bg-good-wash`, `text-good`, etc.) via `@theme inline`.
+`[data-theme=dark]` swaps the values, and `@media (prefers-contrast: more)` raises text, border and signal contrast.
+Only the resolved theme is stored on `<html>`; the visitor's choice lives in `localStorage.appearance`, a key shared with other Komari themes.
+
+| Token | Role | Light | Dark |
+| --- | --- | --- | --- |
+| `--paper` | Page background (`theme-color`) | `#f3f5f8` | `#0a0f1a` |
+| `--surface` | Elevated card / dialog / popover surface | `#ffffff` | `#111827` |
+| `--surface-2` | Nested or recessed zone inside a surface | `#e8edf4` | `#172133` |
+| `--wash` | Quiet interactive / hover wash | `#e5ebf3` | `#1a263b` |
+| `--ink` | Primary body and figure text | `#0d1526` | `#f0f4fa` |
+| `--muted` | Secondary labels and metadata | `#45546a` | `#97a8c2` |
+| `--faint` | Separators and quiet captions (≥ 3:1 on paper) | `#61718a` | `#6a7d9b` |
+| `--line` | Hairline structural border | `#d4dce8` | `#23314a` |
+| `--line-strong` | Stronger border and dark empty-cell outline | `#b5c2d4` | `#354868` |
+| `--accent` | Primary / selected control fill | `#1849c6` | `#4e86f7` |
+| `--on-accent` | Text on `--accent` | `#ffffff` | `#070e1b` |
+| `--accent-text` | Accent used as text or links (AA on paper/surface/wash) | `#1643b8` | `#78a6ff` |
+| `--accent-wash` | Tinted background for active / selected states | `#e3ecff` | `#142442` |
+| `--good` | Healthy / online status text and instrument fill | `#0a7246` | `#34d399` |
+| `--good-wash` | Tinted background for `good` status chips | `#dcf5ea` | `#0d2b22` |
+| `--warn` | Warning status text (AA on paper/surface/wash) | `#8f4b00` | `#fbbf24` |
+| `--warn-fill` | Warning instrument cell fill (≥ 3:1 on empty cell) | `#a85800` | `#f59e0b` |
+| `--warn-wash` | Tinted background for `warn` status chips | `#fff0d4` | `#2b1f0b` |
+| `--danger` | Critical / offline status text and instrument fill | `#bf1b30` | `#fb7185` |
+| `--danger-wash` | Tinted background for `danger` status chips | `#ffe4e8` | `#31141f` |
+| `--sage` | Legacy soft viridian tint | `#a3e4c7` | `#1c5240` |
+| `--sage-text` | Legacy viridian text / fill alias | `#0a7246` | `#34d399` |
+| `--chart-1` | Chart series 1 (Cobalt) | `#1849c6` | `#5b92ff` |
+| `--chart-2` | Chart series 2 (Teal) | `#0b877d` | `#2dd4bf` |
+| `--chart-3` | Chart series 3 (Amber) | `#c86400` | `#fbbf24` |
+| `--chart-4` | Chart series 4 (Orchid / Plum) | `#8e2de2` | `#e879f9` |
 
 ## Privacy and performance
 
