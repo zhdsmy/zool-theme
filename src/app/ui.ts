@@ -22,3 +22,15 @@ export const useDialog = (name: keyof Dialogs) =>
     () => dialogs[name],
     () => false,
   )
+
+const MOBILE_QUERY = '(width < 768px)'
+
+export const useIsMobile = () =>
+  useSyncExternalStore(
+    (l) => {
+      const mq = window.matchMedia(MOBILE_QUERY)
+      mq.addEventListener('change', l)
+      return () => mq.removeEventListener('change', l)
+    },
+    () => window.matchMedia(MOBILE_QUERY).matches,
+  )

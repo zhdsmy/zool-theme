@@ -13,20 +13,9 @@ import { BlockGrid, levelFor, MirrorSpark, TickBar } from '@/components/instrume
 import { coreTicks, liveSpanMinutes, memoryBlocks, recentBuckets } from '@/core/live'
 import { Popover } from '@/components/Popover'
 import { Bytes, Percent, RegionTag, Speed, StatusDot, useBilling, useRelativeTime, useUptime } from '@/components/bits'
+import { useIsMobile } from '@/app/ui'
 
 /* ---------- pieces ---------- */
-
-function useIsMobile() {
-  const [mobile, setMobile] = useState(() => (typeof window !== 'undefined' ? window.matchMedia('(width < 768px)').matches : false))
-  useEffect(() => {
-    const mq = window.matchMedia('(width < 768px)')
-    const sync = () => setMobile(mq.matches)
-    sync()
-    mq.addEventListener('change', sync)
-    return () => mq.removeEventListener('change', sync)
-  }, [])
-  return mobile
-}
 
 /**
  * One reading, enlarged. `instrument` carries the same shape the ledger row uses, so a node
@@ -53,12 +42,17 @@ function Stat({
   )
 }
 
+/**
+ * On phones, short rows sit two-up (~165px per cell at 390px, enough for a label plus a
+ * ~14-char ASCII / ~7-char CJK value). Rows that can exceed that budget pass `wide: true`
+ * to span both columns; an odd trailing narrow row is promoted so no row ends half-empty.
+ */
 type InfoRow = [label: string, value: ReactNode, wide?: boolean]
 
 function InfoList({ title, rows }: { title: string; rows: InfoRow[] }) {
   const visible = rows.filter(([, v]) => v !== '' && v !== null && v !== undefined)
   if (!visible.length) return null
-  const wideFlags = visible.map(([k, v, w]) => Boolean(w || (typeof v === 'string' && k.length + v.length > 22)))
+  const wideFlags = visible.map(([, , w]) => Boolean(w))
   const narrowIndices = wideFlags.flatMap((isWide, idx) => (isWide ? [] : [idx]))
   if (narrowIndices.length % 2 === 1) {
     wideFlags[narrowIndices[narrowIndices.length - 1]] = true
@@ -211,7 +205,7 @@ function SeriesDot({ color }: { color: string }) {
   return <span className="mr-1 inline-block h-[6px] w-[6px] rounded-full align-[1px]" style={{ background: color }} aria-hidden />
 }
 
-function LoadCharts({ node, points, hours, snap }: { node: NodeInfo; points: HistoryPoint[]; hours: number; snap?: Snapshot }) {
+function LoadCharts({ node, points, hours, height, snap }: { node: NodeInfo; points: HistoryPoint[]; hours: number; height: number; snap?: Snapshot }) {
   const { t } = useTranslation()
   const fmt = useTimeFormats(hours)
   const memTotal = snap?.memTotal || node.memTotal
@@ -223,7 +217,7 @@ function LoadCharts({ node, points, hours, snap }: { node: NodeInfo; points: His
     area,
     points: points.map((p) => ({ t: p.at, v: pick(p) })),
   })
-  const common = { formatTime: fmt.axis, formatTooltipTime: fmt.tooltip }
+  const common = { height, formatTime: fmt.axis, formatTooltipTime: fmt.tooltip }
   const last = points[points.length - 1]
 
   return (
@@ -291,7 +285,7 @@ function LoadCharts({ node, points, hours, snap }: { node: NodeInfo; points: His
 
 const PING_COLORS = ['var(--chart-1)', 'var(--chart-2)', 'var(--chart-3)', 'var(--chart-4)']
 
-function PingChart({ data, hours }: { data: PingData; hours: number }) {
+function PingChart({ data, hours, height }: { data: PingData; hours: number; height: number }) {
   const { t } = useTranslation()
   const fmt = useTimeFormats(hours)
   const [hidden, setHidden] = useState<Set<number>>(new Set())
@@ -306,7 +300,7 @@ function PingChart({ data, hours }: { data: PingData; hours: number }) {
 
   return (
     <div className="node-ping-card card p-5">
-      <Chart series={series} height={240} format={(v) => `${formatNumber(v, 0)} ms`} formatTime={fmt.axis} formatTooltipTime={fmt.tooltip} label={t('node.tabPing')} />
+      <Chart series={series} height={height} format={(v) => `${formatNumber(v, 0)} ms`} formatTime={fmt.axis} formatTooltipTime={fmt.tooltip} label={t('node.tabPing')} />
       <ul className="node-ping-list mt-5 divide-y divide-line border-t border-line">
         {data.tasks.map((task, i) => (
           <li key={task.id}>
@@ -346,6 +340,7 @@ function PingChart({ data, hours }: { data: PingData; hours: number }) {
 
 function NodeCharts({ node, snap }: { node: NodeInfo; snap?: Snapshot }) {
   const { t } = useTranslation()
+  const isMobile = useIsMobile()
   const recordHours = useStore((s) => s.site?.recordHours ?? 0)
   const [range, setRange] = useState(0)
   // Only the live range needs to follow the socket; history ranges stay put.
@@ -395,6 +390,7 @@ function NodeCharts({ node, snap }: { node: NodeInfo; snap?: Snapshot }) {
   const rangeLabel = (h: number) => (h === 0 ? t('node.rangeLive') : h < 24 ? t('node.rangeHours', { count: h }) : t('node.rangeDays', { count: h / 24 }))
   const activeRanges = tab === 'load' ? ranges : pingRanges
   const activeRange = tab === 'load' ? range : pingRange
+  const chartHeight = tab === 'load' ? (isMobile ? 87 : 150) : isMobile ? 140 : 240
 
   return (
     <section className="node-charts mt-16">
@@ -445,31 +441,31 @@ function NodeCharts({ node, snap }: { node: NodeInfo; snap?: Snapshot }) {
           <p className="rounded-[20px] border border-dashed border-line py-16 text-center text-[14px] text-muted">{t('app.loadError')}</p>
         ) : tab === 'load' ? (
           points === null ? (
-            <ChartSkeleton />
+            <ChartSkeleton height={chartHeight} />
           ) : points.length < 2 && range > 0 ? (
             <p className="rounded-[20px] border border-dashed border-line py-16 text-center text-[14px] text-muted">{t('node.noHistory')}</p>
           ) : (
-            <LoadCharts node={node} points={points} hours={range || 0.25} snap={snap} />
+            <LoadCharts node={node} points={points} hours={range || 0.25} height={chartHeight} snap={snap} />
           )
         ) : pingData === null ? (
-          <ChartSkeleton single />
+          <ChartSkeleton single height={chartHeight} />
         ) : pingData.tasks.length === 0 ? (
           <p className="rounded-[20px] border border-dashed border-line py-16 text-center text-[14px] text-muted">{t('node.noPing')}</p>
         ) : (
-          <PingChart data={pingData} hours={pingRange} />
+          <PingChart data={pingData} hours={pingRange} height={chartHeight} />
         )}
       </div>
     </section>
   )
 }
 
-function ChartSkeleton({ single = false }: { single?: boolean }) {
+function ChartSkeleton({ single = false, height }: { single?: boolean; height: number }) {
   return (
     <div className={single ? '' : 'node-chart-grid grid gap-4 md:grid-cols-2 xl:grid-cols-3'}>
       {Array.from({ length: single ? 1 : 6 }, (_, i) => (
         <div key={i} className="node-chart-card card p-5">
           <div className="skeleton h-3 w-20" />
-          <div className={`node-chart-skel skeleton mt-5 ${single ? 'h-[240px]' : 'h-[150px]'}`} />
+          <div className="node-chart-skel skeleton mt-5" style={{ height }} />
         </div>
       ))}
     </div>
@@ -667,12 +663,12 @@ export function NodePage({ id }: { id: string }) {
         <InfoList
           title={t('node.system')}
           rows={[
-            [t('node.os'), node.os],
+            [t('node.os'), node.os, node.os.length > 14],
             [t('node.arch'), node.arch],
             [t('node.cpu'), node.cpuName + (node.cpuCores ? ` × ${node.cpuCores}` : ''), true],
             [t('node.virtualization'), node.virtualization],
             [t('node.gpu'), node.gpuName, true],
-            [t('node.kernel'), node.kernel],
+            [t('node.kernel'), node.kernel, node.kernel.length > 14],
           ]}
         />
         <InfoList

@@ -846,11 +846,6 @@
     padding-inline: 11px;
     font-size: 12px;
   }
-  .node-ranges > .pill[aria-pressed='true'] {
-    background: var(--accent-wash);
-    border-color: var(--accent);
-    color: var(--accent-text);
-  }
   .node-live-note {
     margin-top: 6px;
     font-size: 12px;
@@ -874,7 +869,6 @@
   }
   .node-chart-skel {
     margin-top: 8px;
-    height: 87px;
   }
   .node-ping-card {
     padding: 12px;
