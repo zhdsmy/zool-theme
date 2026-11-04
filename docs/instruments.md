@@ -28,13 +28,13 @@ using few colours.
 
 | Level | Fill token | Light | Dark |
 | --- | --- | --- | --- |
-| `good` | `--good` | `#3F7D5A` | `#7FB894` |
-| `warn` | `--warn-fill` | `#B07316` | `#E0A54A` |
-| `danger` | `--danger` | `#b3261e` | `#f2837a` |
+| `good` | `--good` | `#0a7246` | `#34d399` |
+| `warn` | `--warn-fill` | `#a85800` | `#f59e0b` |
+| `danger` | `--danger` | `#bf1b30` | `#fb7185` |
 
 Card percentage numbers stay in `--ink` at `good`, so routine readings stay quiet and colour
 draws the eye to action. Only `warn` and `danger` numbers take a status colour: `--warn`
-(`#9a5b0b` light / `#e0a54a` dark) and `--danger`. The yellow fill has its own token because
+(`#8f4b00` light / `#fbbf24` dark) and `--danger`. The yellow fill has its own token because
 small filled cells and text need different contrast. "Needs attention" counts each online
 node with any yellow or red reading once; the lower thresholds can increase that count.
 
@@ -93,7 +93,7 @@ carry both peaks.
 
 12 capsules covering the live window, so each one is countable rather than a dotted rule.
 
-- filled sage dot — the node reported in that window
+- filled viridian dot (`--good`) — the node reported in that window
 - hollow red ring — silence
 - faint grey dot — we were not watching: before the buffer started, and any stretch where the
   socket was down or the tab was asleep. "We were not looking" must never render as "it was down".
