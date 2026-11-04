@@ -93,7 +93,9 @@
     "free": "免費",
     "autoRenew": "自動續約",
     "unlimited": "不限",
-    "cores_other": "{{count}} 核"
+    "cores_other": "{{count}} 核",
+    "payAsYouGo": "隨用隨付",
+    "unknown": "未知"
   },
   "unit": {
     "days_other": "{{count}} 天",
@@ -145,7 +147,11 @@
     "avg": "平均",
     "min": "最低",
     "max": "最高",
-    "refresh": "重新整理"
+    "refresh": "重新整理",
+    "bandwidth": "頻寬",
+    "ipSupport": "IP 支援",
+    "networkRoute": "網路線路",
+    "noCycleUsage": "本週期用量暫無資料。"
   },
   "auth": {
     "signIn": "登入",

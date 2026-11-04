@@ -93,7 +93,9 @@
     "free": "免费",
     "autoRenew": "自动续费",
     "unlimited": "不限",
-    "cores_other": "{{count}} 核"
+    "cores_other": "{{count}} 核",
+    "payAsYouGo": "按量计费",
+    "unknown": "未知"
   },
   "unit": {
     "days_other": "{{count}} 天",
@@ -145,7 +147,11 @@
     "avg": "平均",
     "min": "最低",
     "max": "最高",
-    "refresh": "刷新"
+    "refresh": "刷新",
+    "bandwidth": "带宽",
+    "ipSupport": "IP 支持",
+    "networkRoute": "网络线路",
+    "noCycleUsage": "本周期用量暂无数据。"
   },
   "auth": {
     "signIn": "登录",

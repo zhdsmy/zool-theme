@@ -103,7 +103,41 @@ describe('nezha adapter', () => {
     expect(b.trafficLimit).toBe(2 * 1024 ** 4)
     expect(b.expiredAt).toBe(Date.parse('2031-05-01T00:00:00+08:00'))
     expect(parsePublicNote('just a note').price).toBe(0)
-    expect(parsePublicNote('{"billingDataMod":{"amount":"0","endDate":"0000-00-00T23:59:59+08:00"}}')).toMatchObject({ price: -1, expiredAt: null })
+    expect(parsePublicNote('{"billingDataMod":{"amount":"0","endDate":"0000-00-00T23:59:59+08:00"}}')).toMatchObject({ price: -1, expiredAt: 0 })
+  })
+
+  it.each([
+    ['100TB/Month', 100 * 1024 ** 4, 30],
+    ['100GB/Month', 100 * 1024 ** 3, 30],
+    ['1.5TB/月', 1.5 * 1024 ** 4, 30],
+    ['600GB/Year', 600 * 1024 ** 3, 365],
+    ['2TiB', 2 * 1024 ** 4, 0],
+    ['Unlimited', 0, 0],
+    ['', -1, 0],
+    ['0GB', -1, 0],
+    ['1..5TB', -1, 0],
+    ['2TB/Fortnight', -1, 0],
+    ['10GB/Month/Year', -1, 0],
+  ])('reads traffic capacity and period from %s', (trafficVol, trafficLimit, trafficLimitPeriod) => {
+    expect(parsePublicNote(JSON.stringify({ planDataMod: { trafficVol } })))
+      .toMatchObject({ trafficLimit, trafficLimitPeriod })
+  })
+
+  it('reads plan details without treating missing IP flags as unsupported', () => {
+    const note = { planDataMod: { bandwidth: '50Mbps', IPv4: '1', IPv6: '0', networkRoute: '4837,CMI', extra: 'Home connection' } }
+    expect(parsePublicNote(JSON.stringify(note))).toMatchObject({ bandwidth: '50Mbps', ipv4: true, ipv6: false, networkRoute: '4837,CMI', note: 'Home connection' })
+    expect(parsePublicNote('{}').ipv6).toBeUndefined()
+  })
+
+  it('distinguishes pay-as-you-go, free, and unknown billing', () => {
+    expect(parsePublicNote('{"billingDataMod":{"amount":"-1"}}').price).toBe(-2)
+    expect(parsePublicNote('{"billingDataMod":{"amount":"0"}}').price).toBe(-1)
+    expect(parsePublicNote('{}')).toMatchObject({ price: 0, expiredAt: null, trafficLimit: -1 })
+  })
+
+  it('ignores malformed field types from public JSON', () => {
+    expect(parsePublicNote(JSON.stringify({ billingDataMod: { amount: {}, cycle: [], endDate: 123 }, planDataMod: { trafficVol: 123, IPv6: [] } })))
+      .toMatchObject({ price: 0, expiredAt: null, trafficLimit: -1, ipv6: undefined })
   })
 })
 

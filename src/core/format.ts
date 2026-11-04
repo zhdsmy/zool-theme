@@ -1,4 +1,4 @@
-import type { TrafficLimitType } from './model'
+import type { NodeInfo, Snapshot, TrafficLimitType } from './model'
 
 const BYTE_UNITS = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB']
 
@@ -72,6 +72,12 @@ export function trafficUsed(type: TrafficLimitType, up: number, down: number) {
     default:
       return Math.max(up, down)
   }
+}
+
+export function quotaUsage(node: NodeInfo, snap: Snapshot | undefined): number | null {
+  // shortcut: Nezha only supplies cumulative counters; enable period percentages when cycle statistics are available.
+  if (!snap || node.trafficLimitPeriod) return null
+  return trafficUsed(node.trafficLimitType, snap.totalUp, snap.totalDown)
 }
 
 /** Amortises recurring bills over calendar months. Free / unset / one-time costs are zero. */

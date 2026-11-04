@@ -45,6 +45,13 @@ describe('nodeCondition', () => {
     expect(quota.quotaUsed).toBe(true)
     expect(nodeCondition(node({ trafficLimit: 100, trafficLimitType: 'sum' }), snap({ totalUp: 10, totalDown: 10 }), now, true).quotaUsed).toBe(false)
   })
+
+  it('keeps permanent services valid and never compares monthly quotas with lifetime traffic', () => {
+    const period = node({ expiredAt: 0, trafficLimit: 100, trafficLimitPeriod: 30 })
+    const condition = nodeCondition(period, snap({ totalUp: 1000, totalDown: 1000 }), now, true)
+    expect(condition.expired).toBe(false)
+    expect(condition.quotaUsed).toBe(false)
+  })
 })
 
 describe('cleanSnapshot', () => {

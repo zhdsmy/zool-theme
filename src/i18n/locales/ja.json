@@ -93,7 +93,9 @@
     "free": "無料",
     "autoRenew": "自動更新",
     "unlimited": "無制限",
-    "cores_other": "{{count}} コア"
+    "cores_other": "{{count}} コア",
+    "payAsYouGo": "従量課金",
+    "unknown": "不明"
   },
   "unit": {
     "days_other": "{{count}} 日",
@@ -145,7 +147,11 @@
     "avg": "平均",
     "min": "最小",
     "max": "最大",
-    "refresh": "更新"
+    "refresh": "更新",
+    "bandwidth": "帯域幅",
+    "ipSupport": "IP 対応",
+    "networkRoute": "ネットワーク経路",
+    "noCycleUsage": "この期間の使用量データはありません。"
   },
   "auth": {
     "signIn": "ログイン",

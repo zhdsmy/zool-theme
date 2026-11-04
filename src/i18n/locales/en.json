@@ -99,7 +99,9 @@
     "autoRenew": "Auto-renew",
     "unlimited": "Unlimited",
     "cores_one": "{{count}} core",
-    "cores_other": "{{count}} cores"
+    "cores_other": "{{count}} cores",
+    "payAsYouGo": "Pay as you go",
+    "unknown": "Unknown"
   },
   "unit": {
     "days_one": "{{count}} day",
@@ -154,7 +156,11 @@
     "avg": "Avg",
     "min": "Min",
     "max": "Max",
-    "refresh": "Refresh"
+    "refresh": "Refresh",
+    "bandwidth": "Bandwidth",
+    "ipSupport": "IP support",
+    "networkRoute": "Network route",
+    "noCycleUsage": "Usage for this period is unavailable."
   },
   "auth": {
     "signIn": "Sign in",

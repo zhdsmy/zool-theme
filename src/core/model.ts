@@ -54,17 +54,23 @@ export interface NodeInfo {
   diskTotal: number
   /** Lower sorts first. */
   weight: number
-  /** 0 = not set, -1 = free. */
+  /** 0 = not set, -1 = free, -2 = pay-as-you-go. */
   price: number
   currency: string
   /** Billing cycle in days (30 ≈ monthly, 365 ≈ yearly). 0 = not set, -1 = one-time. */
   billingCycle: number
   autoRenewal: boolean
-  /** Expiry as epoch ms, or null when not set / never expires. */
+  /** Expiry as epoch ms; 0 = explicitly permanent, null = not set. */
   expiredAt: number | null
-  /** Bytes; 0 = unlimited. */
+  /** Bytes; 0 = unlimited, -1 = unknown. */
   trafficLimit: number
   trafficLimitType: TrafficLimitType
+  /** Period in days, when the quota does not share the cumulative counters' window. */
+  trafficLimitPeriod?: number
+  bandwidth?: string
+  ipv4?: boolean
+  ipv6?: boolean
+  networkRoute?: string
   note: string
 }
 

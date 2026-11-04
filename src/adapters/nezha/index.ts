@@ -84,7 +84,7 @@ interface NezhaServiceInfo {
 
 interface PublicNote {
   billingDataMod?: { endDate?: string; autoRenewal?: string; cycle?: string; amount?: string }
-  planDataMod?: { trafficVol?: string; trafficType?: string }
+  planDataMod?: { trafficVol?: string; trafficType?: string; bandwidth?: string; IPv4?: string; IPv6?: string; networkRoute?: string; extra?: string }
 }
 
 const CYCLES: [RegExp, number][] = [
@@ -96,13 +96,16 @@ const CYCLES: [RegExp, number][] = [
   [/^(三年|3y|triennial)$/i, 1095],
 ]
 
-const SIZE = /^([\d.]+)\s*([KMGTP]?)i?B?$/i
+const SIZE = /^(\d+(?:\.\d+)?)\s*([KMGTP]?)i?B?$/i
+const text = (value: unknown) => typeof value === 'string' ? value.trim() : ''
 
 function parseSize(v = ''): number {
+  if (/^(unlimited|unmetered|不限|无限(?:流量)?)$/i.test(v.trim())) return 0
   const m = SIZE.exec(v.trim())
-  if (!m) return 0
+  if (!m) return -1
   const pow = ' KMGTP'.indexOf((m[2] || ' ').toUpperCase())
-  return Number(m[1]) * 1024 ** Math.max(0, pow)
+  const bytes = Number(m[1]) * 1024 ** Math.max(0, pow)
+  return Number.isFinite(bytes) && bytes > 0 ? bytes : -1
 }
 
 export function parsePublicNote(note: string | undefined) {
@@ -112,8 +115,14 @@ export function parsePublicNote(note: string | undefined) {
     billingCycle: 0,
     autoRenewal: false,
     expiredAt: null as number | null,
-    trafficLimit: 0,
+    trafficLimit: -1,
     trafficLimitType: 'max' as NodeInfo['trafficLimitType'],
+    trafficLimitPeriod: 0,
+    bandwidth: '',
+    ipv4: undefined as boolean | undefined,
+    ipv6: undefined as boolean | undefined,
+    networkRoute: '',
+    note: '',
   }
   if (!note || note.trim()[0] !== '{') return out
   let parsed: PublicNote
@@ -124,22 +133,37 @@ export function parsePublicNote(note: string | undefined) {
   }
   const b = parsed.billingDataMod
   if (b) {
-    const amount = (b.amount ?? '').trim()
-    const num = /-?[\d.]+/.exec(amount)
-    if (amount === '0' || /free|免费/i.test(amount)) out.price = -1
+    const amount = text(b.amount)
+    const num = /-?\d+(?:\.\d+)?/.exec(amount)
+    if (amount === '-1') out.price = -2
+    else if (amount === '0' || /free|免费/i.test(amount)) out.price = -1
     else if (num) {
-      out.price = Number(num[0])
-      out.currency = amount.replace(num[0], '').trim().slice(0, 4) || '$'
+      const price = Number(num[0])
+      if (Number.isFinite(price) && price > 0) {
+        out.price = price
+        out.currency = amount.replace(num[0], '').trim().slice(0, 4) || '$'
+      }
     }
-    out.billingCycle = CYCLES.find(([re]) => re.test((b.cycle ?? '').trim()))?.[1] ?? 0
-    out.autoRenewal = b.autoRenewal === '1'
-    const end = b.endDate ? Date.parse(b.endDate) : NaN
-    out.expiredAt = Number.isFinite(end) && new Date(end).getUTCFullYear() > 2000 ? end : null
+    out.billingCycle = CYCLES.find(([re]) => re.test(text(b.cycle)))?.[1] ?? 0
+    out.autoRenewal = text(b.autoRenewal) === '1'
+    const endDate = text(b.endDate)
+    const end = Date.parse(endDate)
+    out.expiredAt = endDate.startsWith('0000-00-00') ? 0 : Number.isFinite(end) && new Date(end).getUTCFullYear() > 2000 ? end : null
   }
   const p = parsed.planDataMod
-  if (p?.trafficVol) {
-    out.trafficLimit = parseSize(p.trafficVol)
-    out.trafficLimitType = p.trafficType === '2' ? 'sum' : 'max'
+  if (p) {
+    const parts = text(p.trafficVol).split('/')
+    const period = parts.length === 2 ? CYCLES.find(([re]) => re.test(parts[1].trim()))?.[1] : 0
+    if (parts.length <= 2 && period !== undefined) {
+      out.trafficLimit = parseSize(parts[0])
+      out.trafficLimitPeriod = out.trafficLimit > 0 ? period : 0
+    }
+    out.trafficLimitType = text(p.trafficType) === '2' ? 'sum' : 'max'
+    out.bandwidth = text(p.bandwidth)
+    out.ipv4 = text(p.IPv4) === '1' ? true : text(p.IPv4) === '0' ? false : undefined
+    out.ipv6 = text(p.IPv6) === '1' ? true : text(p.IPv6) === '0' ? false : undefined
+    out.networkRoute = text(p.networkRoute)
+    out.note = text(p.extra)
   }
   return out
 }
@@ -188,7 +212,6 @@ export function mapServer(s: NezhaServer, groups: Map<number, string[]>, note?: 
     diskTotal: h.disk_total ?? 0,
     // Nezha sorts by display_index descending.
     weight: -(s.display_index ?? 0),
-    note: '',
     ...billing,
   }
 }

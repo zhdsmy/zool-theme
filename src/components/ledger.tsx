@@ -4,7 +4,7 @@ import { ArrowDown, ArrowUp } from 'lucide-react'
 import { adapter, getBlindWindows, getLive, useStore } from '@/app/store'
 import { Link } from '@/app/router'
 import type { NodeInfo, Snapshot } from '@/core/model'
-import { formatPercent, splitBytes, splitSpeed, ratio, trafficUsed } from '@/core/format'
+import { formatPercent, splitBytes, splitSpeed, ratio, quotaUsage } from '@/core/format'
 import { coreTicks, liveSpanMinutes, memoryBlocks, recentBuckets, reportRun } from '@/core/live'
 import { stripFlag } from '@/core/region'
 import { nodeCondition, type Condition } from '@/core/condition'
@@ -146,10 +146,8 @@ export function NodeStrip({
   const notch = node.cpuCores > 0 && snap ? Math.min(1, snap.load1 / node.cpuCores) : undefined
   const height = compact ? 9 : 11
   const expiry = billing.expiry(node)
-  const quota =
-    node.trafficLimit > 0 && snap
-      ? ratio(trafficUsed(node.trafficLimitType, snap.totalUp, snap.totalDown), node.trafficLimit)
-      : null
+  const used = quotaUsage(node, snap)
+  const quota = node.trafficLimit > 0 && used !== null ? ratio(used, node.trafficLimit) : null
 
   return (
     <Link
@@ -421,8 +419,8 @@ export function NodeCard({ node, snap, tick, pending }: { node: NodeInfo; snap?:
 
   const price = showBilling ? billing.price(node) : ''
   const expiry = showBilling ? billing.expiry(node) : null
-  const used = snap ? trafficUsed(node.trafficLimitType, snap.totalUp, snap.totalDown) : 0
-  const quota = node.trafficLimit > 0 && snap ? ratio(used, node.trafficLimit) : null
+  const used = quotaUsage(node, snap)
+  const quota = node.trafficLimit > 0 && used !== null ? ratio(used, node.trafficLimit) : null
   const spec = [
     osShort(node.os),
     node.cpuCores ? t('metric.cores', { count: node.cpuCores }) : '',
@@ -543,6 +541,9 @@ export function NodeCard({ node, snap, tick, pending }: { node: NodeInfo; snap?:
                   </span>
                 )}
               </span>
+              {Boolean(node.trafficLimitPeriod) && node.trafficLimit > 0 && (
+                <span className="text-[12px] text-muted">{t('metric.quota')} <span className="num">{billing.quota(node)}</span></span>
+              )}
             </span>
 
             </>}

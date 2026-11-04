@@ -56,7 +56,7 @@ function sortValue(key: SortKey, n: NodeInfo, s: Snapshot | undefined): number |
     case 'uptime':
       return s?.online ? s.uptime : -1
     case 'expiry':
-      return n.expiredAt ?? Number.MAX_SAFE_INTEGER
+      return n.expiredAt || Number.MAX_SAFE_INTEGER
     default:
       return n.weight
   }

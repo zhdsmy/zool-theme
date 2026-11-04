@@ -3,7 +3,7 @@ import { Globe } from 'lucide-react'
 import type { NodeInfo } from '@/core/model'
 import { FLAG_CODES } from '@/core/flags.manifest'
 import { regionFlagCode } from '@/core/region'
-import { daysUntil, duration, formatMoney, formatPercent, splitBytes, splitSpeed, type Parts } from '@/core/format'
+import { daysUntil, duration, formatBytes, formatMoney, formatPercent, splitBytes, splitSpeed, type Parts } from '@/core/format'
 
 export function StatusDot({ online, pending, className = '' }: { online: boolean; pending?: boolean; className?: string }) {
   const { t } = useTranslation()
@@ -60,12 +60,19 @@ export function useBilling() {
   }
   return {
     price(n: NodeInfo) {
+      if (n.price === -2) return t('metric.payAsYouGo')
       if (n.price === -1) return t('metric.free')
       if (!(n.price > 0)) return ''
       return `${formatMoney(n.price, n.currency)}${cycle(n.billingCycle)}`
     },
+    quota(n: NodeInfo) {
+      if (n.trafficLimit < 0) return t('metric.unknown')
+      if (n.trafficLimit === 0) return t('metric.unlimited')
+      return `${formatBytes(n.trafficLimit)}${cycle(n.trafficLimitPeriod ?? 0)}`
+    },
     expiry(n: NodeInfo): { text: string; level?: 'warn' | 'danger' } | null {
       if (n.expiredAt === null) return null
+      if (n.expiredAt === 0) return { text: t('expiry.longTerm') }
       const days = daysUntil(n.expiredAt)
       if (days > 3650) return { text: t('expiry.longTerm') }
       if (days < 0) return { text: t('expiry.expired'), level: 'danger' }

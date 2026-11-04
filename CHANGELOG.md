@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.0+zhdsmy.3 — 2026-11-04
+
+- Read Nezha traffic quotas with billing periods, including `100TB/Month` and `100GB/Month`, and distinguish unknown quotas from unlimited plans.
+- Show plan bandwidth, IP support, network routes and extra notes on node pages. Period quotas show their capacity without comparing them to lifetime traffic or raising false quota alerts; cycle usage is explicitly unavailable until the backend supplies it.
+- Preserve the permanent expiry marker and show pay-as-you-go billing separately from free service, across all four languages.
+
 ## 1.0.0+zhdsmy.2 — 2026-11-04
 
 - Sum the monthly cost of online recurring paid nodes after currency conversion; annual bills are divided by 12.

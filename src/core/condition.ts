@@ -1,5 +1,5 @@
 import type { NodeInfo, Snapshot } from './model'
-import { ratio, trafficUsed } from './format'
+import { quotaUsage, ratio } from './format'
 
 /**
  * What a node's row or card should say about it, beyond its readings.
@@ -31,7 +31,8 @@ export const hasReadings = (s: Snapshot | undefined) => Boolean(s && (s.memTotal
 
 export function nodeCondition(node: NodeInfo, snap: Snapshot | undefined, now: number, fed: boolean): Condition {
   const lastSeen = snap && snap.at > 0 ? snap.at : null
-  const quota = node.trafficLimit > 0 && snap ? ratio(trafficUsed(node.trafficLimitType, snap.totalUp, snap.totalDown), node.trafficLimit) : 0
+  const used = quotaUsage(node, snap)
+  const quota = node.trafficLimit > 0 && used !== null ? ratio(used, node.trafficLimit) : 0
   const kind: ConditionKind = !snap
     ? fed
       ? 'offline'

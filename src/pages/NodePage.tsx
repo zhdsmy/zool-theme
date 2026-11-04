@@ -4,7 +4,7 @@ import { ArrowLeft, ChevronDown, RefreshCw } from 'lucide-react'
 import { adapter, getLive, useStore, useVisibleNodes } from '@/app/store'
 import { Link, navigate } from '@/app/router'
 import type { HistoryPoint, NodeInfo, PingData, Snapshot } from '@/core/model'
-import { formatBytes, formatClock, formatNumber, formatPercent, formatSpeed, ratio, trafficUsed } from '@/core/format'
+import { formatBytes, formatClock, formatNumber, formatPercent, formatSpeed, quotaUsage, ratio } from '@/core/format'
 import { regionName, stripFlag } from '@/core/region'
 import { summariseDay } from '@/core/summary'
 import { Chart, type ChartSeries } from '@/components/Chart'
@@ -472,7 +472,7 @@ export function NodePage({ id }: { id: string }) {
   const pending = !snap && !fed
   const memTotal = snap?.memTotal || node.memTotal
   const diskTotal = snap?.diskTotal || node.diskTotal
-  const used = snap ? trafficUsed(node.trafficLimitType, snap.totalUp, snap.totalDown) : 0
+  const used = quotaUsage(node, snap)
   const price = billing.price(node)
   const expiry = billing.expiry(node)
   const region = regionName(node.region, i18n.language)
@@ -615,6 +615,9 @@ export function NodePage({ id }: { id: string }) {
         <InfoList
           title={t('node.network')}
           rows={[
+            [t('node.bandwidth'), node.bandwidth],
+            [t('node.ipSupport'), [node.ipv4 === undefined ? '' : `IPv4 ${node.ipv4 ? '✓' : '×'}`, node.ipv6 === undefined ? '' : `IPv6 ${node.ipv6 ? '✓' : '×'}`].filter(Boolean).join(' · ')],
+            [t('node.networkRoute'), node.networkRoute],
             [
               t('node.today'),
               day.summary ? (
@@ -651,10 +654,11 @@ export function NodePage({ id }: { id: string }) {
               t('metric.quota'),
               node.trafficLimit > 0 ? (
                 <span key="q" className="num">
-                  {formatBytes(used)} / {formatBytes(node.trafficLimit)}
+                  {used !== null ? `${formatBytes(used)} / ` : ''}{billing.quota(node)}
+                  {Boolean(node.trafficLimitPeriod) && <span className="mt-1 block max-w-[24ch] text-[11px] whitespace-normal text-muted">{t('node.noCycleUsage')}</span>}
                 </span>
               ) : adapter.capabilities.trafficLimit ? (
-                t('metric.unlimited')
+                billing.quota(node)
               ) : (
                 ''
               ),
