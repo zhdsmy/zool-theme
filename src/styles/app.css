@@ -29,6 +29,16 @@
   --chart-2: #6f8f7a;
   --chart-3: #b08a4a;
   --chart-4: #8a8fb8;
+  /* dispatch contract: semantic tokens added for the mobile redesign. Values are owned by the
+     palette package; names are fixed. */
+  --surface-2: var(--wash);
+  --accent: var(--sage-text);
+  --accent-text: var(--sage-text);
+  --accent-wash: var(--wash);
+  --on-accent: var(--paper);
+  --good-wash: var(--wash);
+  --warn-wash: var(--wash);
+  --danger-wash: var(--wash);
   color-scheme: light;
 }
 
@@ -80,6 +90,15 @@
   --color-sage-text: var(--sage-text);
   --color-warn: var(--warn);
   --color-danger: var(--danger);
+  --color-surface-2: var(--surface-2);
+  --color-accent: var(--accent);
+  --color-accent-text: var(--accent-text);
+  --color-accent-wash: var(--accent-wash);
+  --color-on-accent: var(--on-accent);
+  --color-good: var(--good);
+  --color-good-wash: var(--good-wash);
+  --color-warn-wash: var(--warn-wash);
+  --color-danger-wash: var(--danger-wash);
   --font-sans: 'Inter Variable', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', 'PingFang SC',
     'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
   --font-mono: ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, Consolas, monospace;
@@ -622,3 +641,13 @@
     scroll-behavior: auto !important;
   }
 }
+
+/* ===== home-mobile: owned by the home package (HomePage / ledger / Header). ===== */
+/* ===== end home-mobile ===== */
+
+
+
+
+
+/* ===== node-mobile: owned by the node package (NodePage / Chart / Footer). ===== */
+/* ===== end node-mobile ===== */
