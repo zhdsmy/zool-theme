@@ -35,7 +35,7 @@
 
 ## Fork versions
 
-This fork uses `<upstream-version>+zhdsmy.<revision>`, currently `1.0.0+zhdsmy.3`. Increment the revision for changes on the same upstream baseline; after adopting upstream `1.0.1`, start at `1.0.1+zhdsmy.1`. Git tags include the `v` prefix and packaged ZIP filenames include the complete version.
+This fork uses `<upstream-version>+zhdsmy.<revision>`, currently `1.0.0+zhdsmy.4`. Increment the revision for changes on the same upstream baseline; after adopting upstream `1.0.1`, start at `1.0.1+zhdsmy.1`. Git tags include the `v` prefix and packaged ZIP filenames include the complete version.
 
 The suffix is SemVer build metadata and does not change version precedence. Identify deployed fork revisions by their complete Git tag and artifact SHA256. `pnpm build && pnpm package` creates the fork packages and `SHA256SUMS` under `release/`.
 
@@ -110,7 +110,7 @@ Then `docker compose up -d`. Options and rollback: [docs/install-nezha.md](docs/
 | `defaultLanguage` | `auto` | `auto`, `en`, `zh-CN`, `zh-TW` or `ja` |
 | `siteTitle` | *(empty)* | Overrides the site name |
 | `showOverview` | `true` | Overview band on the home page |
-| `showCost` | `true` | Online nodes' monthly cost using daily reference exchange rates; CNY in Simplified Chinese, USD otherwise; annual bills divided by 12 |
+| `showCost` | `true` | Online monthly cost with daily exchange rates; displayed prices for guests, actual expenses after login; CNY in Simplified Chinese, USD otherwise |
 | `showGroups` | `true` | Offer the group picker |
 | `defaultGrouped` | `false` | Default state of the visitor's "Show by group" button |
 | `showRegions` | `true` | Region filter |
@@ -157,3 +157,27 @@ tile colours from Simple Icons metadata, the Windows shape is drawn for this pro
 [MIT](LICENSE). The ZOOL name and logo are trademarks of ZOOL LLC.
 
 <p align="center"><sub>A theme by <a href="https://x.com/luoleiorg">@luoleiorg</a></sub></p>
+
+### Private actual expenses (Nezha)
+
+Keep the public plan price in `public_note.billingDataMod.amount`. Set an optional
+`billingDataMod.actualAmount` in the existing **private note** JSON:
+
+```json
+{
+  "billingDataMod": {
+    "actualAmount": "CNY 15.00"
+  }
+}
+```
+
+Use an ISO currency code and amount. The amount uses the same billing cycle as the
+public price; `CNY 0.00` means an explicit zero expense. An empty or absent field
+inherits the public price. Other private-note keys are preserved.
+
+The theme requests private notes from the existing authenticated server API only
+after sign-in. Guests retain the displayed monthly cost; signed-in users see the
+actual online monthly total and an extra expense line on cards and node details.
+Private amounts stay in memory and are cleared on refresh/session reload. An API
+failure leaves actual expenses unavailable instead of presenting the public total
+as actual. No Nezha backend changes are required.

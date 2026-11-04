@@ -29,7 +29,7 @@
     "nodes": "オンラインのノード",
     "bandwidth": "帯域幅",
     "traffic": "累計トラフィック",
-    "cost": "オンライン月額コスト",
+    "cost": "オンライン表示月額",
     "attention": "要注意",
     "allClear": "上限に近いものなし",
     "costNodes_other": "オンライン有料ノード {{count}} 台",
@@ -37,7 +37,9 @@
     "costCachedRates": "保存済みレート",
     "costLoading": "為替レートを取得中…",
     "costUnavailable": "為替レートを取得できません",
-    "regions_other": "{{count}} 地域"
+    "regions_other": "{{count}} 地域",
+    "actualCost": "オンライン実際の月額支出",
+    "actualCostUnavailable": "実際の支出を取得できません"
   },
   "toolbar": {
     "all": "すべて",
@@ -95,7 +97,8 @@
     "unlimited": "無制限",
     "cores_other": "{{count}} コア",
     "payAsYouGo": "従量課金",
-    "unknown": "不明"
+    "unknown": "不明",
+    "actualCost": "実際の支出"
   },
   "unit": {
     "days_other": "{{count}} 日",

@@ -161,6 +161,8 @@ export function HomePage() {
   const snapshots = useStore((s) => s.snapshots)
   const connection = useStore((s) => s.connection)
   const settings = useStore((s) => s.settings)
+  const loggedIn = useStore((s) => s.session.loggedIn)
+  const actualCosts = useStore((s) => s.actualCosts)
   const description = useStore((s) => s.site?.description)
   const tick = useStore((s) => s.liveVersion)
   const view = useView(settings.defaultView)
@@ -188,7 +190,9 @@ export function HomePage() {
     return () => { active = false; clearInterval(timer) }
   }, [settings.showCost])
   const costCurrency = i18n.resolvedLanguage === 'zh-CN' ? 'CNY' : 'USD'
-  const cost = useMemo(() => onlineMonthlyCost(nodes, snapshots, costCurrency, rates?.rates), [nodes, snapshots, costCurrency, rates])
+  const cost = useMemo(() => loggedIn && actualCosts === null ? { amount: null, paid: 0 }
+    : onlineMonthlyCost(nodes, snapshots, costCurrency, rates?.rates, loggedIn ? actualCosts ?? undefined : undefined),
+  [nodes, snapshots, costCurrency, rates, loggedIn, actualCosts])
 
   const setSort = (next: Sort) => {
     setSortState(next)
@@ -409,7 +413,7 @@ export function HomePage() {
             />
             {settings.showCost && (
               <Metric
-                label={t('overview.cost')}
+                label={t(loggedIn ? 'overview.actualCost' : 'overview.cost')}
                 subOnPhone
                 value={
                   <>
@@ -417,7 +421,7 @@ export function HomePage() {
                     {cost.amount !== null && <span className="ml-1 text-[0.55em] text-muted">{t('unit.perMonth')}</span>}
                   </>
                 }
-                sub={cost.amount === null ? t(rateError ? 'overview.costUnavailable' : 'overview.costLoading') : <>
+                sub={cost.amount === null ? t(loggedIn && actualCosts === null ? 'overview.actualCostUnavailable' : rateError ? 'overview.costUnavailable' : 'overview.costLoading') : <>
                   {t('overview.costNodes', { count: cost.paid })}
                   {rates && <span className="mt-1 block text-faint">
                     {t(rates.stale ? 'overview.costCachedRates' : 'overview.costRates')}{' '}

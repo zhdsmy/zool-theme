@@ -150,6 +150,12 @@ export interface Session {
   username?: string
 }
 
+/** Private expense for one displayed billing cycle. Zero is an explicit override. */
+export interface ActualCost {
+  amount: number
+  currency: string
+}
+
 export type LoginResult =
   | { ok: true }
   | { ok: false; reason: 'need2fa' | 'invalid' | 'invalid2fa' | 'network'; message?: string }
@@ -175,6 +181,8 @@ export interface MonitorAdapter {
   loadSite(): Promise<SiteInfo>
   loadNodes(): Promise<NodeInfo[]>
   loadSession(): Promise<Session>
+  /** Authenticated metadata only; never loaded for guests or persisted in browser storage. */
+  loadActualCosts?(): Promise<Record<string, ActualCost>>
   subscribe(listener: (event: LiveEvent) => void, onStatus?: (status: ConnectionStatus) => void): () => void
   /** Drop any cached connection or frame so the next load and subscribe start fresh. */
   reset?(): void

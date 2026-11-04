@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.0+zhdsmy.4 — 2026-11-04
+
+- Read optional actual expenses from Nezha private-note JSON after authentication; empty values inherit public billing prices and explicit zero remains zero.
+- Show the actual online monthly total for signed-in users and add actual expense lines to VPS cards and node details. Guest views and public WebSocket metadata retain displayed prices.
+- Keep private amounts out of browser storage and discard them on refresh; a protected API failure does not silently fall back to a displayed-price total.
+
+
 ## 1.0.0+zhdsmy.3 — 2026-11-04
 
 - Read Nezha traffic quotas with billing periods, including `100TB/Month` and `100GB/Month`, and distinguish unknown quotas from unlimited plans.

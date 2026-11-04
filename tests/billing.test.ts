@@ -1,4 +1,4 @@
-import { beforeAll, describe, expect, it } from 'vitest'
+import { beforeAll, describe, expect, it, vi } from 'vitest'
 import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { createInstance } from 'i18next'
@@ -11,17 +11,22 @@ import zhCN from '../src/i18n/locales/zh-CN.json'
 import zhTW from '../src/i18n/locales/zh-TW.json'
 import ja from '../src/i18n/locales/ja.json'
 
+const privateBilling = vi.hoisted(() => ({ loggedIn: false, actualCosts: null as Record<string, { amount: number; currency: string }> | null }))
+vi.mock('../src/app/store', () => ({
+  useStore: (select: (state: unknown) => unknown) => select({ session: { loggedIn: privateBilling.loggedIn }, actualCosts: privateBilling.actualCosts }),
+}))
+
 const i18n = createInstance()
 const resources = { en: { translation: en }, 'zh-CN': { translation: zhCN }, 'zh-TW': { translation: zhTW }, ja: { translation: ja } }
 beforeAll(async () => { await i18n.use(initReactI18next).init({ resources, lng: 'en', interpolation: { escapeValue: false } }) })
 
 function Billing({ node }: { node: NodeInfo }) {
   const billing = useBilling()
-  return createElement('div', null, [billing.price(node), billing.expiry(node)?.text, billing.quota(node)].filter(Boolean).join(' | '))
+  return createElement('div', null, [billing.price(node), billing.actualPrice(node), billing.expiry(node)?.text, billing.quota(node)].filter(Boolean).join(' | '))
 }
 
 function render(note: object) {
-  const node = parsePublicNote(JSON.stringify(note)) as NodeInfo
+  const node = { ...parsePublicNote(JSON.stringify(note)), id: 'sample' } as NodeInfo
   return renderToStaticMarkup(createElement(I18nextProvider, { i18n }, createElement(Billing, { node })))
 }
 
@@ -38,5 +43,18 @@ describe('Nezha billing display', () => {
     expect(metered).not.toContain(t.metric.free)
     expect(render({})).toContain(t.metric.unknown)
     expect(render({ planDataMod: { trafficVol: 'Unlimited' } })).toContain(t.metric.unlimited)
+  })
+
+  it('shows private expenses only when authenticated, with zero and empty-field inheritance', () => {
+    const displayed = { billingDataMod: { amount: 'USD 10.00', cycle: 'Month' } }
+    privateBilling.actualCosts = { sample: { amount: 0, currency: 'CNY' } }
+    expect(render(displayed)).not.toContain('¥0.00')
+    privateBilling.loggedIn = true
+    expect(render(displayed)).toContain('¥0.00')
+    privateBilling.actualCosts = {}
+    expect(render(displayed).match(/\$10\.00/g)).toHaveLength(2)
+    privateBilling.actualCosts = null
+    expect(render(displayed).match(/\$10\.00/g)).toHaveLength(1)
+    privateBilling.loggedIn = false
   })
 })

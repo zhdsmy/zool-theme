@@ -32,7 +32,7 @@
     "nodes": "Nodes online",
     "bandwidth": "Bandwidth",
     "traffic": "Total traffic",
-    "cost": "Online monthly cost",
+    "cost": "Online displayed monthly cost",
     "attention": "Needs attention",
     "allClear": "Nothing near a limit",
     "costNodes_one": "across {{count}} online paid node",
@@ -42,7 +42,9 @@
     "costLoading": "Loading exchange rates…",
     "costUnavailable": "Exchange rates unavailable",
     "regions_one": "{{count}} region",
-    "regions_other": "{{count}} regions"
+    "regions_other": "{{count}} regions",
+    "actualCost": "Online actual monthly expense",
+    "actualCostUnavailable": "Actual expenses are unavailable"
   },
   "toolbar": {
     "all": "All",
@@ -101,7 +103,8 @@
     "cores_one": "{{count}} core",
     "cores_other": "{{count}} cores",
     "payAsYouGo": "Pay as you go",
-    "unknown": "Unknown"
+    "unknown": "Unknown",
+    "actualCost": "Actual expense"
   },
   "unit": {
     "days_one": "{{count}} day",

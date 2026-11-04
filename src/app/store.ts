@@ -1,6 +1,6 @@
 import { useMemo, useSyncExternalStore } from 'react'
 import adapter from '@adapter'
-import type { ConnectionStatus, HistoryPoint, NodeInfo, Session, SiteInfo, Snapshot } from '@/core/model'
+import type { ActualCost, ConnectionStatus, HistoryPoint, NodeInfo, Session, SiteInfo, Snapshot } from '@/core/model'
 import { DEFAULT_SETTINGS, normalizeSettings, type ThemeSettings } from '@/core/settings'
 import { blindNow, noteFrame, type BlindWindow } from '@/core/live'
 import { cleanSnapshot } from '@/core/condition'
@@ -14,6 +14,8 @@ export interface State {
   nodes: NodeInfo[]
   snapshots: Record<string, Snapshot>
   session: Session
+  /** Null while private billing is unavailable; an empty map means all prices are inherited. */
+  actualCosts: Record<string, ActualCost> | null
   connection: ConnectionStatus
   /**
    * At least one live frame has arrived. Until then a node with no snapshot is waiting, not
@@ -34,6 +36,7 @@ let state: State = {
   nodes: [],
   snapshots: {},
   session: { loggedIn: false },
+  actualCosts: null,
   connection: 'connecting',
   fed: false,
   refreshing: false,
@@ -120,9 +123,11 @@ let unsubscribe: (() => void) | null = null
 let refreshTimer: ReturnType<typeof setTimeout> | undefined
 
 const load = async () => {
-  const [site, nodes] = await Promise.all([adapter.loadSite(), adapter.loadNodes()])
-  set({ site, nodes, settings: normalizeSettings(site.settings), phase: 'ready' })
-  adapter.loadSession().then((session) => set({ session }))
+  const [site, nodes, session] = await Promise.all([adapter.loadSite(), adapter.loadNodes(), adapter.loadSession()])
+  const actualCosts = session.loggedIn
+    ? await (adapter.loadActualCosts?.() ?? Promise.resolve({})).catch(() => null)
+    : null
+  set({ site, nodes, session, actualCosts, settings: normalizeSettings(site.settings), phase: 'ready' })
 }
 
 function connect() {
@@ -166,7 +171,7 @@ export async function start() {
  */
 export async function refresh() {
   if (state.refreshing || state.phase !== 'ready') return
-  set({ refreshing: true })
+  set({ refreshing: true, actualCosts: null })
   refreshTimer = setTimeout(() => set({ refreshing: false }), 10_000)
   unsubscribe?.()
   unsubscribe = null

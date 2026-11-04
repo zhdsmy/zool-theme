@@ -13,6 +13,14 @@ const online = { online: true } as Snapshot
 afterEach(() => { vi.unstubAllGlobals(); vi.restoreAllMocks() })
 
 describe('monthly fleet cost', () => {
+  it('uses actual expenses, including zero, and inherits missing overrides before conversion', () => {
+    const nodes = [node('zero', 'CNY', 90), node('discount', 'USD', 10), node('inherit', 'USD', 120, 365), node('offline', 'CNY', 50)]
+    const snapshots = { zero: online, discount: online, inherit: online }
+    const actual = { zero: { amount: 0, currency: 'CNY' }, discount: { amount: 14, currency: 'CNY' } }
+    expect(onlineMonthlyCost(nodes, snapshots, 'CNY', rates, actual)).toEqual({ amount: 84, paid: 2 })
+    expect(onlineMonthlyCost(nodes, snapshots, 'USD', rates, actual)).toEqual({ amount: 12, paid: 2 })
+    expect(onlineMonthlyCost(nodes, snapshots, 'CNY', rates)).toEqual({ amount: 230, paid: 3 })
+  })
   const nodes = [
     node('usd', '$', 120, 365), node('cny', '￥', 70), node('eur', 'EUR', 9), node('aud', 'AUD$', 15),
     node('offline', '$', 12), node('unseen', '$', 100), node('free', 'CNY', -1), node('once', '$', 100, -1),

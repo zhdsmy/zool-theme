@@ -11,6 +11,9 @@ const fake = vi.hoisted(() => {
     loads: 0,
     nodes: [node('a')],
     failNextLoad: false,
+    loggedIn: false,
+    privateLoads: 0,
+    failPrivateLoad: false,
     node,
   }
   return f
@@ -29,7 +32,12 @@ vi.mock('@adapter', () => ({
       }
       return fake.nodes
     },
-    loadSession: async () => ({ loggedIn: false }),
+    loadSession: async () => ({ loggedIn: fake.loggedIn }),
+    loadActualCosts: async () => {
+      fake.privateLoads++
+      if (fake.failPrivateLoad) throw new Error('private API unavailable')
+      return { a: { amount: 0, currency: 'CNY' } }
+    },
     subscribe: (l: Listener) => {
       fake.listeners.push(l)
       return () => {
@@ -112,5 +120,43 @@ describe('store: fed and refresh', () => {
     expect(getState().snapshots.b.online).toBe(false)
     expect(getState().snapshots.b.cpu).toBe(1)
     expect(getState().snapshots.a.online).toBe(true)
+  })
+
+  it('never loads private billing for guests', async () => {
+    const { refresh, getState } = await import('../src/app/store')
+    const before = fake.privateLoads
+    await refresh()
+    emit()
+    expect(fake.privateLoads).toBe(before)
+    expect(getState().actualCosts).toBeNull()
+  })
+
+  it('loads private billing after authentication and clears it before a logout refresh', async () => {
+    const { refresh, getState } = await import('../src/app/store')
+    fake.loggedIn = true
+    await refresh()
+    emit()
+    expect(getState().actualCosts).toEqual({ a: { amount: 0, currency: 'CNY' } })
+    fake.loggedIn = false
+    const before = fake.privateLoads
+    const refreshing = refresh()
+    expect(getState().actualCosts).toBeNull()
+    await refreshing
+    emit()
+    expect(getState().session.loggedIn).toBe(false)
+    expect(getState().actualCosts).toBeNull()
+    expect(fake.privateLoads).toBe(before)
+  })
+
+  it('keeps private billing unavailable when the protected API fails', async () => {
+    const { refresh, getState } = await import('../src/app/store')
+    fake.loggedIn = true
+    fake.failPrivateLoad = true
+    await refresh()
+    emit()
+    expect(getState().session.loggedIn).toBe(true)
+    expect(getState().actualCosts).toBeNull()
+    fake.loggedIn = false
+    fake.failPrivateLoad = false
   })
 })

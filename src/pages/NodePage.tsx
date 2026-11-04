@@ -671,6 +671,7 @@ export function NodePage({ id }: { id: string }) {
           title={t('node.billing')}
           rows={[
             [t('metric.price'), price],
+            [t('metric.actualCost'), billing.actualPrice(node)],
             [
               t('metric.expiry'),
               expiry ? (

@@ -392,6 +392,7 @@ export function NodeCard({ node, snap, tick, pending }: { node: NodeInfo; snap?:
   const uptime = useUptime()
   const billing = useBilling()
   const showBilling = useStore((s) => s.settings.showBilling)
+  const actualPrice = showBilling ? billing.actualPrice(node) : ''
 
   const live = useMemo(() => {
     const points = getLive(node.id)
@@ -547,6 +548,12 @@ export function NodeCard({ node, snap, tick, pending }: { node: NodeInfo; snap?:
             </span>
 
             </>}
+            {actualPrice && (
+              <span className="mt-4 flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 text-[12px]">
+                <span className="text-muted">{t('metric.actualCost')}</span>
+                <span className="num">{actualPrice}</span>
+              </span>
+            )}
             {/* everything else, on one line */}
             <span className="mt-4 flex items-center gap-2 border-t border-line pt-3.5 text-[12px] text-muted">
               {pending ? <span className="skeleton h-3 flex-1" aria-hidden="true" /> : cond.kind === 'online' ? <span className="truncate">

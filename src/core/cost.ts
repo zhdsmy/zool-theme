@@ -1,6 +1,6 @@
 import { currencyCode, monthlyCost } from './format'
 import { request } from './http'
-import type { NodeInfo, Snapshot } from './model'
+import type { ActualCost, NodeInfo, Snapshot } from './model'
 
 export interface ExchangeRates {
   date: string
@@ -63,16 +63,18 @@ export function onlineMonthlyCost(
   snapshots: Record<string, Snapshot>,
   currency: 'CNY' | 'USD',
   rates: Record<string, number> = { USD: 1 },
+  actualCosts?: Record<string, ActualCost>,
 ) {
   let amount = 0
   let paid = 0
   let complete = true
   for (const node of nodes) {
     if (!snapshots[node.id]?.online) continue
-    const monthly = monthlyCost(node.price, node.billingCycle)
+    const actual = actualCosts?.[node.id]
+    const monthly = monthlyCost(actual?.amount ?? node.price, node.billingCycle)
     if (monthly <= 0) continue
     paid++
-    const code = currencyCode(node.currency)
+    const code = currencyCode(actual?.currency ?? node.currency)
     if (code === currency) amount += monthly
     else if (code && rates[code] > 0 && rates[currency] > 0) amount += monthly / rates[code] * rates[currency]
     else complete = false

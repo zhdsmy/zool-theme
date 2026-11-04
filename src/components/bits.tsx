@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { Globe } from 'lucide-react'
+import { useStore } from '@/app/store'
 import type { NodeInfo } from '@/core/model'
 import { FLAG_CODES } from '@/core/flags.manifest'
 import { regionFlagCode } from '@/core/region'
@@ -52,18 +53,26 @@ export function useUptime() {
 
 export function useBilling() {
   const { t } = useTranslation()
+  const loggedIn = useStore((s) => s.session.loggedIn)
+  const actualCosts = useStore((s) => s.actualCosts)
   const cycle = (days: number) => {
     if (days <= 0) return days === -1 ? ` ${t('unit.oneTime')}` : ''
     if (days >= 28 && days <= 31) return t('unit.perMonth')
     if (days >= 360 && days <= 366) return t('unit.perYear')
     return t('unit.perDays', { count: days })
   }
+  const price = (n: NodeInfo) => {
+    if (n.price === -2) return t('metric.payAsYouGo')
+    if (n.price === -1) return t('metric.free')
+    if (!(n.price > 0)) return ''
+    return `${formatMoney(n.price, n.currency)}${cycle(n.billingCycle)}`
+  }
   return {
-    price(n: NodeInfo) {
-      if (n.price === -2) return t('metric.payAsYouGo')
-      if (n.price === -1) return t('metric.free')
-      if (!(n.price > 0)) return ''
-      return `${formatMoney(n.price, n.currency)}${cycle(n.billingCycle)}`
+    price,
+    actualPrice(n: NodeInfo) {
+      if (!loggedIn || actualCosts === null) return ''
+      const actual = actualCosts[n.id]
+      return actual ? `${formatMoney(actual.amount, actual.currency)}${cycle(n.billingCycle)}` : price(n)
     },
     quota(n: NodeInfo) {
       if (n.trafficLimit < 0) return t('metric.unknown')

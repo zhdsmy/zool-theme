@@ -1,6 +1,7 @@
 import { request, resilientSocket, wsUrl } from '@/core/http'
 import type {
   LiveEvent,
+  ActualCost,
   LoginResult,
   MonitorAdapter,
   NodeInfo,
@@ -85,6 +86,19 @@ interface NezhaServiceInfo {
 interface PublicNote {
   billingDataMod?: { endDate?: string; autoRenewal?: string; cycle?: string; amount?: string }
   planDataMod?: { trafficVol?: string; trafficType?: string; bandwidth?: string; IPv4?: string; IPv6?: string; networkRoute?: string; extra?: string }
+}
+
+export function parseActualCost(note: unknown): ActualCost | undefined {
+  if (typeof note !== 'string') return
+  try {
+    const amount = text(JSON.parse(note)?.billingDataMod?.actualAmount)
+    const match = /^([A-Z]{3})\s+(\d+(?:\.\d+)?)$/i.exec(amount)
+    if (match && Number.isFinite(Number(match[2]))) {
+      return { currency: match[1].toUpperCase(), amount: Number(match[2]) }
+    }
+  } catch {
+    /* Empty, plain-text or malformed private notes keep the displayed price. */
+  }
 }
 
 const CYCLES: [RegExp, number][] = [
@@ -404,6 +418,17 @@ export const nezha: MonitorAdapter = {
     } catch {
       return { loggedIn: false }
     }
+  },
+
+  async loadActualCosts() {
+    const res = await request<Common<{ id: number; note?: string }[]>>('/api/v1/server', { cache: 'no-store' })
+    if (!res.success || !Array.isArray(res.data)) throw new Error('Private billing unavailable')
+    const costs: Record<string, ActualCost> = {}
+    for (const server of res.data) {
+      const cost = parseActualCost(server.note)
+      if (cost) costs[String(server.id)] = cost
+    }
+    return costs
   },
 
   subscribe(listener, onStatus) {
