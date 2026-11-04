@@ -309,7 +309,7 @@ export function HomePage() {
   const shown = sections.reduce((n, s) => n + s.rows.length, 0)
 
   return (
-    <div className="wrap pt-10 md:pt-16">
+    <div className="wrap pt-3.5 md:pt-16">
       {/* headline */}
       <section className="fade-in">
         <p className="eyebrow flex flex-wrap items-center gap-x-2 gap-y-1">
@@ -322,7 +322,11 @@ export function HomePage() {
               <span className="text-faint">/</span>
               {/* What used to be a 52px headline, at the size of a caption: it is one sentence,
                   and the overview beside it is what the top of the page is actually for. */}
-              <span className={`normal-case tracking-normal ${offline ? 'text-danger' : ''}`}>
+              <span
+                className={`normal-case tracking-normal ${
+                  offline ? 'rounded-full bg-danger-wash px-2 py-0.5 font-medium text-danger md:rounded-none md:bg-transparent md:p-0 md:font-normal' : ''
+                }`}
+              >
                 {offline === 0 ? t('status.allOnline') : t('status.someOffline', { count: offline })}
               </span>
             </>
@@ -338,105 +342,219 @@ export function HomePage() {
         {/* The fleet at a glance. This is the top of the page, so it is the biggest type on
             it — but a band of figures, not one 52px sentence. */}
         {settings.showOverview && (
-          <div
-            className={`mt-4 grid grid-cols-3 gap-x-4 border-y border-line lg:gap-x-0 lg:divide-x lg:divide-line ${
-              settings.showCost ? 'lg:grid-cols-5' : 'lg:grid-cols-4'
-            }`}
-          >
-            <Metric
-              label={t('overview.nodes')}
-              tone={offline ? 'text-danger' : ''}
-              value={
-                <>
-                  {online}
-                  <span className="ml-1 text-[0.55em] text-muted">/ {nodes.length}</span>
-                </>
-              }
-              sub={totals.regions > 0 ? t('overview.regions', { count: totals.regions }) : undefined}
-            />
-            <Metric
-              label={t('overview.bandwidth')}
-              value={
-                <>
-                  {splitSpeed(totals.up + totals.down).value}
-                  <span className="ml-1 text-[0.55em] text-muted">{splitSpeed(totals.up + totals.down).unit}</span>
-                </>
-              }
-              sub={
-                <Pair
-                  up={`${splitSpeed(totals.up).value} ${splitSpeed(totals.up).unit}`}
-                  down={`${splitSpeed(totals.down).value} ${splitSpeed(totals.down).unit}`}
-                />
-              }
-            />
-            <Metric
-              label={t('overview.traffic')}
-              value={
-                <>
-                  {splitBytes(totals.traffic).value}
-                  <span className="ml-1 text-[0.55em] text-muted">{splitBytes(totals.traffic).unit}</span>
-                </>
-              }
-              sub={
-                <Pair
-                  up={`${splitBytes(totals.trafficUp).value} ${splitBytes(totals.trafficUp).unit}`}
-                  down={`${splitBytes(totals.trafficDown).value} ${splitBytes(totals.trafficDown).unit}`}
-                />
-              }
-            />
-            {/* Not an average. A mean CPU across a one-core VPS and a sixteen-core box is
-                arithmetic without meaning; this counts the machines with a reading past its own
-                warning line, which is the question a summary actually owes the reader. */}
-            <Metric
-              label={t('overview.attention')}
-              className={settings.showCost ? 'col-span-2 lg:col-span-1' : 'col-span-3 lg:col-span-1'}
-              subOnPhone
-              tone={totals.worst?.level === 'danger' ? 'text-danger' : totals.worst ? 'text-warn' : ''}
-              value={totals.attention}
-              sub={
-                totals.worst
-                  ? `${stripFlag(totals.worst.name)} · ${t(`metric.${totals.worst.metric}`)} ${formatPercent(totals.worst.pct)}%`
-                  : t('overview.allClear')
-              }
-            />
-            {settings.showCost && (
+          <>
+            {/* Mobile compact overview: two tight tiers inside a bordered surface card */}
+            <div className="home-overview-mobile mt-2.5 overflow-hidden rounded-[14px] border border-line bg-surface md:hidden">
+              <div className="grid grid-cols-3 divide-x divide-line">
+                <div className="min-w-0 px-2.5 py-2">
+                  <div className="flex items-baseline justify-between gap-1">
+                    <p className="truncate text-[10.5px] leading-tight text-muted">{t('overview.nodes')}</p>
+                    {fed && totals.regions > 0 && (
+                      <span className="num shrink-0 text-[10px] leading-tight text-faint">{t('overview.regions', { count: totals.regions })}</span>
+                    )}
+                  </div>
+                  <p className={`num mt-1 truncate text-[16px] leading-none font-medium tracking-[-0.02em] ${!fed ? 'text-faint' : offline ? 'text-danger' : 'text-ink'}`}>
+                    {fed ? (
+                      <>
+                        {online}
+                        <span className="ml-0.5 text-[11px] font-normal text-muted">/ {nodes.length}</span>
+                      </>
+                    ) : (
+                      '—'
+                    )}
+                  </p>
+                </div>
+
+                <div className="min-w-0 px-2.5 py-2">
+                  <p className="truncate text-[10.5px] leading-tight text-muted">{t('overview.bandwidth')}</p>
+                  <p className={`num mt-1 truncate text-[16px] leading-none font-medium tracking-[-0.02em] ${fed ? 'text-ink' : 'text-faint'}`}>
+                    {fed ? (
+                      <>
+                        {splitSpeed(totals.up + totals.down).value}
+                        <span className="ml-0.5 text-[10.5px] font-normal text-muted">{splitSpeed(totals.up + totals.down).unit}</span>
+                      </>
+                    ) : (
+                      '—'
+                    )}
+                  </p>
+                </div>
+
+                <div className="min-w-0 px-2.5 py-2">
+                  <p className="truncate text-[10.5px] leading-tight text-muted">{t('overview.traffic')}</p>
+                  <p className={`num mt-1 truncate text-[16px] leading-none font-medium tracking-[-0.02em] ${fed ? 'text-ink' : 'text-faint'}`}>
+                    {fed ? (
+                      <>
+                        {splitBytes(totals.traffic).value}
+                        <span className="ml-0.5 text-[10.5px] font-normal text-muted">{splitBytes(totals.traffic).unit}</span>
+                      </>
+                    ) : (
+                      '—'
+                    )}
+                  </p>
+                </div>
+              </div>
+
+              <div className={`grid border-t border-line bg-surface-2 ${settings.showCost ? 'grid-cols-[1.15fr_0.85fr] divide-x divide-line' : 'grid-cols-1'}`}>
+                <div className="min-w-0 px-2.5 py-2">
+                  <div className="flex items-center justify-between gap-1.5">
+                    <p className="truncate text-[10.5px] leading-tight text-muted">{t('overview.attention')}</p>
+                    <span
+                      className={`num shrink-0 rounded-full px-1.5 py-0.5 text-[10.5px] leading-none font-semibold ${
+                        !fed
+                          ? 'text-faint'
+                          : totals.worst?.level === 'danger'
+                            ? 'bg-danger-wash text-danger'
+                            : totals.worst
+                              ? 'bg-warn-wash text-warn'
+                              : 'bg-good-wash text-good'
+                      }`}
+                    >
+                      {fed ? totals.attention : '—'}
+                    </span>
+                  </div>
+                  <p
+                    className={`num mt-1 truncate text-[11px] leading-tight ${
+                      !fed ? 'text-faint' : totals.worst?.level === 'danger' ? 'font-medium text-danger' : totals.worst ? 'font-medium text-warn' : 'text-muted'
+                    }`}
+                  >
+                    {!fed
+                      ? '—'
+                      : totals.worst
+                        ? `${stripFlag(totals.worst.name)} · ${t(`metric.${totals.worst.metric}`)} ${formatPercent(totals.worst.pct)}%`
+                        : t('overview.allClear')}
+                  </p>
+                </div>
+
+                {settings.showCost && (
+                  <div className="min-w-0 px-2.5 py-2">
+                    <div className="flex items-baseline justify-between gap-1">
+                      <p className="truncate text-[10.5px] leading-tight text-muted">{t(loggedIn ? 'overview.actualCost' : 'overview.cost')}</p>
+                      {fed && cost.amount !== null && (
+                        <span className="num shrink-0 truncate text-[10px] leading-tight text-muted" title={t('overview.costNodes', { count: cost.paid })}>
+                          {t('unit.nodes', { count: cost.paid })}
+                        </span>
+                      )}
+                    </div>
+                    <div className="num mt-1 flex items-baseline justify-between gap-1 leading-none">
+                      {!fed || cost.amount === null ? (
+                        <span className="truncate text-[11px] text-muted">
+                          {!fed
+                            ? '—'
+                            : t(loggedIn && actualCosts === null ? 'overview.actualCostUnavailable' : rateError ? 'overview.costUnavailable' : 'overview.costLoading')}
+                        </span>
+                      ) : (
+                        <span className="truncate text-[14px] font-medium tracking-[-0.02em] text-ink">
+                          {formatMoney(cost.amount, costCurrency)}
+                          <span className="ml-0.5 text-[10px] font-normal text-muted">{t('unit.perMonth')}</span>
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Desktop overview band (unchanged structure and spacing at ≥ 768px) */}
+            <div
+              className={`mt-4 hidden border-y border-line md:grid md:grid-cols-3 md:gap-x-4 lg:gap-x-0 lg:divide-x lg:divide-line ${
+                settings.showCost ? 'lg:grid-cols-5' : 'lg:grid-cols-4'
+              }`}
+            >
               <Metric
-                label={t(loggedIn ? 'overview.actualCost' : 'overview.cost')}
-                subOnPhone
+                label={t('overview.nodes')}
+                tone={offline ? 'text-danger' : ''}
                 value={
                   <>
-                    {cost.amount === null ? '—' : formatMoney(cost.amount, costCurrency)}
-                    {cost.amount !== null && <span className="ml-1 text-[0.55em] text-muted">{t('unit.perMonth')}</span>}
+                    {online}
+                    <span className="ml-1 text-[0.55em] text-muted">/ {nodes.length}</span>
                   </>
                 }
-                sub={cost.amount === null ? t(loggedIn && actualCosts === null ? 'overview.actualCostUnavailable' : rateError ? 'overview.costUnavailable' : 'overview.costLoading') : <>
-                  {t('overview.costNodes', { count: cost.paid })}
-                  {rates && <span className="mt-1 block text-faint">
-                    {t(rates.stale ? 'overview.costCachedRates' : 'overview.costRates')}{' '}
-                    <time dateTime={rates.date} className="block md:inline">{rates.date}</time>
-                  </span>}
-                </>}
+                sub={totals.regions > 0 ? t('overview.regions', { count: totals.regions }) : undefined}
               />
-            )}
-          </div>
+              <Metric
+                label={t('overview.bandwidth')}
+                value={
+                  <>
+                    {splitSpeed(totals.up + totals.down).value}
+                    <span className="ml-1 text-[0.55em] text-muted">{splitSpeed(totals.up + totals.down).unit}</span>
+                  </>
+                }
+                sub={
+                  <Pair
+                    up={`${splitSpeed(totals.up).value} ${splitSpeed(totals.up).unit}`}
+                    down={`${splitSpeed(totals.down).value} ${splitSpeed(totals.down).unit}`}
+                  />
+                }
+              />
+              <Metric
+                label={t('overview.traffic')}
+                value={
+                  <>
+                    {splitBytes(totals.traffic).value}
+                    <span className="ml-1 text-[0.55em] text-muted">{splitBytes(totals.traffic).unit}</span>
+                  </>
+                }
+                sub={
+                  <Pair
+                    up={`${splitBytes(totals.trafficUp).value} ${splitBytes(totals.trafficUp).unit}`}
+                    down={`${splitBytes(totals.trafficDown).value} ${splitBytes(totals.trafficDown).unit}`}
+                  />
+                }
+              />
+              {/* Not an average. A mean CPU across a one-core VPS and a sixteen-core box is
+                  arithmetic without meaning; this counts the machines with a reading past its own
+                  warning line, which is the question a summary actually owes the reader. */}
+              <Metric
+                label={t('overview.attention')}
+                className={settings.showCost ? 'col-span-2 lg:col-span-1' : 'col-span-3 lg:col-span-1'}
+                subOnPhone
+                tone={totals.worst?.level === 'danger' ? 'text-danger' : totals.worst ? 'text-warn' : ''}
+                value={totals.attention}
+                sub={
+                  totals.worst
+                    ? `${stripFlag(totals.worst.name)} · ${t(`metric.${totals.worst.metric}`)} ${formatPercent(totals.worst.pct)}%`
+                    : t('overview.allClear')
+                }
+              />
+              {settings.showCost && (
+                <Metric
+                  label={t(loggedIn ? 'overview.actualCost' : 'overview.cost')}
+                  subOnPhone
+                  value={
+                    <>
+                      {cost.amount === null ? '—' : formatMoney(cost.amount, costCurrency)}
+                      {cost.amount !== null && <span className="ml-1 text-[0.55em] text-muted">{t('unit.perMonth')}</span>}
+                    </>
+                  }
+                  sub={cost.amount === null ? t(loggedIn && actualCosts === null ? 'overview.actualCostUnavailable' : rateError ? 'overview.costUnavailable' : 'overview.costLoading') : <>
+                    {t('overview.costNodes', { count: cost.paid })}
+                    {rates && <span className="mt-1 block text-faint">
+                      {t(rates.stale ? 'overview.costCachedRates' : 'overview.costRates')}{' '}
+                      <time dateTime={rates.date} className="block md:inline">{rates.date}</time>
+                    </span>}
+                  </>}
+                />
+              )}
+            </div>
+          </>
         )}
         {description && description !== 'A simple server monitor tool.' && (
-          <p className="mt-3 max-w-[60ch] text-[14px] leading-relaxed text-muted">{description}</p>
+          <p className="mt-2.5 max-w-[60ch] text-[13px] leading-relaxed text-muted md:mt-3 md:text-[14px]">{description}</p>
         )}
       </section>
 
       {/* toolbar: one row from tablet width up — groups, regions, then how to sort and draw */}
-      <section className="home-toolbar mt-8 flex flex-wrap items-center gap-2 md:flex-nowrap">
+      <section className="home-toolbar mt-2.5 flex flex-wrap items-center gap-x-1.5 gap-y-0.5 md:mt-8 md:flex-nowrap md:gap-2">
         {offerGroups && (
-          <div className="segmented flex items-center rounded-full border border-line p-0.5">
+          <div className="segmented flex items-center rounded-full border border-line bg-surface p-0.5 md:bg-transparent">
             <Popover
               label={`${t('toolbar.groups')} ${pickedGroups.length || t('toolbar.all')}`}
               align="start"
-              buttonClassName={`pill min-h-8 gap-1 border-0 px-2.5 sm:gap-1.5 sm:px-3 ${pickedGroups.length ? 'text-ink' : ''}`}
+              buttonClassName={`pill min-h-8 gap-1 border-0 px-2.5 sm:gap-1.5 sm:px-3 ${pickedGroups.length ? 'text-accent-text font-medium md:font-normal md:text-ink' : ''}`}
               button={
                 <>
                   <span>{t('toolbar.groups')}</span>
-                  <span className={`num text-muted ${pickedGroups.length ? '' : 'hidden sm:inline'}`}>{pickedGroups.length ? pickedGroups.length : t('toolbar.all')}</span>
+                  <span className={`num text-muted ${pickedGroups.length ? 'text-accent-text' : 'hidden sm:inline'}`}>{pickedGroups.length ? pickedGroups.length : t('toolbar.all')}</span>
                   <ChevronDown size={14} strokeWidth={1.7} className="text-muted" aria-hidden />
                 </>
               }
@@ -462,7 +580,7 @@ export function HomePage() {
                             }
                           >
                             <span
-                              className={`grid size-4 shrink-0 place-items-center rounded-[5px] border ${on ? 'border-ink bg-ink text-paper' : 'border-line-strong'}`}
+                              className={`grid size-4 shrink-0 place-items-center rounded-[5px] border ${on ? 'border-accent bg-accent text-on-accent' : 'border-line-strong'}`}
                               aria-hidden
                             >
                               {on && <Check size={12} strokeWidth={2.2} />}
@@ -494,7 +612,7 @@ export function HomePage() {
               disabled={pickedGroups.length === 1}
               onClick={() => setGrouping(grouping === 'grouped' ? 'flat' : 'grouped')}
               className={`grid h-8 w-9 place-items-center rounded-full transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${
-                grouping === 'grouped' ? 'bg-ink text-paper' : 'text-muted hover:text-ink'
+                grouping === 'grouped' ? 'bg-accent text-on-accent' : 'text-muted hover:text-ink'
               }`}
             >
               <ListTree size={15} strokeWidth={1.7} aria-hidden />
@@ -506,7 +624,7 @@ export function HomePage() {
           // On a phone the strip gets a row of its own: squeezed between the group picker and
           // the view switch it had room for one pill, which reads as the only region there is.
           <div
-            className="scroll-x order-last -ml-1 flex min-w-0 basis-full gap-1 py-1 pl-1 md:order-none md:flex-1 md:basis-auto"
+            className="region-strip scroll-x order-last -ml-1 flex min-w-0 basis-full gap-1 pl-1 md:order-none md:flex-1 md:basis-auto md:py-1"
             role="group"
             aria-label={t('toolbar.regions')}
           >
@@ -514,23 +632,25 @@ export function HomePage() {
               <button
                 key={code}
                 type="button"
-                className="pill min-h-8 shrink-0 gap-1.5 px-3 text-[12px]"
+                className="region-pill pill min-h-8 shrink-0 gap-1.5 px-3 text-[12px]"
                 aria-pressed={pickedRegion === code}
                 title={regionName(code, i18n.language)}
                 onClick={() => setFilter({ groups: pickedGroups, region: pickedRegion === code ? null : code })}
               >
-                <RegionFlag code={code} />
-                <span className="font-mono tracking-wide">{code}</span>
-                <span className="num text-muted">{count}</span>
+                <span className="region-pill-inner md:contents">
+                  <RegionFlag code={code} />
+                  <span className="font-mono tracking-wide">{code}</span>
+                  <span className="num text-muted">{count}</span>
+                </span>
               </button>
             ))}
             {filtering && (
               <button
                 type="button"
-                className="pill min-h-8 shrink-0 px-3 text-[12px] underline-offset-4 hover:underline md:hidden"
+                className="region-pill pill min-h-8 shrink-0 px-3 text-[12px] underline-offset-4 hover:underline md:hidden"
                 onClick={() => setFilter({ groups: [], region: null })}
               >
-                {t('toolbar.clear')}
+                <span className="region-pill-inner text-accent-text md:contents">{t('toolbar.clear')}</span>
               </button>
             )}
           </div>
@@ -554,11 +674,11 @@ export function HomePage() {
 
         <Popover
           label={t('toolbar.sort')}
-          buttonClassName="pill border-line! text-ink"
+          buttonClassName="sort-pill pill border-line! bg-surface text-ink md:bg-transparent"
           button={
             <>
               <ArrowDownUp size={14} strokeWidth={1.7} aria-hidden />
-              <span className="hidden sm:inline">{t(`sort.${sort.key}`)}</span>
+              <span className="text-[12px] md:text-[13px]">{t(`sort.${sort.key}`)}</span>
             </>
           }
           panelClassName="w-[220px] p-1.5"
@@ -579,9 +699,9 @@ export function HomePage() {
                     >
                       <span className="flex-1">{t(`sort.${key}`)}</span>
                       {active && (
-                        <span className="flex items-center gap-1 text-[12px] text-muted">
+                        <span className="flex items-center gap-1 text-[12px] text-accent-text">
                           {sort.desc ? t('toolbar.descending') : t('toolbar.ascending')}
-                          <Check size={15} strokeWidth={1.8} className="text-ink" aria-hidden />
+                          <Check size={15} strokeWidth={1.8} className="text-accent-text" aria-hidden />
                         </span>
                       )}
                     </button>
@@ -592,7 +712,7 @@ export function HomePage() {
           )}
         </Popover>
 
-        <div className="segmented flex rounded-full border border-line p-0.5" role="group" aria-label={t('toolbar.view')}>
+        <div className="segmented flex rounded-full border border-line bg-surface p-0.5 md:bg-transparent" role="group" aria-label={t('toolbar.view')}>
           {(
             [
               ['ledger', List, 'list'],
@@ -607,7 +727,7 @@ export function HomePage() {
               aria-label={t(`toolbar.${labelKey}`)}
               onClick={() => setView(value as View)}
               className={`grid h-8 w-9 place-items-center rounded-full transition-colors ${
-                view === value ? 'bg-ink text-paper' : 'text-muted hover:text-ink'
+                view === value ? 'bg-accent text-on-accent' : 'text-muted hover:text-ink'
               }`}
             >
               <Icon size={15} strokeWidth={1.7} />
@@ -634,7 +754,7 @@ export function HomePage() {
                 aria-label={t(`toolbar.${value}`)}
                 onClick={() => setDensity(value as Density)}
                 className={`grid h-8 w-9 place-items-center rounded-full transition-colors ${
-                  density === value ? 'bg-ink text-paper' : 'text-muted hover:text-ink'
+                  density === value ? 'bg-accent text-on-accent' : 'text-muted hover:text-ink'
                 }`}
               >
                 <Icon size={15} strokeWidth={1.7} />
@@ -647,7 +767,7 @@ export function HomePage() {
       {/* the ledger */}
       {/* While the connection is down after data arrived, the readings stay but dim: they are the
           last known values, not a fleet that went offline. */}
-      <section className="mt-4" data-stale={fed && connection !== 'open' ? '' : undefined}>
+      <section className="mt-2 md:mt-4" data-stale={fed && connection !== 'open' ? '' : undefined}>
         {shown === 0 ? (
           <p className="rounded-[20px] border border-dashed border-line py-16 text-center text-[14px] text-muted">{t('toolbar.empty')}</p>
         ) : (
@@ -663,7 +783,7 @@ export function HomePage() {
                 />
               )}
               {view === 'cards' ? (
-                <div data-grid="cards" className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                <div data-grid="cards" className="mt-2.5 grid gap-2.5 sm:grid-cols-2 md:mt-4 md:gap-3 lg:grid-cols-3 xl:grid-cols-4">
                   {section.rows.map((node) => (
                     <NodeCard key={node.id} node={node} snap={snapshots[node.id]} tick={tick} pending={!fed && !snapshots[node.id]} />
                   ))}
@@ -677,7 +797,7 @@ export function HomePage() {
           ))
         )}
         {shown > 0 && (
-          <p className="num mt-4 text-[12px] text-muted">
+          <p className="num mt-3 text-[12px] text-muted md:mt-4">
             {filtering ? t('status.shown', { shown, count: nodes.length }) : t('status.summary', { online, count: nodes.length })}
           </p>
         )}

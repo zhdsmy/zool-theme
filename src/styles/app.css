@@ -643,6 +643,105 @@
 }
 
 /* ===== home-mobile: owned by the home package (HomePage / ledger / Header). ===== */
+@media (width < 768px) {
+  header.home-header .icon-btn {
+    width: 40px;
+    height: 40px;
+  }
+
+  .home-toolbar button {
+    min-height: 40px;
+    min-width: 40px;
+  }
+
+  .home-toolbar .segmented {
+    padding: 2px;
+  }
+
+  .home-toolbar .segmented > button,
+  .home-toolbar .segmented > .relative > button {
+    height: 36px;
+    min-height: 40px;
+    min-width: 40px;
+  }
+
+  .home-toolbar .sort-pill {
+    min-height: 40px;
+    padding-inline: 11px;
+    gap: 5px;
+  }
+
+  .home-toolbar .region-pill {
+    min-height: 40px;
+    min-width: 40px;
+    padding: 6px 0;
+    border-color: transparent;
+    background: transparent;
+  }
+
+  .home-toolbar .region-pill-inner {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    height: 28px;
+    padding: 0 9px;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    color: var(--muted);
+    transition:
+      color 0.15s,
+      border-color 0.15s,
+      background-color 0.15s;
+  }
+
+  .home-toolbar .region-pill:hover .region-pill-inner {
+    color: var(--ink);
+  }
+
+  .home-toolbar .region-pill[aria-pressed='true'] .region-pill-inner {
+    border-color: var(--accent);
+    background: var(--accent-wash);
+    color: var(--accent-text);
+    font-weight: 500;
+  }
+
+  .node-strip .region-tag-strip {
+    height: 18px;
+    padding-inline: 5px;
+    font-size: 10px;
+    gap: 3px;
+    background: var(--surface-2);
+  }
+
+  .pending-strip {
+    gap: 2px 12px;
+    margin-top: 4px;
+    padding-left: 22px;
+  }
+
+  .pending-strip > span {
+    height: 14px;
+  }
+
+  .pending-strip .skeleton {
+    height: 9px;
+  }
+
+  .pending-card {
+    gap: 14px 12px;
+    margin-top: 14px;
+  }
+
+  .pending-card > span:not(:last-child) {
+    grid-template-rows: 16px 2px 22px 6px 14px 6px 15px;
+  }
+
+  .pending-card > span:last-child {
+    gap: 6px 12px;
+    padding-top: 12px;
+  }
+}
 /* ===== end home-mobile ===== */
 
 
