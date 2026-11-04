@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { adapter, start, useStore } from './store'
+import { adapter, setExchangeRates, start, useStore } from './store'
+import { loadExchangeRates } from '@/core/cost'
 import { usePathname } from './router'
 import { setDefaultAppearance, useView } from './prefs'
 import { resolveLocale, setLocale } from '@/i18n'
@@ -74,6 +75,19 @@ export function App() {
   useEffect(() => {
     start()
   }, [])
+
+  useEffect(() => {
+    if (!settings.showCost && !settings.showBilling) return
+    let active = true
+    const refresh = () => loadExchangeRates().then((value) => {
+      if (active) setExchangeRates(value)
+    }).catch(() => {
+      if (active) setExchangeRates(null, true)
+    })
+    refresh()
+    const timer = setInterval(refresh, 86_400_000)
+    return () => { active = false; clearInterval(timer) }
+  }, [settings.showCost, settings.showBilling])
 
   useEffect(() => {
     setDefaultAppearance(settings.defaultAppearance)

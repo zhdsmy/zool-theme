@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { loadExchangeRates, onlineMonthlyCost } from '../src/core/cost'
+import { convertAmount, displayCurrency, loadExchangeRates, onlineMonthlyCost } from '../src/core/cost'
 import { currencyCode, formatMoney } from '../src/core/format'
 import type { NodeInfo, Snapshot } from '../src/core/model'
 
@@ -13,6 +13,18 @@ const online = { online: true } as Snapshot
 afterEach(() => { vi.unstubAllGlobals(); vi.restoreAllMocks() })
 
 describe('monthly fleet cost', () => {
+  it('shares locale currency and validates conversion for all billing displays', () => {
+    expect(displayCurrency('zh-CN')).toBe('CNY')
+    for (const locale of ['en', 'zh-TW', 'ja', undefined]) expect(displayCurrency(locale)).toBe('USD')
+    expect(convertAmount(10, 'USD', 'CNY', rates)).toBe(70)
+    expect(convertAmount(70, 'CNY', 'USD', rates)).toBe(10)
+    expect(convertAmount(0, 'CNY', 'USD')).toBe(0)
+    expect(convertAmount(70, 'CNY', 'CNY')).toBe(70)
+    expect(convertAmount(70, 'CNY', 'USD')).toBeNull()
+    expect(convertAmount(1, 'EUR', 'USD', { USD: 1, EUR: Infinity })).toBeNull()
+    expect(convertAmount(1, 'EUR', 'USD', { USD: 1, EUR: -1 })).toBeNull()
+    expect(convertAmount(NaN, 'USD', 'USD', rates)).toBeNull()
+  })
   it('uses actual expenses, including zero, and inherits missing overrides before conversion', () => {
     const nodes = [node('zero', 'CNY', 90), node('discount', 'USD', 10), node('inherit', 'USD', 120, 365), node('offline', 'CNY', 50)]
     const snapshots = { zero: online, discount: online, inherit: online }

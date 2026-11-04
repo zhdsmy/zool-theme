@@ -1,6 +1,6 @@
 import { useMemo, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ArrowDown, ArrowUp } from 'lucide-react'
+import { ArrowDown, ArrowUp, CalendarClock, Clock3 } from 'lucide-react'
 import { adapter, getBlindWindows, getLive, useStore } from '@/app/store'
 import { Link } from '@/app/router'
 import type { NodeInfo, Snapshot } from '@/core/model'
@@ -548,38 +548,39 @@ export function NodeCard({ node, snap, tick, pending }: { node: NodeInfo; snap?:
             </span>
 
             </>}
-            {actualPrice && (
-              <span className="mt-4 flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 text-[12px]">
-                <span className="text-muted">{t('metric.actualCost')}</span>
-                <span className="num">{actualPrice}</span>
+            <span className="mt-4 grid gap-2 border-t border-line pt-3 text-[12px]">
+              <span className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1 text-muted">
+                {pending ? <span className="skeleton h-3 flex-1" aria-hidden="true" /> : cond.kind === 'online' ? (
+                  <span className="inline-flex items-center gap-1.5" title={t('metric.uptime')}>
+                    <Clock3 size={12} strokeWidth={1.7} aria-hidden />
+                    <span className="sr-only">{t('metric.uptime')}: </span>
+                    <span className="num">{uptime(snap!.uptime)}</span>
+                  </span>
+                ) : <ConditionNote cond={cond} />}
+                {cond.kind === 'online' && expiry && (
+                  <span className={`inline-flex items-center gap-1.5 ${expiry.level === 'danger' ? 'text-danger' : expiry.level === 'warn' ? 'text-warn' : ''}`} title={t('metric.expiry')}>
+                    <CalendarClock size={12} strokeWidth={1.7} aria-hidden />
+                    <span className="sr-only">{t('metric.expiry')}: </span>
+                    <span>{expiry.text}</span>
+                  </span>
+                )}
+                <span className="ml-auto flex shrink-0 items-center">
+                  {pending ? <span className="skeleton h-[18px] w-12" aria-hidden="true" /> : <DotRun run={live.run} label={t('status.live')} size={3} gap={2} />}
+                </span>
               </span>
-            )}
-            {/* everything else, on one line */}
-            <span className="mt-4 flex items-center gap-2 border-t border-line pt-3.5 text-[12px] text-muted">
-              {pending ? <span className="skeleton h-3 flex-1" aria-hidden="true" /> : cond.kind === 'online' ? <span className="truncate">
-                {t('metric.uptime')} <span className="num text-ink">{uptime(snap!.uptime)}</span>
-              </span> : <ConditionNote cond={cond} />}
-              {/* the price goes only in a card too narrow for it (under 280px, narrower than any
-                  four-up row): the uptime truncates first, since the price is what a billing
-                  site turns this setting on to see */}
-              {cond.kind === 'online' && price && (
-                <span className="contents @max-[17.5rem]:hidden">
-                  <span className="text-faint">·</span>
-                  <span className="num shrink-0">{price}</span>
+              {(price || actualPrice) && (
+                <span className="card-billing flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+                  {price && <span className="inline-flex items-baseline gap-1.5 whitespace-nowrap" title={t('metric.price')}>
+                    <span className="text-muted">{t('metric.listPriceShort')}</span>
+                    <span className="num">{price}</span>
+                  </span>}
+                  {actualPrice && <span className="inline-flex items-baseline gap-1.5 whitespace-nowrap" title={t('metric.actualCost')}>
+                    <span className="sr-only">{t('metric.actualCost')}: </span>
+                    <span className="text-muted" aria-hidden>{t('metric.actualCostShort')}</span>
+                    <span className="num font-medium">{actualPrice}</span>
+                  </span>}
                 </span>
               )}
-              {cond.kind === 'online' && expiry && (
-                <>
-                  <span className="text-faint">·</span>
-                  <span className={`shrink-0 ${expiry.level === 'danger' ? 'text-danger' : expiry.level === 'warn' ? 'text-warn' : ''}`}>
-                    {expiry.text}
-                  </span>
-                </>
-              )}
-              {/* the reporting run needs no label: it is the only thing here that is not words */}
-              <span className="ml-auto flex shrink-0 items-center">
-                {pending ? <span className="skeleton h-[18px] w-12" aria-hidden="true" /> : <DotRun run={live.run} label={t('status.live')} size={3} gap={2} />}
-              </span>
             </span>
           </>
       </span>

@@ -35,7 +35,7 @@
 
 ## Fork versions
 
-This fork uses `<upstream-version>+zhdsmy.<revision>`, currently `1.0.0+zhdsmy.4`. Increment the revision for changes on the same upstream baseline; after adopting upstream `1.0.1`, start at `1.0.1+zhdsmy.1`. Git tags include the `v` prefix and packaged ZIP filenames include the complete version.
+This fork uses `<upstream-version>+zhdsmy.<revision>`, currently `1.0.0+zhdsmy.5`. Increment the revision for changes on the same upstream baseline; after adopting upstream `1.0.1`, start at `1.0.1+zhdsmy.1`. Git tags include the `v` prefix and packaged ZIP filenames include the complete version.
 
 The suffix is SemVer build metadata and does not change version precedence. Identify deployed fork revisions by their complete Git tag and artifact SHA256. `pnpm build && pnpm package` creates the fork packages and `SHA256SUMS` under `release/`.
 
@@ -181,3 +181,5 @@ actual online monthly total and an extra expense line on cards and node details.
 Private amounts stay in memory and are cleared on refresh/session reload. An API
 failure leaves actual expenses unavailable instead of presenting the public total
 as actual. No Nezha backend changes are required.
+
+All displayed monetary amounts, including card/list/detail prices and private actual expenses, use CNY in Simplified Chinese and USD in other locales. They share the overview reference rates; an unavailable conversion shows a dash. Per-node bills keep their original billing period; only the monthly overview amortizes annual bills. Card footers group listed and actual costs below uptime, expiry and live status.

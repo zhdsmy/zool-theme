@@ -104,7 +104,9 @@
     "cores_other": "{{count}} cores",
     "payAsYouGo": "Pay as you go",
     "unknown": "Unknown",
-    "actualCost": "Actual expense"
+    "actualCost": "Actual expense",
+    "listPriceShort": "Listed",
+    "actualCostShort": "Paid"
   },
   "unit": {
     "days_one": "{{count}} day",

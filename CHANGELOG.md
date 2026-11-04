@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.0+zhdsmy.5 — 2026-11-04
+
+- Group listed and actual card expenses in the bottom footer, with compact labels, accessible uptime/expiry icons and wrapping that keeps both amounts visible.
+- Convert all billing displays to CNY for Simplified Chinese and USD for other locales, sharing one daily reference-rate state across overview, list, cards and node details. Keep original billing periods and hide amounts when conversion is unavailable.
+
+
 ## 1.0.0+zhdsmy.4 — 2026-11-04
 
 - Read optional actual expenses from Nezha private-note JSON after authentication; empty values inherit public billing prices and explicit zero remains zero.

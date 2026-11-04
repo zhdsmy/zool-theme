@@ -57,6 +57,17 @@ export function loadExchangeRates() {
   return loading ??= fetchRates().finally(() => { loading = undefined })
 }
 
+export const displayCurrency = (locale?: string) => locale === 'zh-CN' ? 'CNY' : 'USD'
+
+export function convertAmount(amount: number, source: string, target: 'CNY' | 'USD', rates: Record<string, number> = { USD: 1 }): number | null {
+  if (!Number.isFinite(amount) || amount < 0) return null
+  if (amount === 0) return 0
+  const code = currencyCode(source)
+  if (code === target) return amount
+  if (!code || !Number.isFinite(rates[code]) || rates[code] <= 0 || !Number.isFinite(rates[target]) || rates[target] <= 0) return null
+  return amount / rates[code] * rates[target]
+}
+
 /** Never present a partial currency sum as the fleet's total. */
 export function onlineMonthlyCost(
   nodes: readonly NodeInfo[],
@@ -74,10 +85,9 @@ export function onlineMonthlyCost(
     const monthly = monthlyCost(actual?.amount ?? node.price, node.billingCycle)
     if (monthly <= 0) continue
     paid++
-    const code = currencyCode(actual?.currency ?? node.currency)
-    if (code === currency) amount += monthly
-    else if (code && rates[code] > 0 && rates[currency] > 0) amount += monthly / rates[code] * rates[currency]
-    else complete = false
+    const converted = convertAmount(monthly, actual?.currency ?? node.currency, currency, rates)
+    if (converted === null) complete = false
+    else amount += converted
   }
   return { amount: complete ? amount : null, paid }
 }

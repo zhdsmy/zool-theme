@@ -6,7 +6,7 @@ import { setDensity, setGrouping, setView, useDensity, useGrouping, useView } fr
 import type { Density, View } from '@/core/settings'
 import type { NodeInfo, Snapshot } from '@/core/model'
 import { formatMoney, formatPercent, ratio, splitBytes, splitSpeed } from '@/core/format'
-import { loadExchangeRates, onlineMonthlyCost, type ExchangeRates } from '@/core/cost'
+import { displayCurrency, onlineMonthlyCost } from '@/core/cost'
 import { regionName, stripFlag } from '@/core/region'
 import { Popover } from '@/components/Popover'
 import { GroupHeading, NodeCard, NodeStrip } from '@/components/ledger'
@@ -175,21 +175,9 @@ export function HomePage() {
     showInAddress(next)
   }
   const [sort, setSortState] = useState<Sort>(readSort)
-  const [rates, setRates] = useState<ExchangeRates | null>(null)
-  const [rateError, setRateError] = useState(false)
-  useEffect(() => {
-    if (!settings.showCost) return
-    let active = true
-    const refresh = () => loadExchangeRates().then((value) => {
-      if (active) { setRates(value); setRateError(false) }
-    }).catch(() => {
-      if (active) setRateError(true)
-    })
-    refresh()
-    const timer = setInterval(refresh, 86_400_000)
-    return () => { active = false; clearInterval(timer) }
-  }, [settings.showCost])
-  const costCurrency = i18n.resolvedLanguage === 'zh-CN' ? 'CNY' : 'USD'
+  const rates = useStore((s) => s.exchangeRates)
+  const rateError = useStore((s) => s.exchangeRateError)
+  const costCurrency = displayCurrency(i18n.resolvedLanguage)
   const cost = useMemo(() => loggedIn && actualCosts === null ? { amount: null, paid: 0 }
     : onlineMonthlyCost(nodes, snapshots, costCurrency, rates?.rates, loggedIn ? actualCosts ?? undefined : undefined),
   [nodes, snapshots, costCurrency, rates, loggedIn, actualCosts])

@@ -11,9 +11,10 @@ import zhCN from '../src/i18n/locales/zh-CN.json'
 import zhTW from '../src/i18n/locales/zh-TW.json'
 import ja from '../src/i18n/locales/ja.json'
 
-const privateBilling = vi.hoisted(() => ({ loggedIn: false, actualCosts: null as Record<string, { amount: number; currency: string }> | null }))
+const privateBilling = vi.hoisted(() => ({ loggedIn: false, actualCosts: null as Record<string, { amount: number; currency: string }> | null,
+  exchangeRates: { date: '2026-11-04', rates: { USD: 1, CNY: 7, EUR: 0.9, AUD: 1.5 } } as { date: string; rates: Record<string, number> } | null }))
 vi.mock('../src/app/store', () => ({
-  useStore: (select: (state: unknown) => unknown) => select({ session: { loggedIn: privateBilling.loggedIn }, actualCosts: privateBilling.actualCosts }),
+  useStore: (select: (state: unknown) => unknown) => select({ session: { loggedIn: privateBilling.loggedIn }, actualCosts: privateBilling.actualCosts, exchangeRates: privateBilling.exchangeRates }),
 }))
 
 const i18n = createInstance()
@@ -45,16 +46,43 @@ describe('Nezha billing display', () => {
     expect(render({ planDataMod: { trafficVol: 'Unlimited' } })).toContain(t.metric.unlimited)
   })
 
-  it('shows private expenses only when authenticated, with zero and empty-field inheritance', () => {
+  it('shows private expenses only when authenticated, with zero and empty-field inheritance', async () => {
+    await i18n.changeLanguage('en')
     const displayed = { billingDataMod: { amount: 'USD 10.00', cycle: 'Month' } }
     privateBilling.actualCosts = { sample: { amount: 0, currency: 'CNY' } }
-    expect(render(displayed)).not.toContain('¥0.00')
+    expect(render(displayed)).not.toContain('$0.00')
     privateBilling.loggedIn = true
-    expect(render(displayed)).toContain('¥0.00')
+    expect(render(displayed)).toContain('$0.00')
     privateBilling.actualCosts = {}
     expect(render(displayed).match(/\$10\.00/g)).toHaveLength(2)
     privateBilling.actualCosts = null
     expect(render(displayed).match(/\$10\.00/g)).toHaveLength(1)
     privateBilling.loggedIn = false
+  })
+
+  it.each(['en', 'zh-CN', 'zh-TW', 'ja'] as const)('uses the locale currency for both bills and preserves the year cycle in %s', async (locale) => {
+    await i18n.changeLanguage(locale)
+    privateBilling.loggedIn = true
+    privateBilling.actualCosts = { sample: { amount: 14, currency: 'CNY' } }
+    const html = render({ billingDataMod: { amount: 'EUR 9.00', cycle: 'Year' } })
+    const unit = resources[locale].translation.unit.perYear
+    expect(html).toContain(`${locale === 'zh-CN' ? '¥70.00' : '$10.00'}${unit}`)
+    expect(html).toContain(`${locale === 'zh-CN' ? '¥14.00' : '$2.00'}${unit}`)
+    expect(html).not.toContain('€')
+    privateBilling.loggedIn = false
+    privateBilling.actualCosts = null
+  })
+
+  it('withholds an unconvertible bill while zero remains displayable without rates', async () => {
+    await i18n.changeLanguage('en')
+    privateBilling.exchangeRates = null
+    privateBilling.loggedIn = true
+    privateBilling.actualCosts = { sample: { amount: 0, currency: 'CNY' } }
+    const html = render({ billingDataMod: { amount: 'CNY 70.00', cycle: 'Month' } })
+    expect(html).toContain('—')
+    expect(html).toContain('$0.00')
+    expect(html).not.toContain('¥70.00')
+    privateBilling.loggedIn = false
+    privateBilling.actualCosts = null
   })
 })

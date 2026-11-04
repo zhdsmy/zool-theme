@@ -4,6 +4,7 @@ import type { ActualCost, ConnectionStatus, HistoryPoint, NodeInfo, Session, Sit
 import { DEFAULT_SETTINGS, normalizeSettings, type ThemeSettings } from '@/core/settings'
 import { blindNow, noteFrame, type BlindWindow } from '@/core/live'
 import { cleanSnapshot } from '@/core/condition'
+import type { ExchangeRates } from '@/core/cost'
 
 export { adapter }
 
@@ -16,6 +17,8 @@ export interface State {
   session: Session
   /** Null while private billing is unavailable; an empty map means all prices are inherited. */
   actualCosts: Record<string, ActualCost> | null
+  exchangeRates: ExchangeRates | null
+  exchangeRateError: boolean
   connection: ConnectionStatus
   /**
    * At least one live frame has arrived. Until then a node with no snapshot is waiting, not
@@ -37,6 +40,8 @@ let state: State = {
   snapshots: {},
   session: { loggedIn: false },
   actualCosts: null,
+  exchangeRates: null,
+  exchangeRateError: false,
   connection: 'connecting',
   fed: false,
   refreshing: false,
@@ -51,6 +56,10 @@ function set(patch: Partial<State>) {
 }
 
 export const getState = () => state
+
+export function setExchangeRates(exchangeRates: ExchangeRates | null, exchangeRateError = false) {
+  set({ exchangeRates, exchangeRateError })
+}
 
 export function useStore<T>(selector: (s: State) => T): T {
   return useSyncExternalStore(

@@ -98,7 +98,9 @@
     "cores_other": "{{count}} 核",
     "payAsYouGo": "按量计费",
     "unknown": "未知",
-    "actualCost": "实际支出"
+    "actualCost": "实际支出",
+    "listPriceShort": "标价",
+    "actualCostShort": "实付"
   },
   "unit": {
     "days_other": "{{count}} 天",

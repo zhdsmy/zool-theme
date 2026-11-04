@@ -98,7 +98,9 @@
     "cores_other": "{{count}} コア",
     "payAsYouGo": "従量課金",
     "unknown": "不明",
-    "actualCost": "実際の支出"
+    "actualCost": "実際の支出",
+    "listPriceShort": "表示",
+    "actualCostShort": "実費"
   },
   "unit": {
     "days_other": "{{count}} 日",

@@ -98,7 +98,9 @@
     "cores_other": "{{count}} 核",
     "payAsYouGo": "隨用隨付",
     "unknown": "未知",
-    "actualCost": "實際支出"
+    "actualCost": "實際支出",
+    "listPriceShort": "標價",
+    "actualCostShort": "實付"
   },
   "unit": {
     "days_other": "{{count}} 天",
