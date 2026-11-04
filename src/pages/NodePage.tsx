@@ -600,7 +600,7 @@ export function NodePage({ id }: { id: string }) {
         </Stat>
       </section>
 
-      <div className="mt-14 grid gap-10 md:grid-cols-2 xl:grid-cols-3">
+      <div className="mt-14 grid grid-cols-1 gap-10 md:grid-cols-2 xl:grid-cols-3">
         <InfoList
           title={t('node.system')}
           rows={[
