@@ -29,10 +29,14 @@
     "nodes": "オンラインのノード",
     "bandwidth": "帯域幅",
     "traffic": "累計トラフィック",
-    "cost": "月額コスト",
+    "cost": "オンライン月額コスト",
     "attention": "要注意",
     "allClear": "上限に近いものなし",
-    "costNodes_other": "有料ノード {{count}} 台",
+    "costNodes_other": "オンライン有料ノード {{count}} 台",
+    "costRates": "参考レート",
+    "costCachedRates": "保存済みレート",
+    "costLoading": "為替レートを取得中…",
+    "costUnavailable": "為替レートを取得できません",
     "regions_other": "{{count}} 地域"
   },
   "toolbar": {

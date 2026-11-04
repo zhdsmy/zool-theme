@@ -51,6 +51,16 @@ describe('komari adapter', () => {
 })
 
 describe('nezha adapter', () => {
+  it.each([
+    ['CNY 60.00', 60, 'CNY'],
+    ['USD 36.00', 36, 'USD'],
+    ['AUD 30.48', 30.48, 'AUD'],
+    ['EUR 19.98', 19.98, 'EUR'],
+  ])('reads canonical billing amount %s', (amount, price, currency) => {
+    expect(parsePublicNote(JSON.stringify({ billingDataMod: { amount, cycle: 'Year' } })))
+      .toMatchObject({ price, currency, billingCycle: 365 })
+  })
+
   const groups = groupIndex(nezhaGroups.data as NezhaGroup[])
   const event = mapFrame(nezhaFrame as NezhaFrame, groups)
 

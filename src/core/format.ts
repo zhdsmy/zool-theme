@@ -74,10 +74,13 @@ export function trafficUsed(type: TrafficLimitType, up: number, down: number) {
   }
 }
 
-/** Normalises a price to a 30-day month. Returns 0 for free / unset / one-time. */
+/** Amortises recurring bills over calendar months. Free / unset / one-time costs are zero. */
 export function monthlyCost(price: number, cycleDays: number) {
-  if (!(price > 0) || !(cycleDays > 0)) return 0
-  return (price * 30) / cycleDays
+  if (!Number.isFinite(price) || !Number.isFinite(cycleDays) || price <= 0 || cycleDays <= 0) return 0
+  const months = cycleDays >= 28 && cycleDays <= 31 ? 1
+    : cycleDays >= 360 && cycleDays <= 366 ? 12
+    : ({ 90: 3, 180: 6, 182: 6, 730: 24, 1095: 36 } as Record<number, number>)[cycleDays] ?? cycleDays * 12 / 365
+  return price / months
 }
 
 export const daysUntil = (at: number, now = Date.now()) => Math.ceil((at - now) / 86_400_000)
@@ -92,7 +95,15 @@ export function formatClock(at: number, withDate = false, locale?: string) {
   })
 }
 
+export function currencyCode(currency: string): string | null {
+  const code = currency.trim().toUpperCase()
+  return ({ '$': 'USD', 'US$': 'USD', '¥': 'CNY', '￥': 'CNY', RMB: 'CNY', '€': 'EUR', 'AUD$': 'AUD', 'A$': 'AUD' } as Record<string, string>)[code]
+    ?? (/^[A-Z]{3}$/.test(code) ? code : null)
+}
+
 export function formatMoney(amount: number, currency: string) {
-  const digits = amount >= 100 ? 0 : 2
-  return `${currency}${amount.toFixed(digits)}`
+  const code = currencyCode(currency)
+  const symbol = ({ USD: '$', CNY: '¥', EUR: '€', AUD: 'A$' } as Record<string, string>)[code ?? '']
+    ?? (code ? `${code} ` : currency)
+  return `${symbol}${amount.toFixed(2)}`
 }

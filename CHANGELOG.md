@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.0+zhdsmy.2 — 2026-11-04
+
+- Sum the monthly cost of online recurring paid nodes after currency conversion; annual bills are divided by 12.
+- Use CNY for Simplified Chinese and USD for the other languages, with daily reference rates, a dated cache fallback and an explicit unavailable state.
+- Standardize currency formatting and add regression coverage for billing amounts, amortization and exchange rates.
+
 ## 1.0.0+zhdsmy.1 — 2026-09-21
 
 Based on upstream ZOOL 1.0.0, including upstream main through `5d7ffd5`.

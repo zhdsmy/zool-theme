@@ -5,7 +5,8 @@ import { adapter, useStore, useVisibleNodes } from '@/app/store'
 import { setDensity, setGrouping, setView, useDensity, useGrouping, useView } from '@/app/prefs'
 import type { Density, View } from '@/core/settings'
 import type { NodeInfo, Snapshot } from '@/core/model'
-import { formatMoney, formatPercent, monthlyCost, ratio, splitBytes, splitSpeed } from '@/core/format'
+import { formatMoney, formatPercent, ratio, splitBytes, splitSpeed } from '@/core/format'
+import { loadExchangeRates, onlineMonthlyCost, type ExchangeRates } from '@/core/cost'
 import { regionName, stripFlag } from '@/core/region'
 import { Popover } from '@/components/Popover'
 import { GroupHeading, NodeCard, NodeStrip } from '@/components/ledger'
@@ -172,6 +173,22 @@ export function HomePage() {
     showInAddress(next)
   }
   const [sort, setSortState] = useState<Sort>(readSort)
+  const [rates, setRates] = useState<ExchangeRates | null>(null)
+  const [rateError, setRateError] = useState(false)
+  useEffect(() => {
+    if (!settings.showCost) return
+    let active = true
+    const refresh = () => loadExchangeRates().then((value) => {
+      if (active) { setRates(value); setRateError(false) }
+    }).catch(() => {
+      if (active) setRateError(true)
+    })
+    refresh()
+    const timer = setInterval(refresh, 86_400_000)
+    return () => { active = false; clearInterval(timer) }
+  }, [settings.showCost])
+  const costCurrency = i18n.resolvedLanguage === 'zh-CN' ? 'CNY' : 'USD'
+  const cost = useMemo(() => onlineMonthlyCost(nodes, snapshots, costCurrency, rates?.rates), [nodes, snapshots, costCurrency, rates])
 
   const setSort = (next: Sort) => {
     setSortState(next)
@@ -197,7 +214,6 @@ export function HomePage() {
     // contribute equally to it — whereas this answers the only question a summary owes you.
     let attention = 0
     let worst: { name: string; metric: 'cpu' | 'memory' | 'disk'; pct: number; level: Level } | null = null
-    const costs = new Map<string, [number, number]>()
     for (const n of nodes) {
       const s = snapshots[n.id]
       if (s?.online) {
@@ -225,13 +241,7 @@ export function HomePage() {
         trafficUp += s.totalUp
         trafficDown += s.totalDown
       }
-      const m = monthlyCost(n.price, n.billingCycle)
-      if (m > 0) {
-        const [sum, count] = costs.get(n.currency) ?? [0, 0]
-        costs.set(n.currency, [sum + m, count + 1])
-      }
     }
-    const lead = [...costs.entries()].sort((a, b) => b[1][1] - a[1][1])[0]
     return {
       up,
       down,
@@ -241,8 +251,6 @@ export function HomePage() {
       attention,
       worst,
       regions: new Set(nodes.map((n) => n.region).filter(Boolean)).size,
-      cost: lead ? formatMoney(lead[1][0], lead[0]) : '',
-      paid: [...costs.values()].reduce((n2, [, c]) => n2 + c, 0),
     }
   }, [nodes, snapshots])
 
@@ -340,7 +348,7 @@ export function HomePage() {
         {settings.showOverview && (
           <div
             className={`mt-4 grid grid-cols-3 gap-x-4 border-y border-line lg:gap-x-0 lg:divide-x lg:divide-line ${
-              settings.showCost && totals.cost ? 'lg:grid-cols-5' : 'lg:grid-cols-4'
+              settings.showCost ? 'lg:grid-cols-5' : 'lg:grid-cols-4'
             }`}
           >
             <Metric
@@ -389,7 +397,7 @@ export function HomePage() {
                 warning line, which is the question a summary actually owes the reader. */}
             <Metric
               label={t('overview.attention')}
-              className={settings.showCost && totals.cost ? 'col-span-2 lg:col-span-1' : 'col-span-3 lg:col-span-1'}
+              className={settings.showCost ? 'col-span-2 lg:col-span-1' : 'col-span-3 lg:col-span-1'}
               subOnPhone
               tone={totals.worst?.level === 'danger' ? 'text-danger' : totals.worst ? 'text-warn' : ''}
               value={totals.attention}
@@ -399,16 +407,23 @@ export function HomePage() {
                   : t('overview.allClear')
               }
             />
-            {settings.showCost && totals.cost && (
+            {settings.showCost && (
               <Metric
                 label={t('overview.cost')}
+                subOnPhone
                 value={
                   <>
-                    {totals.cost}
-                    <span className="ml-1 text-[0.55em] text-muted">{t('unit.perMonth')}</span>
+                    {cost.amount === null ? '—' : formatMoney(cost.amount, costCurrency)}
+                    {cost.amount !== null && <span className="ml-1 text-[0.55em] text-muted">{t('unit.perMonth')}</span>}
                   </>
                 }
-                sub={t('overview.costNodes', { count: totals.paid })}
+                sub={cost.amount === null ? t(rateError ? 'overview.costUnavailable' : 'overview.costLoading') : <>
+                  {t('overview.costNodes', { count: cost.paid })}
+                  {rates && <span className="mt-1 block text-faint">
+                    {t(rates.stale ? 'overview.costCachedRates' : 'overview.costRates')}{' '}
+                    <time dateTime={rates.date} className="block md:inline">{rates.date}</time>
+                  </span>}
+                </>}
               />
             )}
           </div>

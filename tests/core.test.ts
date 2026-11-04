@@ -30,7 +30,14 @@ describe('format', () => {
   })
 
   it('normalises prices to a month', () => {
-    expect(monthlyCost(120, 365)).toBeCloseTo(9.86, 2)
+    expect(monthlyCost(120, 365)).toBe(10)
+    expect(monthlyCost(30, 90)).toBe(10)
+    expect(monthlyCost(60, 182)).toBe(10)
+    expect(monthlyCost(240, 730)).toBe(10)
+    expect(monthlyCost(360, 1095)).toBe(10)
+    expect(monthlyCost(10, 31)).toBe(10)
+    expect(monthlyCost(365, 1)).toBeCloseTo(365 * 365 / 12)
+    expect(monthlyCost(Infinity, 30)).toBe(0)
     expect(monthlyCost(-1, 30)).toBe(0)
     expect(monthlyCost(10, 0)).toBe(0)
     expect(daysUntil(Date.now() + 86_400_000 * 2.5)).toBe(3)

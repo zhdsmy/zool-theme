@@ -35,7 +35,7 @@
 
 ## Fork 版本约定
 
-本 fork 使用 `<上游版本>+zhdsmy.<修订号>`，当前为 `1.0.0+zhdsmy.1`。同一上游基线上仅递增末尾修订号；合入上游 `1.0.1` 后从 `1.0.1+zhdsmy.1` 开始。Git 标签加 `v` 前缀，构建包文件名包含完整版本号。
+本 fork 使用 `<上游版本>+zhdsmy.<修订号>`，当前为 `1.0.0+zhdsmy.2`。同一上游基线上仅递增末尾修订号；合入上游 `1.0.1` 后从 `1.0.1+zhdsmy.1` 开始。Git 标签加 `v` 前缀，构建包文件名包含完整版本号。
 
 此后缀属于 SemVer 构建标识，不影响版本优先级比较。部署时用完整 Git 标签和包 SHA256 确认 fork 修订。执行 `pnpm build && pnpm package` 会在 `release/` 生成对应构建包和 `SHA256SUMS`。
 
@@ -102,7 +102,7 @@ services:
 | `defaultLanguage` | `auto` | `auto`、`en`、`zh-CN`、`zh-TW` 或 `ja` |
 | `siteTitle` | *（空）* | 覆盖站点名称 |
 | `showOverview` | `true` | 首页总览带 |
-| `showCost` | `true` | 月度成本，按币种汇总并折算为 30 天 |
+| `showCost` | `true` | 在线节点月均成本，按每日参考汇率换算；简体中文显示人民币，其他语言显示美元；年付按 12 个月分摊 |
 | `showGroups` | `true` | 提供分组选择 |
 | `defaultGrouped` | `false` | 访客「按分组展示」按钮的默认状态 |
 | `showRegions` | `true` | 地区筛选 |
