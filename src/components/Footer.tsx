@@ -15,20 +15,20 @@ export function Footer() {
   const note = useStore((s) => s.settings.footerNote)
 
   return (
-    <footer className="mt-24 border-t border-line">
-      <div className="wrap flex flex-col gap-6 pt-10 pb-8 md:flex-row md:items-start md:justify-between">
+    <footer className="site-footer mt-24 border-t border-line">
+      <div className="site-footer-inner wrap flex flex-col gap-6 pt-10 pb-8 md:flex-row md:items-start md:justify-between">
         <div className="space-y-2 text-[13px] leading-relaxed text-muted">
           {note && <p className="text-ink">{note}</p>}
           <p>
             <Trans
               i18nKey="app.poweredBy"
               components={{
-                link: <a className="text-ink underline-offset-4 hover:underline" href={adapter.poweredBy.url} target="_blank" rel="noreferrer">{adapter.poweredBy.name}</a>,
+                link: <a className="text-ink underline-offset-4 hover:text-accent-text hover:underline" href={adapter.poweredBy.url} target="_blank" rel="noreferrer">{adapter.poweredBy.name}</a>,
               }}
             />
             <span className="mx-2 text-faint">·</span>
             <a
-              className="underline-offset-4 hover:text-ink hover:underline"
+              className="underline-offset-4 hover:text-accent-text hover:underline"
               href="https://github.com/foru17/zool-theme"
               target="_blank"
               rel="noreferrer"
@@ -42,13 +42,13 @@ export function Footer() {
           <Trans
             i18nKey="app.productBy"
             components={{
-              link: <a className="text-ink underline-offset-4 hover:underline" href="https://x.com/luoleiorg" target="_blank" rel="noreferrer">@luoleiorg</a>,
+              link: <a className="text-ink underline-offset-4 hover:text-accent-text hover:underline" href="https://x.com/luoleiorg" target="_blank" rel="noreferrer">@luoleiorg</a>,
             }}
           />
         </p>
       </div>
       {/* The closing wordmark from the ZOOL site, cropped so it rises from the page edge. */}
-      <div className="wrap h-[clamp(40px,9vw,112px)] overflow-hidden" aria-hidden="true">
+      <div className="site-footer-wordmark wrap h-[clamp(40px,9vw,112px)] overflow-hidden" aria-hidden="true">
         <Wordmark className="h-auto w-full translate-y-[12%] text-wash" />
       </div>
     </footer>
