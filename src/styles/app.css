@@ -16,9 +16,9 @@
   --line: #d4dce8;
   --line-strong: #b5c2d4;
   --wash: #e5ebf3;
-  --sage: #a3e4c7;
-  --sage-text: #0a7246;
   --good: #0a7246;
+  --sage: var(--good-wash);
+  --sage-text: var(--good);
   --warn: #8f4b00;
   --warn-fill: #a85800;
   --danger: #bf1b30;
@@ -50,8 +50,6 @@
   --line: #23314a;
   --line-strong: #354868;
   --wash: #1a263b;
-  --sage: #1c5240;
-  --sage-text: #34d399;
   --good: #34d399;
   --warn: #fbbf24;
   --warn-fill: #f59e0b;
@@ -83,7 +81,6 @@
     --accent: #1038a3;
     --accent-text: #0f3290;
     --good: #065735;
-    --sage-text: #065735;
     --warn: #703a00;
     --warn-fill: #7a4000;
     --danger: #961223;
@@ -97,7 +94,6 @@
     --accent: #6ea0ff;
     --accent-text: #9ec0ff;
     --good: #6ee7b7;
-    --sage-text: #6ee7b7;
     --warn: #fde68a;
     --warn-fill: #fde047;
     --danger: #fda4af;
@@ -182,7 +178,7 @@
 
 @layer components {
   .wrap {
-    width: min(1200px, 100% - 40px);
+    width: min(1200px, 100% - 28px);
     margin-inline: auto;
   }
   @media (min-width: 768px) {
@@ -442,9 +438,6 @@
     display: none;
   }
   @media (width < 768px) {
-    .wrap {
-      width: min(1200px, 100% - 28px);
-    }
     .pill {
       min-height: 32px;
       padding: 0 11px;
@@ -645,7 +638,8 @@
   }
 
   /* A segmented control keeps its buttons the same shape as its frame: 40px tall pills
-     inside a 2px inset. */
+     inside a 2px inset. Forcing a coarse-pointer button height into a 32px-tall frame had
+     stretched the pressed button into an upright oval that spilled past the frame's curve. */
   .home-toolbar .segmented {
     padding: 2px;
   }
