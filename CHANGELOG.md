@@ -1,6 +1,8 @@
 # Changelog
 
-## 1.0.0+zhdsmy.7 — 2026-11-05
+## 1.0.0+zhdsmy.8 — 2026-11-05
+
+`v1.0.0+zhdsmy.7` was tagged with the same changes but exceeded the 128 KiB Nezha bundle budget and was never deployed; this release draws the phone info-list divider in CSS to stay within it.
 
 - Redesign the palette: cool mineral paper / deep navy slate with a single cobalt accent, distinct good / warn / danger signals with tinted status chips, and four separable chart colours; all text and instrument pairs meet WCAG contrast in light, dark and high-contrast modes. Favicon and `theme-color` follow the new tokens.
 - Raise phone information density: a 53px header with an untruncated title and a visible sign-in icon, a two-tier overview card, compact toolbar and region chips, and 66px ledger rows (about 12 nodes per iPhone screen, up from 7).

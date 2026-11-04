@@ -53,13 +53,8 @@ function InfoList({ title, rows }: { title: string; rows: InfoRow[] }) {
   const visible = rows.filter(([, v]) => v !== '' && v !== null && v !== undefined)
   if (!visible.length) return null
   const wideFlags = visible.map(([, , w]) => Boolean(w))
-  const narrowIndices = wideFlags.flatMap((isWide, idx) => (isWide ? [] : [idx]))
-  if (narrowIndices.length % 2 === 1) {
-    wideFlags[narrowIndices[narrowIndices.length - 1]] = true
-    narrowIndices.pop()
-  }
-  const colSide = new Map<number, 'left' | 'right'>()
-  narrowIndices.forEach((rowIdx, pos) => colSide.set(rowIdx, pos % 2 === 0 ? 'left' : 'right'))
+  // Narrow rows pair up two to a line on phones; an odd one out takes the full width.
+  if (wideFlags.filter((w) => !w).length % 2) wideFlags[wideFlags.lastIndexOf(false)] = true
 
   return (
     <section className="node-info-section">
@@ -69,7 +64,6 @@ function InfoList({ title, rows }: { title: string; rows: InfoRow[] }) {
           <div
             key={k}
             data-wide={wideFlags[i] ? '' : undefined}
-            data-col={colSide.get(i)}
             className="node-info-row flex items-baseline justify-between gap-6 border-b border-line py-3 text-[14px]"
           >
             <dt className="node-info-dt shrink-0 text-muted">{k}</dt>

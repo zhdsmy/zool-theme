@@ -904,8 +904,11 @@
     line-height: 1.35;
     margin-bottom: -1px;
   }
-  .node-info-row[data-col='left'] {
+  /* Every half-width row draws the middle rule; the right column's copy falls outside the
+     list's clipped edge. */
+  .node-info-row:not([data-wide]) {
     border-right: 1px solid var(--line);
+    margin-right: -1px;
   }
   .node-info-row[data-wide] {
     grid-column: 1 / -1;
