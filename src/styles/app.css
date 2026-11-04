@@ -28,8 +28,7 @@
   --chart-2: #0b877d;
   --chart-3: #c86400;
   --chart-4: #8e2de2;
-  /* dispatch contract: semantic tokens added for the mobile redesign. Values are owned by the
-     palette package; names are fixed. */
+  /* Semantic roles: raised zones, the accent and tinted status backgrounds. */
   --surface-2: #e8edf4;
   --accent: #1849c6;
   --accent-text: #1643b8;
@@ -693,7 +692,7 @@
   }
 }
 
-/* ===== home-mobile: owned by the home package (HomePage / ledger / Header). ===== */
+/* ---------- phone layout: home page, header and ledger ---------- */
 @media (width < 768px) {
   .home-overview {
     border: 1px solid var(--line);
@@ -791,13 +790,8 @@
     padding-top: 12px;
   }
 }
-/* ===== end home-mobile ===== */
 
-
-
-
-
-/* ===== node-mobile: owned by the node package (NodePage / Chart / Footer). ===== */
+/* ---------- phone layout: node page, charts and footer ---------- */
 @media (width < 768px) {
   .node-page {
     padding-top: 12px;
@@ -1051,4 +1045,3 @@
     min-height: 40px;
   }
 }
-/* ===== end node-mobile ===== */
