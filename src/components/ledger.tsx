@@ -362,18 +362,18 @@ function CardReading({
 }) {
   return (
     <span className="min-w-0">
-      <span className="block truncate text-[11.5px] text-muted md:text-[12px] @max-xs:text-[11px]">{label}</span>
+      <span className="block truncate text-[11px] leading-3.5 text-muted md:text-[12px] md:leading-normal @max-xs:text-[11px]">{label}</span>
       {/* The number takes the warning colour too. The instrument alone is easy to skim past,
           and the number is where the eye already is — colouring only the bar buries the alarm
           in the quietest part of the reading. */}
       <Percent
         value={percent}
-        className={`mt-0.5 block text-[18px] leading-tight font-light tracking-[-0.02em] md:mt-1 md:text-[20px] @max-xs:text-[18px] ${
+        className={`mt-0.5 block text-[17px] leading-5 font-light tracking-[-0.02em] md:mt-1 md:text-[20px] md:leading-tight @max-xs:text-[18px] ${
           level === 'danger' ? 'text-danger' : level === 'warn' ? 'text-warn' : ''
         }`}
       />
-      <span className="mt-1.5 block md:mt-2.5">{instrument}</span>
-      {sub && <span className="num mt-1.5 block truncate text-[11px] text-muted md:mt-2">{sub}</span>}
+      <span className="mt-1 block md:mt-2.5">{instrument}</span>
+      {sub && <span className="num mt-1 block truncate text-[11px] leading-3.5 text-muted md:mt-2 md:leading-normal">{sub}</span>}
     </span>
   )
 }
@@ -464,16 +464,16 @@ export function NodeCard({ node, snap, tick, pending }: { node: NodeInfo; snap?:
     >
       {/* Below 320px — four cards to a row — the card tightens its padding and gaps rather than
           its type: the numbers still lead, and the labels stay above them. */}
-      <span className="flex flex-col p-3.5 md:p-5 @max-xs:p-4">
+      <span className="flex flex-col px-3.5 py-2.5 md:p-5 @max-xs:p-4">
         {/* who the machine is */}
         <span className="flex items-start gap-2.5 md:gap-3">
           <StatusDot online={online} pending={pending || cond.kind === 'never'} className="mt-[6px] md:mt-[7px]" />
           <span className="min-w-0 flex-1">
             <span className="flex min-w-0 items-center gap-2">
               <OsGlyph os={node.os} tile={20} size={13} />
-              <span className="truncate text-[15px] font-medium tracking-[-0.01em] md:text-[16px]">{stripFlag(node.name)}</span>
+              <span className="truncate text-[14px] leading-5 font-medium tracking-[-0.01em] md:text-[16px] md:leading-normal">{stripFlag(node.name)}</span>
             </span>
-            <span className="mt-0.5 block truncate text-[11.5px] text-muted md:mt-1 md:text-[12px]">{spec || '—'}</span>
+            <span className="mt-0.5 block truncate text-[11px] leading-4 text-muted md:mt-1 md:text-[12px] md:leading-normal">{spec || '—'}</span>
           </span>
           <RegionTag code={node.region} className="shrink-0" />
         </span>
@@ -483,7 +483,7 @@ export function NodeCard({ node, snap, tick, pending }: { node: NodeInfo; snap?:
         <>
             {!shown ? <PendingReadings card /> : <>
             {/* how busy it is */}
-            <span className="mt-3.5 grid grid-cols-3 gap-3 md:mt-5 md:gap-4 @max-xs:mt-4 @max-xs:gap-3">
+            <span className="mt-2.5 grid grid-cols-3 gap-3 md:mt-5 md:gap-4 @max-xs:mt-4 @max-xs:gap-3">
               <CardReading
                 label={t('metric.cpu')}
                 percent={cpu}
@@ -540,40 +540,46 @@ export function NodeCard({ node, snap, tick, pending }: { node: NodeInfo; snap?:
             </span>
 
             {/* what it is moving */}
-            <span className="mt-3.5 flex min-w-0 flex-col gap-1.5 border-t border-line pt-3 md:mt-5 md:gap-2 md:pt-4 @max-xs:mt-4">
-              <span className="text-[11.5px] text-muted md:text-[12px]">{t('node.speed')}</span>
-              <MirrorSpark up={live.up} down={live.down} width={CARD_BOX} height={32} stretch label={t('metric.network')} />
-              <span className="grid grid-cols-2 gap-3 text-[18px] leading-6 font-light tracking-[-0.02em] text-ink md:text-[20px] @max-xs:text-[18px]">
-                <span className="flex h-[24px] min-w-0 items-center gap-1.5">
-                  <ArrowUp size={14} className="shrink-0 text-muted" aria-hidden />
-                  <Speed value={snap!.netUp} />
-                </span>
-                <span className="flex h-[24px] min-w-0 items-center gap-1.5">
-                  <ArrowDown size={14} className="shrink-0 text-muted" aria-hidden />
-                  <Speed value={snap!.netDown} />
+            <span className="mt-2.5 flex min-w-0 flex-col gap-1 border-t border-line pt-2 md:mt-5 md:gap-2 md:pt-4 @max-xs:mt-4">
+              <span className="hidden text-[12px] text-muted md:block">{t('node.speed')}</span>
+              <span className="grid grid-cols-3 items-center gap-3 md:contents">
+                <MirrorSpark up={live.up} down={live.down} width={CARD_BOX} height={32} stretch label={t('metric.network')} className="h-[22px] md:h-[32px]" />
+                <span className="col-span-2 grid grid-cols-2 gap-3 text-[15px] leading-5 font-light tracking-[-0.02em] text-ink md:text-[20px] md:leading-6 @max-xs:text-[18px]">
+                  <span className="flex h-[22px] min-w-0 items-center gap-1 md:h-[24px] md:gap-1.5">
+                    <ArrowUp size={14} className="shrink-0 text-muted" aria-hidden />
+                    <Speed value={snap!.netUp} />
+                  </span>
+                  <span className="flex h-[22px] min-w-0 items-center gap-1 md:h-[24px] md:gap-1.5">
+                    <ArrowDown size={14} className="shrink-0 text-muted" aria-hidden />
+                    <Speed value={snap!.netDown} />
+                  </span>
                 </span>
               </span>
-              <span className="flex min-w-0 items-center gap-1 text-[12.5px] leading-5 whitespace-nowrap md:text-[13px]">
-                {/* the label gives way first when a long locale, a quota and five-digit totals meet */}
-                <span className="min-w-0 truncate text-muted">{t('metric.traffic')}</span>
-                <ArrowUp size={12} className="shrink-0 text-muted" aria-hidden />
-                <Bytes value={snap!.totalUp} />
-                <span className="text-muted">·</span>
-                <ArrowDown size={12} className="shrink-0 text-muted" aria-hidden />
-                <Bytes value={snap!.totalDown} />
-                {quota !== null && (
-                  <span className={`num ml-auto shrink-0 ${quota >= 95 ? 'text-danger' : quota >= 80 ? 'text-warn' : 'text-muted'}`}>
-                    {formatPercent(quota)}%
+              <span className="flex min-w-0 flex-wrap items-baseline justify-between gap-x-2 gap-y-0.5 md:contents">
+                <span className="flex min-w-0 flex-1 items-center gap-1 text-[11.5px] leading-4 whitespace-nowrap md:flex-none md:text-[13px] md:leading-5">
+                  {/* the label gives way first when a long locale, a quota and five-digit totals meet */}
+                  <span className="min-w-0 truncate text-muted">{t('metric.traffic')}</span>
+                  <ArrowUp size={12} className="shrink-0 text-muted" aria-hidden />
+                  <Bytes value={snap!.totalUp} />
+                  <span className="text-muted">·</span>
+                  <ArrowDown size={12} className="shrink-0 text-muted" aria-hidden />
+                  <Bytes value={snap!.totalDown} />
+                  {quota !== null && (
+                    <span className={`num ml-auto shrink-0 ${quota >= 95 ? 'text-danger' : quota >= 80 ? 'text-warn' : 'text-muted'}`}>
+                      {formatPercent(quota)}%
+                    </span>
+                  )}
+                </span>
+                {Boolean(node.trafficLimitPeriod) && node.trafficLimit > 0 && (
+                  <span className="ml-auto text-[11px] leading-4 whitespace-nowrap text-muted md:ml-0 md:text-[12px] md:leading-normal">
+                    {t('metric.quota')} <span className="num">{billing.quota(node)}</span>
                   </span>
                 )}
               </span>
-              {Boolean(node.trafficLimitPeriod) && node.trafficLimit > 0 && (
-                <span className="text-[11.5px] text-muted md:text-[12px]">{t('metric.quota')} <span className="num">{billing.quota(node)}</span></span>
-              )}
             </span>
 
             </>}
-            <span className="mt-3 grid gap-1.5 border-t border-line pt-2.5 text-[12px] md:mt-4 md:gap-2 md:pt-3">
+            <span className="mt-2 grid gap-1 border-t border-line pt-2 text-[11.5px] leading-4 md:mt-4 md:gap-2 md:pt-3 md:text-[12px] md:leading-normal">
               <span className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1 text-muted">
                 {pending ? <span className="skeleton h-3 flex-1" aria-hidden="true" /> : cond.kind === 'online' ? (
                   <span className="inline-flex items-center gap-1.5" title={t('metric.uptime')}>
@@ -586,9 +592,9 @@ export function NodeCard({ node, snap, tick, pending }: { node: NodeInfo; snap?:
                   <span
                     className={`inline-flex items-center gap-1.5 ${
                       expiry.level === 'danger'
-                        ? 'rounded-full bg-danger-wash px-1.5 py-0.5 font-medium text-danger md:rounded-none md:bg-transparent md:p-0 md:font-normal'
+                        ? 'rounded-full bg-danger-wash px-1.5 py-0.5 leading-none font-medium text-danger md:rounded-none md:bg-transparent md:p-0 md:leading-normal md:font-normal'
                         : expiry.level === 'warn'
-                          ? 'rounded-full bg-warn-wash px-1.5 py-0.5 font-medium text-warn md:rounded-none md:bg-transparent md:p-0 md:font-normal'
+                          ? 'rounded-full bg-warn-wash px-1.5 py-0.5 leading-none font-medium text-warn md:rounded-none md:bg-transparent md:p-0 md:leading-normal md:font-normal'
                           : ''
                     }`}
                     title={t('metric.expiry')}
@@ -599,7 +605,7 @@ export function NodeCard({ node, snap, tick, pending }: { node: NodeInfo; snap?:
                   </span>
                 )}
                 <span className="ml-auto flex shrink-0 items-center">
-                  {pending ? <span className="skeleton h-[18px] w-12" aria-hidden="true" /> : <DotRun run={live.run} label={t('status.live')} size={3} gap={2} />}
+                  {pending ? <span className="skeleton h-4 w-12 md:h-[18px]" aria-hidden="true" /> : <DotRun run={live.run} label={t('status.live')} size={3} gap={2} />}
                 </span>
               </span>
               {(price || actualPrice) && (

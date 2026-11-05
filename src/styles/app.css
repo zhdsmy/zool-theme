@@ -777,17 +777,40 @@
   }
 
   .pending-card {
-    gap: 14px 12px;
-    margin-top: 14px;
+    gap: 10px 12px;
+    margin-top: 10px;
   }
 
   .pending-card > span:not(:last-child) {
-    grid-template-rows: 16px 2px 22px 6px 14px 6px 15px;
+    grid-template-rows: 14px 2px 22px 4px 14px 4px 14px;
+  }
+
+  .pending-card > span:not(:last-child) > :first-child {
+    font-size: 11px;
+    line-height: 14px;
+  }
+
+  .pending-card > span:not(:last-child) > :nth-child(2) {
+    height: 18px;
   }
 
   .pending-card > span:last-child {
-    gap: 6px 12px;
-    padding-top: 12px;
+    grid-template: 22px 17px / repeat(3, minmax(0, 1fr));
+    gap: 4px 12px;
+    padding-top: 8px;
+  }
+
+  .pending-card > span:last-child > :first-child {
+    display: none;
+  }
+
+  .pending-card > span:last-child > :nth-child(2) {
+    grid-column: span 1;
+  }
+
+  .pending-card > span:last-child > :nth-child(5) {
+    grid-column: 1 / -1;
+    height: 14px;
   }
 }
 
