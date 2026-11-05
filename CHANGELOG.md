@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.0.0+zhdsmy.9 — 2026-11-05
+
+- Fix Nezha latency charts: read the current `monitor_id` / `monitor_name` fields (older `service_*` still accepted), so each probe target keeps its own name and line instead of merging into one unnamed series. Stop showing a made-up 0% loss where Nezha reports none.
+- Phone card view: about 259px per online card (from about 400px), with the rates beside the spark and traffic and quota on one line; every reading kept.
+- Detail page on phones: CPU, memory and disk instruments stretch to the full cell width, swap blocks included.
+- Sparks show only a quiet baseline until two samples exist, instead of a flat rule with stray end dots.
+- Raise the fork's bundle budget to 136 KiB gzip per target.
+
 ## 1.0.0+zhdsmy.8 — 2026-11-05
 
 `v1.0.0+zhdsmy.7` was tagged with the same changes but exceeded the 128 KiB Nezha bundle budget and was never deployed; this release draws the phone info-list divider in CSS to stay within it.
