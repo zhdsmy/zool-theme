@@ -127,7 +127,8 @@ export interface PingTask {
   /** Seconds between probes. */
   interval: number
   /** 0–100. */
-  loss: number
+  /** Percent; unset when the backend does not measure loss. */
+  loss?: number
   avg: number
   min: number
   max: number

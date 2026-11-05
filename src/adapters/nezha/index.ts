@@ -74,11 +74,37 @@ interface NezhaSetting {
   tsdb_enabled?: boolean
 }
 
-interface NezhaServiceInfo {
-  service_id: number
-  service_name: string
+/** Older dashboards send `service_*`; current ones (monitor.michaelzhang.top, 2026-11) send `monitor_*`. */
+export interface NezhaServiceInfo {
+  monitor_id?: number
+  monitor_name?: string
+  service_id?: number
+  service_name?: string
   created_at: number[] | null
   avg_delay: number[] | null
+}
+
+/** Nezha reports average delay per probe window and no loss, so `loss` stays unset. */
+export function mapServices(services: NezhaServiceInfo[]): PingData {
+  const tasks: PingData['tasks'] = []
+  const points: PingData['points'] = []
+  for (const s of services) {
+    const id = s.monitor_id ?? s.service_id ?? 0
+    const at = s.created_at ?? []
+    const delay = s.avg_delay ?? []
+    const values = delay.filter((v) => v > 0)
+    tasks.push({
+      id,
+      name: s.monitor_name ?? s.service_name ?? '',
+      interval: 0,
+      avg: values.length ? values.reduce((a, b) => a + b, 0) / values.length : 0,
+      min: values.length ? Math.min(...values) : 0,
+      max: values.length ? Math.max(...values) : 0,
+    })
+    at.forEach((t, i) => points.push({ at: t, task: id, value: delay[i] ?? -1 }))
+  }
+  points.sort((a, b) => a.at - b.at)
+  return { tasks, points }
 }
 
 /* ---------- public_note (nezha-dash / Nazhua convention) ---------- */
@@ -447,25 +473,7 @@ export const nezha: MonitorAdapter = {
 
   async loadPing(id): Promise<PingData> {
     const res = await request<Common<NezhaServiceInfo[]>>(`/api/v1/server/${encodeURIComponent(id)}/service`)
-    const tasks: PingData['tasks'] = []
-    const points: PingData['points'] = []
-    for (const s of res.data ?? []) {
-      const at = s.created_at ?? []
-      const delay = s.avg_delay ?? []
-      const values = delay.filter((v) => v > 0)
-      tasks.push({
-        id: s.service_id,
-        name: s.service_name,
-        interval: 0,
-        loss: 0,
-        avg: values.length ? values.reduce((a, b) => a + b, 0) / values.length : 0,
-        min: values.length ? Math.min(...values) : 0,
-        max: values.length ? Math.max(...values) : 0,
-      })
-      at.forEach((t, i) => points.push({ at: t, task: s.service_id, value: delay[i] ?? -1 }))
-    }
-    points.sort((a, b) => a.at - b.at)
-    return { tasks, points }
+    return mapServices(res.data ?? [])
   },
 
   async login(username, password): Promise<LoginResult> {

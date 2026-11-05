@@ -311,9 +311,11 @@ function PingChart({ data, hours, height }: { data: PingData; hours: number; hei
               <span className="num text-right">
                 <span className="text-muted sm:hidden">{t('node.avg')} </span>
                 {formatNumber(task.avg, 1)} ms
-                <span className={`ml-2 sm:hidden ${task.loss > 5 ? 'text-danger' : 'text-muted'}`}>
-                  · {formatNumber(task.loss, 1)}%
-                </span>
+                {task.loss !== undefined && (
+                  <span className={`ml-2 sm:hidden ${task.loss > 5 ? 'text-danger' : 'text-muted'}`}>
+                    · {formatNumber(task.loss, 1)}%
+                  </span>
+                )}
               </span>
               <span className="num hidden text-right text-muted sm:block">
                 {t('node.min')} {formatNumber(task.min, 0)}
@@ -321,8 +323,8 @@ function PingChart({ data, hours, height }: { data: PingData; hours: number; hei
               <span className="num hidden text-right text-muted sm:block">
                 {t('node.max')} {formatNumber(task.max, 0)}
               </span>
-              <span className={`num hidden text-right sm:block ${task.loss > 5 ? 'text-danger' : 'text-muted'}`}>
-                {t('node.loss')} {formatNumber(task.loss, 1)}%
+              <span className={`num hidden text-right sm:block ${task.loss! > 5 ? 'text-danger' : 'text-muted'}`}>
+                {task.loss !== undefined && `${t('node.loss')} ${formatNumber(task.loss, 1)}%`}
               </span>
             </button>
           </li>

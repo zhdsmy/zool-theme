@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { mapClientsFrame, mapNode, mapRecord, type KomariClientsFrame, type KomariNode, type KomariRecord } from '../src/adapters/komari'
-import { groupIndex, mapFrame, mapState, parsePublicNote, type NezhaFrame, type NezhaGroup } from '../src/adapters/nezha'
+import { groupIndex, mapFrame, mapServices, mapState, parsePublicNote, type NezhaFrame, type NezhaGroup } from '../src/adapters/nezha'
 import komariNodes from './fixtures/komari-nodes.json'
 import komariFrame from './fixtures/komari-clients-frame.json'
 import komariRecords from './fixtures/komari-records.json'
@@ -154,5 +154,19 @@ describe('nezha mapState last_active', () => {
     const s = mapState({ id: 1, name: 'x', last_active: '2026-09-16T07:59:50Z' } as never, now)
     expect(s.online).toBe(true)
     expect(s.at).toBe(Date.parse('2026-09-16T07:59:50Z'))
+  })
+})
+
+describe('nezha mapServices', () => {
+  it('keeps each probe target separate under current and older field names', () => {
+    const at = [1, 2]
+    const data = mapServices([
+      { monitor_id: 1, monitor_name: '广东联通', created_at: at, avg_delay: [5, 7] },
+      { monitor_id: 2, monitor_name: '广东移动', created_at: at, avg_delay: [4, 0] },
+      { service_id: 3, service_name: 'legacy', created_at: at, avg_delay: [9, 9] },
+    ])
+    expect(data.tasks.map((t) => [t.id, t.name, t.avg])).toEqual([[1, '广东联通', 6], [2, '广东移动', 4], [3, 'legacy', 9]])
+    expect(new Set(data.points.map((p) => p.task))).toEqual(new Set([1, 2, 3]))
+    expect(data.tasks.every((t) => t.loss === undefined)).toBe(true)
   })
 })
