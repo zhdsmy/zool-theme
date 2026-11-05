@@ -266,6 +266,8 @@ function seriesPath(buckets: readonly Bucket[], max: number, width: number, half
   return { line, area }
 }
 
+const sampleCount = (buckets: readonly Bucket[]) => buckets.reduce((n, b) => (b.value === null ? n : n + 1), 0)
+
 /**
  * Upload above the line, download mirrored below it: direction carries the meaning, so the
  * two series stay apart without a second colour.
@@ -310,12 +312,12 @@ export function MirrorSpark({
   const downMax = independentScales ? Math.max(downFocus.peak, 1) : shared
   const u = seriesPath(up, upMax, width, half, false)
   const d = seriesPath(down, downMax, width, half, true)
-  // The buffer fills from page load; until there is a shape to show, stay blank rather than
-  // drawing a lone baseline that reads as a stray rule.
-  const warming = upFocus.lastIndex < 0 && downFocus.lastIndex < 0
+  // The buffer fills from page load; until at least two samples exist to form a line, draw
+  // only the quiet baseline rather than a flat rule with two stray dots at its end.
+  const warming = sampleCount(up) < 2 && sampleCount(down) < 2
   const step = width / Math.max(1, up.length - 1)
   const dot = (buckets: readonly Bucket[], focus: ReturnType<typeof focusPoints>, max: number, isDown: boolean) => {
-    if (focus.lastIndex < 0) return null
+    if (focus.lastIndex < 0 || sampleCount(buckets) < 2) return null
     const value = buckets[focus.lastIndex].value ?? 0
     const cy = isDown ? half + (value / max) * (half - 1) : half - (value / max) * (half - 1)
     const cx = (focus.lastIndex * step).toFixed(1)
@@ -339,13 +341,17 @@ export function MirrorSpark({
       role="img"
       aria-label={label}
     >
-      {!warming && <line x1="0" x2={width} y1={half} y2={half} vectorEffect={nonScaling} style={{ stroke: 'var(--line)' }} shapeRendering="crispEdges" />}
-      <path d={u.area} style={{ fill: 'var(--ink)', fillOpacity: 0.08 }} />
-      <path d={d.area} style={{ fill: 'var(--ink)', fillOpacity: 0.05 }} />
-      <path d={u.line} fill="none" vectorEffect={nonScaling} style={{ stroke: 'var(--ink)' }} strokeWidth={1} strokeLinejoin="round" id={`${id}-u`} />
-      <path d={d.line} fill="none" vectorEffect={nonScaling} style={{ stroke: 'var(--muted)' }} strokeWidth={1} strokeLinejoin="round" />
-      {dot(up, upFocus, upMax, false)}
-      {dot(down, downFocus, downMax, true)}
+      <line x1="0" x2={width} y1={half} y2={half} vectorEffect={nonScaling} style={{ stroke: 'var(--line)' }} shapeRendering="crispEdges" />
+      {!warming && (
+        <>
+          <path d={u.area} style={{ fill: 'var(--ink)', fillOpacity: 0.08 }} />
+          <path d={d.area} style={{ fill: 'var(--ink)', fillOpacity: 0.05 }} />
+          <path d={u.line} fill="none" vectorEffect={nonScaling} style={{ stroke: 'var(--ink)' }} strokeWidth={1} strokeLinejoin="round" id={`${id}-u`} />
+          <path d={d.line} fill="none" vectorEffect={nonScaling} style={{ stroke: 'var(--muted)' }} strokeWidth={1} strokeLinejoin="round" />
+          {dot(up, upFocus, upMax, false)}
+          {dot(down, downFocus, downMax, true)}
+        </>
+      )}
     </svg>
   )
 }

@@ -75,7 +75,8 @@ matters more than the comparison, `independentScales` is available and the label
 carry both peaks.
 
 - Up to 15 minutes of the live ring buffer, bucketed to 24 points (`recentBuckets`). The window
-  stretches to the history that exists, so a freshly opened page still shows a shape.
+  stretches to the history that exists, so a freshly opened page still shows a shape; with fewer
+  than two samples, only the `--line` baseline is drawn as a quiet placeholder (no paths or end dots).
 - Empty buckets break the path instead of interpolating across a gap.
 - One filled dot marks the current value on each half. The peak is reported as text, not as
   a second dot, to keep the strip calm at ledger density.
