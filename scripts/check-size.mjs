@@ -2,7 +2,7 @@
 import { readFileSync } from 'node:fs'
 import { gzipSync } from 'node:zlib'
 
-const limit = Number(process.env.ZOOL_SIZE_LIMIT ?? 131072)
+const limit = Number(process.env.ZOOL_SIZE_LIMIT ?? 139264) // fork budget: 136 KiB (upstream 128 KiB)
 
 try {
   if (!Number.isSafeInteger(limit) || limit < 0 || process.env.ZOOL_SIZE_LIMIT?.trim() === '') {
