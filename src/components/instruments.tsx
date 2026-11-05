@@ -179,7 +179,7 @@ export function BlockGrid({
    * count of divisions still carries the capacity.
    */
   fill?: boolean
-  /** Fill the parent's width with equal cells, as TickBar does. Cards only; no swap group. */
+  /** Fill the parent's width with equal cells, as TickBar does. */
   stretch?: boolean
   animate?: boolean
   label?: string
@@ -220,9 +220,13 @@ export function BlockGrid({
       })}
       {swapBlocks > 0 && (
         <>
-          <span className="w-[3px]" aria-hidden />
+          <span className="w-[3px] shrink-0" aria-hidden />
           {Array.from({ length: swapBlocks }, (_, i) => (
-            <span key={`s${i}`} className="cell-empty rounded-[1px]" style={{ width: w, height: h, background: 'transparent', boxShadow: 'inset 0 0 0 1px var(--line-strong)' }}>
+            <span
+              key={`s${i}`}
+              className={`cell-empty rounded-[1px] ${stretch ? 'min-w-0 flex-1' : ''}`}
+              style={{ width: stretch ? undefined : w, height: h, background: 'transparent', boxShadow: 'inset 0 0 0 1px var(--line-strong)' }}
+            >
               <span className="cell-fill" style={{ backgroundColor: color, transform: 'scaleX(0)' }} />
             </span>
           ))}
