@@ -486,7 +486,7 @@ export function NodePage({ id }: { id: string }) {
   const liveTick = useStore((s) => s.liveVersion)
   const cores = coreTicks(snap?.cpu ?? 0, node?.cpuCores ?? 0)
   const mem = memoryBlocks(snap?.memUsed ?? 0, snap?.memTotal || node?.memTotal || 0, node?.swapTotal ?? 0)
-  const statBox = isMobile ? 92 : 150
+  const statBox = 150
   const statHeight = isMobile ? 12 : 16
   const tickGap = isMobile ? (cores.ticks > 16 ? 1 : 2) : cores.ticks > 16 ? 2 : 4
   // Disk gets blocks too: one shape for "how much of a fixed thing is used".
@@ -580,13 +580,14 @@ export function NodePage({ id }: { id: string }) {
           instrument={
             <TickBar
               animate
+              stretch={isMobile}
               filled={cores.filled}
               ticks={cores.ticks}
               notch={node.cpuCores > 0 && snap ? Math.min(1, snap.load1 / node.cpuCores) : undefined}
               height={statHeight}
-              /* Fit the ticks to a 150px budget (92px on 3-up mobile): four cores get fat ticks so
-                 the reading is not a stub, 32 cores get thin ones and a tighter gap instead of spilling. */
-              width={Math.max(1.5, Math.min(isMobile ? 12 : 18, Math.floor((statBox - (cores.ticks - 1) * tickGap) / cores.ticks)))}
+              /* Fit desktop ticks to a 150px budget: four cores get fat ticks so the reading is
+                 not a stub, 32 cores get thin ones and a tighter gap instead of spilling. */
+              width={Math.max(2, Math.min(18, Math.floor((statBox - (cores.ticks - 1) * tickGap) / cores.ticks)))}
               gap={tickGap}
               level={levelFor('cpu', snap?.cpu ?? 0)}
               label={t('metric.cpu')}
@@ -601,11 +602,12 @@ export function NodePage({ id }: { id: string }) {
           instrument={
             <BlockGrid
               animate
+              stretch={isMobile}
               filled={mem.filled}
               blocks={mem.blocks}
               swapBlocks={mem.swapBlocks}
               height={statHeight}
-              /* Same budget the ticks get, so the two readings stay the same size. */
+              /* Same 150px desktop budget the ticks get, so the two readings stay the same size. */
               box={statBox}
               level={levelFor('memory', snap ? ratio(snap.memUsed, memTotal) : 0)}
               label={t('metric.memory')}
@@ -620,6 +622,7 @@ export function NodePage({ id }: { id: string }) {
           instrument={
             <BlockGrid
               animate
+              stretch={isMobile}
               filled={disk.filled}
               blocks={disk.blocks}
               height={statHeight}
