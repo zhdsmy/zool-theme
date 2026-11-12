@@ -23,6 +23,10 @@ interface Props {
   yMax?: number
   height?: number
   label?: string
+  /** Scale the y axis to the 99th percentile so a few spikes don't flatten every line; spikes clip at the top. */
+  robust?: boolean
+  /** Key of a series to emphasise; the others fade. */
+  focus?: string | null
 }
 
 const PAD = { l: 48, r: 6, t: 10, b: 24 }
@@ -32,7 +36,7 @@ function niceMax(v: number) {
   if (!(v > 0)) return 1
   const exp = 10 ** Math.floor(Math.log10(v))
   const f = v / exp
-  const nf = f <= 1 ? 1 : f <= 2 ? 2 : f <= 2.5 ? 2.5 : f <= 5 ? 5 : 10
+  const nf = f <= 1 ? 1 : f <= 1.5 ? 1.5 : f <= 2 ? 2 : f <= 2.5 ? 2.5 : f <= 5 ? 5 : 10
   return nf * exp
 }
 
@@ -70,7 +74,7 @@ function nearest(points: ChartPoint[], t: number) {
  * A small, dependency-free SVG time-series chart: hairline grid, 1.5px lines,
  * a soft area under the first series, and a crosshair tooltip.
  */
-export function Chart({ series, format, formatTime, formatTooltipTime = formatTime, yMax, height = 150, label }: Props) {
+export function Chart({ series, format, formatTime, formatTooltipTime = formatTime, yMax, height = 150, label, robust, focus }: Props) {
   const box = useRef<HTMLDivElement>(null)
   const [width, setWidth] = useState(0)
   // three charts to a row on a tablet are narrower than one on a phone; both get the compact axes
@@ -100,7 +104,12 @@ export function Chart({ series, format, formatTime, formatTooltipTime = formatTi
   const t0 = all.length ? Math.min(...all.map((p) => p.t)) : 0
   const t1 = all.length ? Math.max(...all.map((p) => p.t)) : 1
   const span = t1 - t0 || 1
-  const dataMax = Math.max(0, ...all.map((p) => p.v ?? 0))
+  const vals = all.flatMap((p) => (p.v === null ? [] : [p.v]))
+  let dataMax = Math.max(0, ...vals)
+  if (robust && vals.length > 20) {
+    vals.sort((a, b) => a - b)
+    dataMax = Math.min(dataMax, vals[Math.floor((vals.length - 1) * 0.99)] * 1.25)
+  }
   const max = yMax && yMax > 0 ? yMax : niceMax(dataMax * 1.1)
 
   const x = (t: number) => pad.l + ((t - t0) / span) * plotW
@@ -192,13 +201,13 @@ export function Chart({ series, format, formatTime, formatTooltipTime = formatTi
             </text>
           ))}
           {paths.map((p) => p.area && <path key={`a-${p.key}`} d={p.area} style={{ fill: `url(#${uid}-${p.key})` }} />)}
-          {paths.map((p) => (
+          {(focus ? [...paths.filter((p) => p.key !== focus), ...paths.filter((p) => p.key === focus)] : paths).map((p) => (
             <path
               key={p.key}
               d={p.line}
               fill="none"
-              style={{ stroke: p.color }}
-              strokeWidth={1.5}
+              style={{ stroke: p.color, opacity: focus && p.key !== focus ? 0.18 : 1, transition: 'opacity 150ms' }}
+              strokeWidth={focus === p.key ? 2.25 : 1.5}
               strokeLinejoin="round"
               strokeLinecap="round"
               vectorEffect="non-scaling-stroke"

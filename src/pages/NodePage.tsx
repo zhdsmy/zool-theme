@@ -3,10 +3,11 @@ import { useTranslation } from 'react-i18next'
 import { ArrowLeft, ChevronDown, RefreshCw } from 'lucide-react'
 import { adapter, getLive, useStore, useVisibleNodes } from '@/app/store'
 import { Link, navigate } from '@/app/router'
+import { setShave, useShave } from '@/app/prefs'
 import type { HistoryPoint, NodeInfo, PingData, Snapshot } from '@/core/model'
 import { formatBytes, formatClock, formatNumber, formatPercent, formatSpeed, quotaUsage, ratio } from '@/core/format'
 import { regionName, stripFlag } from '@/core/region'
-import { summariseDay } from '@/core/summary'
+import { summariseDay, spikeLimit } from '@/core/summary'
 import { Chart, type ChartSeries } from '@/components/Chart'
 import { HourGrid } from '@/components/HourGrid'
 import { BlockGrid, levelFor, MirrorSpark, TickBar } from '@/components/instruments'
@@ -277,59 +278,80 @@ function LoadCharts({ node, points, hours, height, snap }: { node: NodeInfo; poi
   )
 }
 
-const PING_COLORS = ['var(--chart-1)', 'var(--chart-2)', 'var(--chart-3)', 'var(--chart-4)']
+const PING_COLORS = Array.from({ length: 8 }, (_, i) => `var(--chart-${i + 1})`)
 
-function PingChart({ data, hours, height }: { data: PingData; hours: number; height: number }) {
+function PingChart({ data, hours, height, shave }: { data: PingData; hours: number; height: number; shave: boolean }) {
   const { t } = useTranslation()
   const fmt = useTimeFormats(hours)
-  const [hidden, setHidden] = useState<Set<number>>(new Set())
-  const series: ChartSeries[] = data.tasks
-    .filter((task) => !hidden.has(task.id))
-    .map((task) => ({
-      key: String(task.id),
-      label: task.name,
-      color: PING_COLORS[data.tasks.indexOf(task) % PING_COLORS.length],
-      points: data.points.filter((p) => p.task === task.id).map((p) => ({ t: p.at, v: p.value >= 0 ? p.value : null })),
-    }))
+  // null = every line. The first click isolates a line, later clicks add or remove lines,
+  // and removing the last one (or adding the last missing one) goes back to every line.
+  const [shown, setShown] = useState<Set<number> | null>(null)
+  const [focus, setFocus] = useState<number | null>(null)
+  const color = (i: number) => PING_COLORS[i % PING_COLORS.length]
+  const visible = (id: number) => shown === null || shown.has(id)
+  const toggle = (id: number) =>
+    setShown((prev) => {
+      if (prev === null) return new Set([id])
+      const next = new Set(prev)
+      if (!next.delete(id)) next.add(id)
+      return next.size === 0 || next.size === data.tasks.length ? null : next
+    })
+  const series: ChartSeries[] = data.tasks.flatMap((task, i) => {
+    if (!visible(task.id)) return []
+    let points = data.points.filter((p) => p.task === task.id).map((p) => ({ t: p.at, v: p.value >= 0 ? p.value : null }))
+    if (shave) {
+      // spikes are dropped, not blanked, so the line runs straight through them
+      const limit = spikeLimit(points.flatMap((p) => (p.v === null ? [] : [p.v])))
+      points = points.filter((p) => p.v === null || p.v <= limit)
+    }
+    return [{ key: String(task.id), label: task.name, color: color(i), points }]
+  })
 
   return (
     <div className="node-ping-card card p-5 md:p-4 lg:p-5">
-      <Chart series={series} height={height} format={(v) => `${formatNumber(v, 0)} ms`} formatTime={fmt.axis} formatTooltipTime={fmt.tooltip} label={t('node.tabPing')} />
-      <ul className="node-ping-list mt-5 divide-y divide-line border-t border-line">
+      <Chart
+        series={series}
+        height={height}
+        robust
+        focus={focus !== null && visible(focus) ? String(focus) : null}
+        format={(v) => `${formatNumber(v, 0)} ms`}
+        formatTime={fmt.axis}
+        formatTooltipTime={fmt.tooltip}
+        label={t('node.tabPing')}
+      />
+      <ul className="node-ping-list mt-3 grid sm:grid-cols-2 sm:gap-x-6 xl:grid-cols-3" onPointerLeave={() => setFocus(null)}>
         {data.tasks.map((task, i) => (
-          <li key={task.id}>
+          <li key={task.id} className="border-t border-line">
             <button
               type="button"
-              aria-pressed={!hidden.has(task.id)}
-              onClick={() => setHidden((h) => (h.has(task.id) ? new Set([...h].filter((x) => x !== task.id)) : new Set([...h, task.id])))}
-              className={`node-ping-row grid w-full grid-cols-[1fr_auto] items-center gap-4 py-3 text-left text-[13px] sm:grid-cols-[minmax(0,1fr)_repeat(4,72px)] ${hidden.has(task.id) ? 'opacity-40' : ''}`}
+              aria-pressed={visible(task.id)}
+              onClick={() => toggle(task.id)}
+              onPointerEnter={(e) => e.pointerType === 'mouse' && setFocus(task.id)}
+              className={`node-ping-row grid w-full grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-3 py-2 text-left text-[13px] transition-opacity ${visible(task.id) ? '' : 'opacity-40'}`}
             >
-              <span className="flex min-w-0 items-center gap-2.5">
-                <span className="h-[2px] w-4 shrink-0 rounded-full" style={{ background: PING_COLORS[i % PING_COLORS.length] }} />
-                <span className="truncate">{task.name}</span>
+              <span className="flex min-w-0 items-center gap-2">
+                <span
+                  className="h-[3px] w-3.5 shrink-0 rounded-full"
+                  style={visible(task.id) ? { background: color(i) } : { boxShadow: `inset 0 0 0 1px ${color(i)}` }}
+                />
+                <span className="truncate" title={task.name}>{task.name}</span>
               </span>
-              <span className="num text-right">
-                <span className="text-muted sm:hidden">{t('node.avg')} </span>
-                {formatNumber(task.avg, 1)} ms
+              <span className="num min-w-[58px] text-right">{formatNumber(task.avg, 1)} ms</span>
+              <span className="num min-w-[52px] text-right text-[12px] text-muted" title={`${t('node.min')} – ${t('node.max')}`}>
+                {formatNumber(task.min, 0)}–{formatNumber(task.max, 0)}
                 {task.loss !== undefined && (
-                  <span className={`ml-2 sm:hidden ${task.loss > 5 ? 'text-danger' : 'text-muted'}`}>
-                    · {formatNumber(task.loss, 1)}%
-                  </span>
+                  <span className={`ml-2 ${task.loss > 5 ? 'text-danger' : ''}`} title={t('node.loss')}>{formatNumber(task.loss, 1)}%</span>
                 )}
-              </span>
-              <span className="num hidden text-right text-muted sm:block">
-                {t('node.min')} {formatNumber(task.min, 0)}
-              </span>
-              <span className="num hidden text-right text-muted sm:block">
-                {t('node.max')} {formatNumber(task.max, 0)}
-              </span>
-              <span className={`num hidden text-right sm:block ${task.loss! > 5 ? 'text-danger' : 'text-muted'}`}>
-                {task.loss !== undefined && `${t('node.loss')} ${formatNumber(task.loss, 1)}%`}
               </span>
             </button>
           </li>
         ))}
       </ul>
+      {shown !== null && (
+        <button type="button" className="pill mt-2 min-h-7 px-3 text-[12px]" onClick={() => setShown(null)}>
+          {t('node.showAllLines')}
+        </button>
+      )}
     </div>
   )
 }
@@ -345,6 +367,7 @@ function NodeCharts({ node, snap }: { node: NodeInfo; snap?: Snapshot }) {
   const ranges = adapter.historyRanges.filter((h) => h === 0 || h <= Math.max(recordHours, 1))
   const pingRanges = adapter.target === 'nezha' ? [24] : ranges.filter((h) => h > 0)
   const [tab, setTab] = useState<Tab>('load')
+  const shave = useShave()
   const [pingRange, setPingRange] = useState(pingRanges.includes(24) ? 24 : (pingRanges[0] ?? 24))
   const [history, setHistory] = useState<{ key: string; points: HistoryPoint[] } | null>(null)
   const [ping, setPing] = useState<{ key: string; data: PingData } | null>(null)
@@ -387,7 +410,7 @@ function NodeCharts({ node, snap }: { node: NodeInfo; snap?: Snapshot }) {
   const rangeLabel = (h: number) => (h === 0 ? t('node.rangeLive') : h < 24 ? t('node.rangeHours', { count: h }) : t('node.rangeDays', { count: h / 24 }))
   const activeRanges = tab === 'load' ? ranges : pingRanges
   const activeRange = tab === 'load' ? range : pingRange
-  const chartHeight = tab === 'load' ? (isMobile ? 87 : isNarrow ? 110 : 150) : isMobile ? 140 : isNarrow ? 180 : 240
+  const chartHeight = tab === 'load' ? (isMobile ? 87 : isNarrow ? 110 : 150) : isMobile ? 200 : isNarrow ? 260 : 300
 
   return (
     <section className="node-charts mt-16 md:mt-8 lg:mt-16">
@@ -424,6 +447,11 @@ function NodeCharts({ node, snap }: { node: NodeInfo; snap?: Snapshot }) {
             ))}
           </div>
         )}
+        {tab === 'ping' && (
+          <button type="button" className="pill min-h-8 px-3" aria-pressed={shave} title={t('node.shaveHint')} onClick={() => setShave(!shave)}>
+            {t('node.shave')}
+          </button>
+        )}
         {((tab === 'load' && range > 0) || tab === 'ping') && (
           <button type="button" className="icon-btn" aria-label={t('node.refresh')} title={t('node.refresh')} onClick={() => setNonce((n) => n + 1)}>
             <RefreshCw size={16} strokeWidth={1.6} />
@@ -449,7 +477,7 @@ function NodeCharts({ node, snap }: { node: NodeInfo; snap?: Snapshot }) {
         ) : pingData.tasks.length === 0 ? (
           <p className="rounded-[20px] border border-dashed border-line py-16 text-center text-[14px] text-muted">{t('node.noPing')}</p>
         ) : (
-          <PingChart data={pingData} hours={pingRange} height={chartHeight} />
+          <PingChart data={pingData} hours={pingRange} height={chartHeight} shave={shave} />
         )}
       </div>
     </section>

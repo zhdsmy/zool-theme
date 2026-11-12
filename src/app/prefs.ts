@@ -6,7 +6,7 @@ import type { Appearance, Density, Grouping, View } from '@/core/settings'
  * key names shared by Komari themes so a visitor's choice survives a theme switch.
  */
 
-const KEYS = { appearance: 'appearance', density: 'zool:density', view: 'zool:view', grouping: 'zool:grouped' } as const
+const KEYS = { appearance: 'appearance', density: 'zool:density', view: 'zool:view', grouping: 'zool:grouped', shave: 'zool:ping-shave' } as const
 
 const read = (key: string) => {
   try {
@@ -147,3 +147,14 @@ export function useGrouping(fallback: Grouping) {
   }, [fallback])
   return useSyncExternalStore(subscribe, getGrouping, getGrouping)
 }
+
+/* ---------- latency spike shaving ---------- */
+
+const getShave = () => read(KEYS.shave) === '1'
+
+export function setShave(on: boolean) {
+  write(KEYS.shave, on ? '1' : '0')
+  emit()
+}
+
+export const useShave = () => useSyncExternalStore(subscribe, getShave, getShave)

@@ -37,3 +37,14 @@ export function summariseDay(
   }
   return s
 }
+
+/**
+ * Latency above this counts as a spike: Tukey's far-out fence (Q3 + 3 × IQR), never
+ * tighter than 1.5 × the median, so a steady 2 ms line keeps its normal 3–4 ms jitter.
+ */
+export function spikeLimit(values: number[]): number {
+  if (values.length < 8) return Infinity
+  const s = [...values].sort((a, b) => a - b)
+  const q = (f: number) => s[Math.floor((s.length - 1) * f)]
+  return Math.max(q(0.75) + 3 * (q(0.75) - q(0.25)), q(0.5) * 1.5)
+}

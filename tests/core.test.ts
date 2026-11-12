@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest'
 import { daysUntil, formatBytes, formatNumber, monthlyCost, splitSpeed, trafficUsed } from '../src/core/format'
 import { flagToRegion, stripFlag } from '../src/core/region'
 import { DEFAULT_SETTINGS, normalizeSettings } from '../src/core/settings'
-import { summariseDay } from '../src/core/summary'
+import { spikeLimit, summariseDay } from '../src/core/summary'
 
 describe('format', () => {
   it('formats bytes with sensible precision', () => {
@@ -117,5 +117,16 @@ describe('settings', () => {
       if (d.type === 'nodes') expect(expected).toEqual([])
       else expect(d.default).toEqual(expected)
     }
+  })
+})
+
+describe('spikeLimit', () => {
+  it('drops rare spikes but keeps normal jitter', () => {
+    const line = [100, 96, 104, 98, 102, 101, 99, 97, 103, 100, 1151, 640]
+    const limit = spikeLimit(line)
+    expect(line.filter((v) => v > limit)).toEqual([1151, 640])
+    expect(spikeLimit([2, 3, 2, 3, 2, 2, 3, 4, 2, 16])).toBeGreaterThanOrEqual(4)
+    expect(spikeLimit([2, 3, 2, 3, 2, 2, 3, 4, 2, 16])).toBeLessThan(16)
+    expect(spikeLimit([1, 500])).toBe(Infinity)
   })
 })
