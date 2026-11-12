@@ -457,24 +457,6 @@
     }
   }
 
-  .marquee {
-    display: block;
-    min-width: 0;
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-  }
-  @media (prefers-reduced-motion: no-preference) {
-    .marquee[data-marquee] {
-      text-overflow: clip;
-      mask-image: linear-gradient(to right, transparent, #000 6px, #000 calc(100% - 10px), transparent);
-    }
-    .marquee[data-marquee] > span {
-      display: inline-block;
-      animation: zool-marquee var(--marquee-time, 6s) ease-in-out infinite alternate;
-    }
-  }
-
   .fade-in {
     animation: zool-fade 0.4s var(--ease-out-soft) both;
   }
@@ -666,11 +648,6 @@
     min-height: 40px;
     min-width: 40px;
   }
-}
-
-@keyframes zool-marquee {
-  0%, 20% { transform: translateX(0); }
-  80%, 100% { transform: translateX(var(--marquee-shift, 0)); }
 }
 
 @keyframes zool-ping {

@@ -10,7 +10,7 @@ import { stripFlag } from '@/core/region'
 import { nodeCondition, type Condition } from '@/core/condition'
 import { BlockGrid, DotRun, levelFor, MirrorSpark, TickBar, type Level } from './instruments'
 import { OsGlyph } from './OsGlyph'
-import { Bytes, Marquee, Percent, RegionTag, Speed, StatusDot, useBilling, useUptime, useRelativeTime } from './bits'
+import { Bytes, Percent, RegionTag, Speed, StatusDot, useBilling, useUptime, useRelativeTime } from './bits'
 
 export type Density = 'comfortable' | 'compact'
 
@@ -469,17 +469,23 @@ export function NodeCard({ node, snap, tick, pending }: { node: NodeInfo; snap?:
         <span className="flex items-start gap-2.5 lg:gap-3">
           <StatusDot online={online} pending={pending || cond.kind === 'never'} className="mt-[6px] lg:mt-[7px]" />
           <span className="min-w-0 flex-1">
-            <span className="flex min-w-0 items-center gap-2">
-              <OsGlyph os={node.os} tile={20} size={13} />
-              <Marquee text={stripFlag(node.name)} className="text-[14px] leading-5 font-medium tracking-[-0.01em] lg:text-[16px] lg:leading-normal max-lg:@max-xs:tracking-[-0.02em]" />
+            <span className="flex min-w-0 items-start gap-2">
+              <OsGlyph os={node.os} tile={20} size={13} className="lg:mt-0.5" />
+              {/* up to two lines, then "…"; the full name is the tooltip and the node page title */}
+              <span
+                className="line-clamp-2 min-w-0 text-[14px] leading-5 font-medium tracking-[-0.01em] break-words lg:text-[16px] lg:leading-6 max-lg:@max-xs:tracking-[-0.02em]"
+                title={stripFlag(node.name)}
+              >
+                {stripFlag(node.name)}
+              </span>
             </span>
-            <span className="mt-0.5 flex min-w-0 items-center gap-2 text-[11px] leading-4 text-muted lg:mt-1 lg:block lg:text-[12px] lg:leading-normal">
+            <span className="mt-0.5 flex min-w-0 items-center gap-2 text-[11px] leading-4 text-muted lg:mt-1 lg:text-[12px] lg:leading-normal">
               <span className="truncate">{spec || '—'}</span>
               {/* a narrow card gives the name the whole first row; the region rides on the spec line */}
-              <span className="ml-auto hidden shrink-0 max-lg:@max-xs:flex"><RegionTag code={node.region} /></span>
+              <span className="ml-auto hidden shrink-0 @max-xs:flex"><RegionTag code={node.region} /></span>
             </span>
           </span>
-          <RegionTag code={node.region} className="shrink-0 max-lg:@max-xs:hidden" />
+          <RegionTag code={node.region} className="shrink-0 @max-xs:hidden" />
         </span>
 
         {/* One shape for every state: a node with nothing to show keeps the card's height with
