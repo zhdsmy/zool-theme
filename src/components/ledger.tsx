@@ -10,7 +10,7 @@ import { stripFlag } from '@/core/region'
 import { nodeCondition, type Condition } from '@/core/condition'
 import { BlockGrid, DotRun, levelFor, MirrorSpark, TickBar, type Level } from './instruments'
 import { OsGlyph } from './OsGlyph'
-import { Bytes, Percent, RegionTag, Speed, StatusDot, useBilling, useUptime, useRelativeTime } from './bits'
+import { Bytes, Marquee, Percent, RegionTag, Speed, StatusDot, useBilling, useUptime, useRelativeTime } from './bits'
 
 export type Density = 'comfortable' | 'compact'
 
@@ -471,7 +471,7 @@ export function NodeCard({ node, snap, tick, pending }: { node: NodeInfo; snap?:
           <span className="min-w-0 flex-1">
             <span className="flex min-w-0 items-center gap-2">
               <OsGlyph os={node.os} tile={20} size={13} />
-              <span className="truncate text-[14px] leading-5 font-medium tracking-[-0.01em] lg:text-[16px] lg:leading-normal max-lg:@max-xs:tracking-[-0.02em]">{stripFlag(node.name)}</span>
+              <Marquee text={stripFlag(node.name)} className="text-[14px] leading-5 font-medium tracking-[-0.01em] lg:text-[16px] lg:leading-normal max-lg:@max-xs:tracking-[-0.02em]" />
             </span>
             <span className="mt-0.5 flex min-w-0 items-center gap-2 text-[11px] leading-4 text-muted lg:mt-1 lg:block lg:text-[12px] lg:leading-normal">
               <span className="truncate">{spec || '—'}</span>

@@ -1,3 +1,4 @@
+import { useLayoutEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Globe } from 'lucide-react'
 import { useStore } from '@/app/store'
@@ -131,6 +132,38 @@ export function RegionTag({ code, className = '' }: { code: string; className?: 
     >
       <RegionFlag code={code} />
       {code}
+    </span>
+  )
+}
+
+/**
+ * A single line that slides back and forth when it does not fit, instead of ending in "…".
+ * It only moves when it overflows, and never under reduced motion, where the ellipsis stays.
+ */
+export function Marquee({ text, className = '' }: { text: string; className?: string }) {
+  const box = useRef<HTMLSpanElement>(null)
+  useLayoutEffect(() => {
+    const el = box.current
+    const inner = el?.firstElementChild as HTMLElement | null
+    if (!el || !inner) return
+    const fit = () => {
+      // offsetWidth ignores the transform, so the slide itself never reads as "fits now"
+      const over = inner.offsetWidth - el.clientWidth
+      if (over > 1) {
+        el.dataset.marquee = ''
+        el.style.setProperty('--marquee-shift', `${-over}px`)
+        // about 30px/s with a pause at each end; at least 4s, or a few pixels of overflow reads as a twitch
+        el.style.setProperty('--marquee-time', `${Math.max(4, over / 30 / 0.6 + 1).toFixed(1)}s`)
+      } else delete el.dataset.marquee
+    }
+    fit()
+    const ro = new ResizeObserver(fit)
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [text])
+  return (
+    <span ref={box} className={`marquee ${className}`} title={text}>
+      <span>{text}</span>
     </span>
   )
 }
