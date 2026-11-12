@@ -1097,3 +1097,9 @@
     grid-row: span 2;
   }
 }
+/* A 910px foldable screen cannot spare 48px a side: the cards need it more. */
+@media (768px <= width < 1024px) {
+  .wrap {
+    width: min(1200px, 100% - 64px);
+  }
+}

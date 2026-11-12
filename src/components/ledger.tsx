@@ -373,7 +373,7 @@ function CardReading({
         }`}
       />
       <span className="mt-1 block lg:mt-2.5">{instrument}</span>
-      {sub && <span className="num mt-1 block truncate text-[11px] leading-3.5 text-muted lg:mt-2 lg:leading-normal">{sub}</span>}
+      {sub && <span className="num mt-1 block truncate text-[11px] leading-3.5 text-muted lg:mt-2 lg:leading-normal max-lg:@max-xs:tracking-[-0.02em]">{sub}</span>}
     </span>
   )
 }
@@ -471,11 +471,15 @@ export function NodeCard({ node, snap, tick, pending }: { node: NodeInfo; snap?:
           <span className="min-w-0 flex-1">
             <span className="flex min-w-0 items-center gap-2">
               <OsGlyph os={node.os} tile={20} size={13} />
-              <span className="truncate text-[14px] leading-5 font-medium tracking-[-0.01em] lg:text-[16px] lg:leading-normal">{stripFlag(node.name)}</span>
+              <span className="truncate text-[14px] leading-5 font-medium tracking-[-0.01em] lg:text-[16px] lg:leading-normal max-lg:@max-xs:tracking-[-0.02em]">{stripFlag(node.name)}</span>
             </span>
-            <span className="mt-0.5 block truncate text-[11px] leading-4 text-muted lg:mt-1 lg:text-[12px] lg:leading-normal">{spec || '—'}</span>
+            <span className="mt-0.5 flex min-w-0 items-center gap-2 text-[11px] leading-4 text-muted lg:mt-1 lg:block lg:text-[12px] lg:leading-normal">
+              <span className="truncate">{spec || '—'}</span>
+              {/* a narrow card gives the name the whole first row; the region rides on the spec line */}
+              <span className="ml-auto hidden shrink-0 max-lg:@max-xs:flex"><RegionTag code={node.region} /></span>
+            </span>
           </span>
-          <RegionTag code={node.region} className="shrink-0" />
+          <RegionTag code={node.region} className="shrink-0 max-lg:@max-xs:hidden" />
         </span>
 
         {/* One shape for every state: a node with nothing to show keeps the card's height with
