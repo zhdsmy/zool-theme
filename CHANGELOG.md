@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.0+zhdsmy.12 — 2026-11-12
+
+- Cards go three to a row from 800px instead of 880px: the iPhone Duo inner screen is about 856px wide and still showed two. 768px tablets keep two.
+- Narrow cards: tighter reading gap, side padding and word spacing, so memory "used / total" fits (truncated at 856px: 13 → 1 of 23).
+
 ## 1.0.0+zhdsmy.11 — 2026-11-12
 
 `v1.0.0+zhdsmy.10` was tagged but never deployed; this release carries its changes plus:
