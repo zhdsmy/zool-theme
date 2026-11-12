@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.0+zhdsmy.10 — 2026-11-12
+
+- Foldable inner screens and portrait tablets (768–1023px): cards three to a row from 880px, using the compact phone card (about 270px tall instead of about 450px); the overview fits on one row; less top spacing.
+- Detail page in the same range: tighter header, no empty stat cell, system and billing stacked beside the network list.
+- Rotated inner screen (640–767px): detail charts two to a row.
+- Narrow cards keep rate units and the traffic label inside the card.
+
 ## 1.0.0+zhdsmy.9 — 2026-11-05
 
 - Fix Nezha latency charts: read the current `monitor_id` / `monitor_name` fields (older `service_*` still accepted), so each probe target keeps its own name and line instead of merging into one unnamed series. Stop showing a made-up 0% loss where Nezha reports none.
