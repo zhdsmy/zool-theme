@@ -1076,8 +1076,8 @@
   }
 }
 
-/* ---------- tablet & foldable inner screen: node stats 3-up over network (2) + load ---------- */
-@media (768px <= width < 1280px) {
+/* ---------- small desktop: node stats 3-up over network (2) + load ---------- */
+@media (1024px <= width < 1280px) {
   .node-stats > .node-stat:nth-child(3) {
     border-inline-end-width: 0;
   }
@@ -1086,15 +1086,16 @@
     padding-left: 0;
   }
 }
-/* System and billing stack on the left beside the longer network list, instead of billing
-   sitting alone on a half-empty second row. */
+/* Tablets and foldable inner screens: three info columns are narrow, so long values wrap
+   (right-aligned) instead of ending in "…". */
 @media (768px <= width < 1024px) {
   .node-info-grid {
     align-items: start;
-    row-gap: 24px;
   }
-  .node-info-grid > :nth-child(2) {
-    grid-row: span 2;
+  .node-info-dd {
+    white-space: normal;
+    text-overflow: clip;
+    overflow-wrap: break-word;
   }
 }
 /* A 910px foldable screen cannot spare 48px a side: the cards need it more. */

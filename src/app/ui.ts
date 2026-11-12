@@ -23,14 +23,16 @@ export const useDialog = (name: keyof Dialogs) =>
     () => false,
   )
 
-const MOBILE_QUERY = '(width < 768px)'
-
-export const useIsMobile = () =>
+const useMatch = (query: string) =>
   useSyncExternalStore(
     (l) => {
-      const mq = window.matchMedia(MOBILE_QUERY)
+      const mq = window.matchMedia(query)
       mq.addEventListener('change', l)
       return () => mq.removeEventListener('change', l)
     },
-    () => window.matchMedia(MOBILE_QUERY).matches,
+    () => window.matchMedia(query).matches,
   )
+
+export const useIsMobile = () => useMatch('(width < 768px)')
+/** Phones plus portrait tablets and foldable inner screens: below the lg breakpoint. */
+export const useIsNarrow = () => useMatch('(width < 1024px)')

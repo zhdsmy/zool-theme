@@ -471,21 +471,23 @@ export function NodeCard({ node, snap, tick, pending }: { node: NodeInfo; snap?:
           <span className="min-w-0 flex-1">
             <span className="flex min-w-0 items-start gap-2">
               <OsGlyph os={node.os} tile={20} size={13} className="lg:mt-0.5" />
-              {/* up to two lines, then "…"; the full name is the tooltip and the node page title */}
+              {/* up to two lines, then "…"; the full name is the tooltip and the node page title.
+                  Side by side, every title keeps two lines' height so the readings line up across a row. */}
               <span
-                className="line-clamp-2 min-w-0 text-[14px] leading-5 font-medium tracking-[-0.01em] break-words lg:text-[16px] lg:leading-6 max-lg:@max-xs:tracking-[-0.02em]"
+                className="line-clamp-2 min-w-0 text-[14px] leading-5 sm:min-h-10 lg:min-h-12 font-medium tracking-[-0.01em] break-words lg:text-[16px] lg:leading-6 max-lg:@max-xs:tracking-[-0.02em]"
                 title={stripFlag(node.name)}
               >
                 {stripFlag(node.name)}
               </span>
             </span>
-            <span className="mt-0.5 flex min-w-0 items-center gap-2 text-[11px] leading-4 text-muted lg:mt-1 lg:text-[12px] lg:leading-normal">
-              <span className="truncate">{spec || '—'}</span>
-              {/* a narrow card gives the name the whole first row; the region rides on the spec line */}
-              <span className="ml-auto hidden shrink-0 @max-xs:flex"><RegionTag code={node.region} /></span>
-            </span>
           </span>
           <RegionTag code={node.region} className="shrink-0 @max-xs:hidden" />
+        </span>
+        {/* flush with the readings below, not indented under the name */}
+        <span className="mt-1 flex min-w-0 items-center gap-2 text-[11px] leading-4 text-muted lg:mt-1.5 lg:text-[12px] lg:leading-normal">
+          <span className="truncate">{spec || '—'}</span>
+          {/* a narrow card gives the name the whole first row; the region rides on the spec line */}
+          <span className="ml-auto hidden shrink-0 @max-xs:flex"><RegionTag code={node.region} /></span>
         </span>
 
         {/* One shape for every state: a node with nothing to show keeps the card's height with
@@ -552,8 +554,8 @@ export function NodeCard({ node, snap, tick, pending }: { node: NodeInfo; snap?:
             {/* what it is moving */}
             <span className="mt-2.5 flex min-w-0 flex-col gap-1 border-t border-line pt-2 lg:mt-5 lg:gap-2 lg:pt-4 lg:@max-xs:mt-4">
               <span className="hidden text-[12px] text-muted lg:block">{t('node.speed')}</span>
-              <span className="grid grid-cols-3 items-center gap-3 lg:contents max-lg:@max-xs:grid-cols-[44px_minmax(0,1fr)_minmax(0,1fr)]">
-                <MirrorSpark up={live.up} down={live.down} width={CARD_BOX} height={32} stretch label={t('metric.network')} className="h-[22px] lg:h-[32px]" />
+              <span className="grid grid-cols-3 items-center gap-3 lg:contents max-lg:@max-xs:grid-cols-1">
+                <MirrorSpark up={live.up} down={live.down} width={CARD_BOX} height={32} stretch label={t('metric.network')} className="h-[22px] lg:h-[32px] max-lg:@max-xs:hidden" />
                 <span className="col-span-2 grid grid-cols-2 gap-3 text-[15px] leading-5 max-lg:@max-xs:text-[14px] font-light tracking-[-0.02em] text-ink lg:text-[20px] lg:leading-6 lg:@max-xs:text-[18px]">
                   <span className="flex h-[22px] min-w-0 items-center gap-1 lg:h-[24px] lg:gap-1.5">
                     <ArrowUp size={14} className="shrink-0 text-muted" aria-hidden />

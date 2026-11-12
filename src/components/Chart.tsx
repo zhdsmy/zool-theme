@@ -1,5 +1,5 @@
 import { useId, useLayoutEffect, useMemo, useRef, useState, type PointerEvent } from 'react'
-import { useIsMobile } from '@/app/ui'
+import { useIsNarrow } from '@/app/ui'
 
 export interface ChartPoint {
   t: number
@@ -73,7 +73,8 @@ function nearest(points: ChartPoint[], t: number) {
 export function Chart({ series, format, formatTime, formatTooltipTime = formatTime, yMax, height = 150, label }: Props) {
   const box = useRef<HTMLDivElement>(null)
   const [width, setWidth] = useState(0)
-  const isMobile = useIsMobile()
+  // three charts to a row on a tablet are narrower than one on a phone; both get the compact axes
+  const isMobile = useIsNarrow()
   const [hoverT, setHoverT] = useState<number | null>(null)
   const uid = useId().replace(/:/g, '')
 

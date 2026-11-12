@@ -13,7 +13,7 @@ import { BlockGrid, levelFor, MirrorSpark, TickBar } from '@/components/instrume
 import { coreTicks, liveSpanMinutes, memoryBlocks, recentBuckets } from '@/core/live'
 import { Popover } from '@/components/Popover'
 import { Bytes, Percent, RegionTag, Speed, StatusDot, useBilling, useRelativeTime, useUptime } from '@/components/bits'
-import { useIsMobile } from '@/app/ui'
+import { useIsMobile, useIsNarrow } from '@/app/ui'
 
 /* ---------- pieces ---------- */
 
@@ -33,11 +33,11 @@ function Stat({
   instrument?: ReactNode
 }) {
   return (
-    <div className="node-stat min-w-0 py-5 md:px-5 md:first:pl-0">
-      <p className="node-stat-label text-[13px] text-muted">{label}</p>
-      <div className="node-stat-value mt-2 truncate text-[26px] leading-none font-light tracking-[-0.03em]">{children}</div>
-      {instrument && <div className="node-stat-inst mt-3">{instrument}</div>}
-      {sub && <p className="node-stat-sub num mt-2 truncate text-[12px] text-muted">{sub}</p>}
+    <div className="node-stat min-w-0 py-5 md:px-3 md:py-3.5 md:first:pl-0 lg:px-5 lg:py-5">
+      <p className="node-stat-label text-[13px] text-muted md:text-[12px] lg:text-[13px]">{label}</p>
+      <div className="node-stat-value mt-2 truncate text-[26px] leading-none font-light tracking-[-0.03em] md:mt-1.5 md:text-[22px] lg:mt-2 lg:text-[26px]">{children}</div>
+      {instrument && <div className="node-stat-inst mt-3 md:mt-2 lg:mt-3">{instrument}</div>}
+      {sub && <p className="node-stat-sub num mt-2 truncate text-[12px] text-muted md:mt-1.5 md:text-[11px] lg:mt-2 lg:text-[12px]">{sub}</p>}
     </div>
   )
 }
@@ -58,13 +58,13 @@ function InfoList({ title, rows }: { title: string; rows: InfoRow[] }) {
 
   return (
     <section className="node-info-section">
-      <h2 className="eyebrow mb-3">{title}</h2>
+      <h2 className="eyebrow mb-3 md:mb-1.5 lg:mb-3">{title}</h2>
       <dl className="node-info-list border-t border-line">
         {visible.map(([k, v], i) => (
           <div
             key={k}
             data-wide={wideFlags[i] ? '' : undefined}
-            className="node-info-row flex items-baseline justify-between gap-6 border-b border-line py-3 text-[14px] md:py-2 lg:py-3"
+            className="node-info-row flex items-baseline justify-between gap-6 border-b border-line py-3 text-[14px] md:gap-3 md:py-1.5 md:text-[13px] lg:gap-6 lg:py-3 lg:text-[14px]"
           >
             <dt className="node-info-dt shrink-0 text-muted">{k}</dt>
             <dd className="node-info-dd min-w-0 truncate text-right" title={typeof v === 'string' ? v : undefined}>
@@ -185,10 +185,10 @@ function useTimeFormats(hours: number) {
 
 function ChartCard({ title, value, children }: { title: string; value?: ReactNode; children: ReactNode }) {
   return (
-    <div className="node-chart-card card p-5">
-      <div className="node-chart-head mb-3 flex items-baseline justify-between gap-3">
-        <h3 className="text-[13px] text-muted">{title}</h3>
-        {value && <p className="num truncate text-[13px]">{value}</p>}
+    <div className="node-chart-card card p-5 md:px-3.5 md:py-3 lg:p-5">
+      <div className="node-chart-head mb-3 md:mb-1.5 lg:mb-3 flex items-baseline justify-between gap-3">
+        <h3 className="shrink-0 text-[13px] text-muted md:text-[12px] lg:text-[13px]">{title}</h3>
+        {value && <p className="num truncate text-[13px] md:text-[12px] lg:text-[13px]">{value}</p>}
       </div>
       {children}
     </div>
@@ -215,7 +215,7 @@ function LoadCharts({ node, points, hours, height, snap }: { node: NodeInfo; poi
   const last = points[points.length - 1]
 
   return (
-    <div className="node-chart-grid grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+    <div className="node-chart-grid grid gap-4 sm:grid-cols-2 md:grid-cols-3 md:gap-3 lg:grid-cols-2 lg:gap-4 xl:grid-cols-3">
       <ChartCard title={t('metric.cpu')} value={last ? `${formatPercent(last.cpu)}%` : undefined}>
         <Chart {...common} label={t('metric.cpu')} yMax={100} format={(v) => `${formatNumber(v, 0)}%`} series={[s('cpu', t('metric.cpu'), 'var(--chart-1)', (p) => p.cpu, true)]} />
       </ChartCard>
@@ -293,7 +293,7 @@ function PingChart({ data, hours, height }: { data: PingData; hours: number; hei
     }))
 
   return (
-    <div className="node-ping-card card p-5">
+    <div className="node-ping-card card p-5 md:p-4 lg:p-5">
       <Chart series={series} height={height} format={(v) => `${formatNumber(v, 0)} ms`} formatTime={fmt.axis} formatTooltipTime={fmt.tooltip} label={t('node.tabPing')} />
       <ul className="node-ping-list mt-5 divide-y divide-line border-t border-line">
         {data.tasks.map((task, i) => (
@@ -337,6 +337,7 @@ function PingChart({ data, hours, height }: { data: PingData; hours: number; hei
 function NodeCharts({ node, snap }: { node: NodeInfo; snap?: Snapshot }) {
   const { t } = useTranslation()
   const isMobile = useIsMobile()
+  const isNarrow = useIsNarrow()
   const recordHours = useStore((s) => s.site?.recordHours ?? 0)
   const [range, setRange] = useState(0)
   // Only the live range needs to follow the socket; history ranges stay put.
@@ -386,12 +387,12 @@ function NodeCharts({ node, snap }: { node: NodeInfo; snap?: Snapshot }) {
   const rangeLabel = (h: number) => (h === 0 ? t('node.rangeLive') : h < 24 ? t('node.rangeHours', { count: h }) : t('node.rangeDays', { count: h / 24 }))
   const activeRanges = tab === 'load' ? ranges : pingRanges
   const activeRange = tab === 'load' ? range : pingRange
-  const chartHeight = tab === 'load' ? (isMobile ? 87 : 150) : isMobile ? 140 : 240
+  const chartHeight = tab === 'load' ? (isMobile ? 87 : isNarrow ? 110 : 150) : isMobile ? 140 : isNarrow ? 180 : 240
 
   return (
-    <section className="node-charts mt-16 md:mt-10 lg:mt-16">
+    <section className="node-charts mt-16 md:mt-8 lg:mt-16">
       <div className="node-charts-bar flex flex-wrap items-center gap-3">
-        <h2 className="node-charts-title mr-auto text-[24px] font-light tracking-[-0.02em]">{t('node.charts')}</h2>
+        <h2 className="node-charts-title mr-auto text-[24px] font-light md:text-[20px] lg:text-[24px] tracking-[-0.02em]">{t('node.charts')}</h2>
         {adapter.capabilities.ping && (
           <div className="node-tabs flex rounded-full border border-line bg-surface-2 p-0.5" role="tablist">
             {(['load', 'ping'] as const).map((k) => (
@@ -432,7 +433,7 @@ function NodeCharts({ node, snap }: { node: NodeInfo; snap?: Snapshot }) {
 
       {tab === 'load' && range === 0 && !adapter.capabilities.history && <p className="node-live-note mt-3 text-[13px] text-muted">{t('node.liveOnly')}</p>}
 
-      <div className="node-charts-body mt-5">
+      <div className="node-charts-body mt-5 md:mt-3 lg:mt-5">
         {error ? (
           <p className="rounded-[20px] border border-dashed border-line py-16 text-center text-[14px] text-muted">{t('app.loadError')}</p>
         ) : tab === 'load' ? (
@@ -457,9 +458,9 @@ function NodeCharts({ node, snap }: { node: NodeInfo; snap?: Snapshot }) {
 
 function ChartSkeleton({ single = false, height }: { single?: boolean; height: number }) {
   return (
-    <div className={single ? '' : 'node-chart-grid grid gap-4 sm:grid-cols-2 xl:grid-cols-3'}>
+    <div className={single ? '' : 'node-chart-grid grid gap-4 sm:grid-cols-2 md:grid-cols-3 md:gap-3 lg:grid-cols-2 lg:gap-4 xl:grid-cols-3'}>
       {Array.from({ length: single ? 1 : 6 }, (_, i) => (
-        <div key={i} className="node-chart-card card p-5">
+        <div key={i} className="node-chart-card card p-5 md:px-3.5 md:py-3 lg:p-5">
           <div className="skeleton h-3 w-20" />
           <div className="node-chart-skel skeleton mt-5" style={{ height }} />
         </div>
@@ -472,7 +473,7 @@ function ChartSkeleton({ single = false, height }: { single?: boolean; height: n
 
 export function NodePage({ id }: { id: string }) {
   const { t, i18n } = useTranslation()
-  const isMobile = useIsMobile()
+  const isNarrow = useIsNarrow()
   const nodes = useVisibleNodes()
   const nodeId = decodeURIComponent(id)
   const node = nodes.find((n) => n.id === nodeId)
@@ -487,8 +488,8 @@ export function NodePage({ id }: { id: string }) {
   const cores = coreTicks(snap?.cpu ?? 0, node?.cpuCores ?? 0)
   const mem = memoryBlocks(snap?.memUsed ?? 0, snap?.memTotal || node?.memTotal || 0, node?.swapTotal ?? 0)
   const statBox = 150
-  const statHeight = isMobile ? 12 : 16
-  const tickGap = isMobile ? (cores.ticks > 16 ? 1 : 2) : cores.ticks > 16 ? 2 : 4
+  const statHeight = isNarrow ? 12 : 16
+  const tickGap = isNarrow ? (cores.ticks > 16 ? 1 : 2) : cores.ticks > 16 ? 2 : 4
   // Disk gets blocks too: one shape for "how much of a fixed thing is used".
   const disk = memoryBlocks(snap?.diskUsed ?? 0, snap?.diskTotal || node?.diskTotal || 0, 0, 10)
   // The same fifteen-minute buffer the ledger draws, so the page opens on a familiar shape.
@@ -541,14 +542,14 @@ export function NodePage({ id }: { id: string }) {
         <NodeSwitcher current={node} />
       </div>
 
-      <header className="node-header fade-in mt-8 md:mt-5 lg:mt-10">
+      <header className="node-header fade-in mt-8 md:mt-3 lg:mt-10">
         <p className="eyebrow flex flex-wrap items-center gap-x-2 gap-y-1">
           {node.region && <span>{region}</span>}
           {node.region && node.groups[0] && <span className="text-faint">/</span>}
           {node.groups[0] && <span className="normal-case tracking-normal">{node.groups.join(' · ')}</span>}
         </p>
-        <h1 className="node-title mt-4 text-[34px] leading-[1.1] font-light tracking-[-0.035em] break-words md:text-[38px] lg:text-[50px]">{stripFlag(node.name)}</h1>
-        <p className="node-meta mt-4 flex flex-wrap items-center gap-x-3 gap-y-1 text-[14px] text-muted">
+        <h1 className="node-title mt-4 text-[34px] leading-[1.1] font-light tracking-[-0.035em] break-words md:mt-2 md:text-[30px] lg:mt-4 lg:text-[50px]">{stripFlag(node.name)}</h1>
+        <p className="node-meta mt-4 flex flex-wrap items-center gap-x-3 gap-y-1 text-[14px] text-muted md:mt-2.5 md:text-[13px] lg:mt-4 lg:text-[14px]">
           <span
             data-status={pending ? 'pending' : online ? 'online' : 'offline'}
             className="node-status-chip inline-flex items-center gap-2 text-ink"
@@ -573,14 +574,14 @@ export function NodePage({ id }: { id: string }) {
         </p>
       </header>
 
-      <section className={`node-stats mt-10 md:mt-6 lg:mt-10 grid grid-cols-2 border-y border-line md:grid-cols-3 md:divide-x md:divide-line xl:grid-cols-6 ${online ? '' : 'opacity-50'}`}>
+      <section className={`node-stats mt-10 md:mt-5 lg:mt-10 grid grid-cols-2 border-y border-line md:grid-cols-5 lg:grid-cols-3 md:divide-x md:divide-line xl:grid-cols-6 ${online ? '' : 'opacity-50'}`}>
         <Stat
           label={t('metric.cpu')}
           sub={node.cpuCores ? t('metric.cores', { count: node.cpuCores }) : undefined}
           instrument={
             <TickBar
               animate
-              stretch={isMobile}
+              stretch={isNarrow}
               filled={cores.filled}
               ticks={cores.ticks}
               notch={node.cpuCores > 0 && snap ? Math.min(1, snap.load1 / node.cpuCores) : undefined}
@@ -602,7 +603,7 @@ export function NodePage({ id }: { id: string }) {
           instrument={
             <BlockGrid
               animate
-              stretch={isMobile}
+              stretch={isNarrow}
               filled={mem.filled}
               blocks={mem.blocks}
               swapBlocks={mem.swapBlocks}
@@ -622,7 +623,7 @@ export function NodePage({ id }: { id: string }) {
           instrument={
             <BlockGrid
               animate
-              stretch={isMobile}
+              stretch={isNarrow}
               filled={disk.filled}
               blocks={disk.blocks}
               height={statHeight}
@@ -636,7 +637,7 @@ export function NodePage({ id }: { id: string }) {
         </Stat>
         <Stat label={t('metric.network')} sub={`↑ ${formatBytes(snap?.totalUp ?? 0)} · ↓ ${formatBytes(snap?.totalDown ?? 0)}`}>
           <span className="flex items-center gap-2.5 md:gap-3">
-            <MirrorSpark up={liveNet.up} down={liveNet.down} width={isMobile ? 54 : 72} height={isMobile ? 24 : 30} label={t('metric.network')} />
+            <MirrorSpark up={liveNet.up} down={liveNet.down} width={isNarrow ? 54 : 72} height={isNarrow ? 24 : 30} label={t('metric.network')} />
             {/* stacked: the six-up band gives this cell about 200px, too narrow for both rates in a row */}
             <span className="flex flex-col text-[0.5em] leading-tight">
               <span className="whitespace-nowrap">
@@ -658,7 +659,7 @@ export function NodePage({ id }: { id: string }) {
         </Stat>
       </section>
 
-      <div className="node-info-grid mt-14 grid grid-cols-1 gap-10 md:mt-8 md:grid-cols-2 lg:mt-14 xl:grid-cols-3">
+      <div className="node-info-grid mt-14 grid grid-cols-1 gap-10 md:mt-6 md:grid-cols-3 md:gap-6 lg:mt-14 lg:grid-cols-2 lg:gap-10 xl:grid-cols-3">
         <InfoList
           title={t('node.system')}
           rows={[
@@ -757,7 +758,7 @@ export function NodePage({ id }: { id: string }) {
       </div>
 
       {week && week.length > 0 && (
-        <div className="node-week mt-14 md:mt-8 lg:mt-14">
+        <div className="node-week mt-14 md:mt-6 lg:mt-14">
           <HourGrid points={week} />
         </div>
       )}

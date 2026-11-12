@@ -150,7 +150,7 @@ function Metric({
         </p>
       </div>
       {sub ? (
-        <p className={`num mt-1 truncate text-[10.5px] leading-tight text-muted md:mt-2 md:text-[11px] md:leading-normal ${subOnPhone ? '' : 'hidden md:block'}`}>
+        <p className={`num mt-1 truncate text-[10.5px] leading-tight text-muted md:mt-2 md:line-clamp-2 md:text-[11px] md:leading-normal md:whitespace-normal ${subOnPhone ? '' : 'hidden md:block'}`}>
           {fed ? sub : '—'}
         </p>
       ) : null}
