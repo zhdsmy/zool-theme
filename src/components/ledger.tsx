@@ -373,7 +373,7 @@ function CardReading({
         }`}
       />
       <span className="mt-1 block lg:mt-2.5">{instrument}</span>
-      {sub && <span className="num mt-1 block truncate text-[11px] leading-3.5 text-muted lg:mt-2 lg:leading-normal max-lg:@max-xs:tracking-[-0.02em]">{sub}</span>}
+      {sub && <span className="num mt-1 block truncate text-[11px] leading-3.5 text-muted lg:mt-2 lg:leading-normal max-lg:@max-xs:tracking-[-0.02em] max-lg:@max-xs:[word-spacing:-0.1em]">{sub}</span>}
     </span>
   )
 }
@@ -464,7 +464,7 @@ export function NodeCard({ node, snap, tick, pending }: { node: NodeInfo; snap?:
     >
       {/* Below 320px — four cards to a row — the card tightens its padding and gaps rather than
           its type: the numbers still lead, and the labels stay above them. */}
-      <span className="flex flex-col px-3.5 py-2.5 lg:p-5 lg:@max-xs:p-4">
+      <span className="flex flex-col px-3.5 py-2.5 max-lg:@max-xs:px-3 lg:p-5 lg:@max-xs:p-4">
         {/* who the machine is */}
         <span className="flex items-start gap-2.5 lg:gap-3">
           <StatusDot online={online} pending={pending || cond.kind === 'never'} className="mt-[6px] lg:mt-[7px]" />
@@ -487,7 +487,7 @@ export function NodeCard({ node, snap, tick, pending }: { node: NodeInfo; snap?:
         <>
             {!shown ? <PendingReadings card /> : <>
             {/* how busy it is */}
-            <span className="mt-2.5 grid grid-cols-3 gap-3 lg:mt-5 lg:gap-4 lg:@max-xs:mt-4 lg:@max-xs:gap-3">
+            <span className="mt-2.5 grid grid-cols-3 gap-3 lg:mt-5 max-lg:@max-xs:gap-2 lg:gap-4 lg:@max-xs:mt-4 lg:@max-xs:gap-3">
               <CardReading
                 label={t('metric.cpu')}
                 percent={cpu}

@@ -686,7 +686,7 @@ export function HomePage() {
                 />
               )}
               {view === 'cards' ? (
-                <div data-grid="cards" className="mt-2.5 grid gap-2.5 sm:grid-cols-2 md:mt-4 md:gap-3 min-[55rem]:grid-cols-3 xl:grid-cols-4">
+                <div data-grid="cards" className="mt-2.5 grid gap-2.5 sm:grid-cols-2 md:mt-4 md:gap-3 min-[50rem]:grid-cols-3 xl:grid-cols-4">
                   {section.rows.map((node) => (
                     <NodeCard key={node.id} node={node} snap={snapshots[node.id]} tick={tick} pending={!fed && !snapshots[node.id]} />
                   ))}
