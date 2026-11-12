@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.0.0+zhdsmy.16 — 2026-11-12
+
+- Latency chart takes most of the card: taller plot (300 / 260 / 200px on desktop / tablet / phone), legend in two columns from 640px and three from 1280px, each row showing average and min–max.
+- The y axis follows the 99th percentile, so a few 1000ms spikes clip at the top instead of squashing every line to the bottom.
+- Eight distinct line colours instead of four repeating ones.
+- Legend: the first click shows only that line, later clicks add or remove lines, and removing the last one (or "Show all") brings every line back. Hovering a row highlights its line. The axis rescales to the lines shown.
+- New 削峰 / "Hide spikes" toggle beside the refresh button: drops each line's occasional abnormal highs (above Q3 + 3 × IQR, never below 1.5 × median); remembered per browser. Legend min–max still shows the raw values.
+
 ## 1.0.0+zhdsmy.15 — 2026-11-12
 
 - Detail page on foldable inner screens and portrait tablets (768–1023px): the five stats share one row with full-width instruments; system, network and billing sit in three columns, and long values wrap instead of ending in "…"; charts go three to a row with compact axes and shorter plots; smaller header. At 856px the page is about 1.4 screens tall.
