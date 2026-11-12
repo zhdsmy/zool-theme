@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.0+zhdsmy.17 — 2026-11-12
+
+- Latency legend becomes a row of wrapping chips (colour dot, name, average) instead of a table: eight lines take two rows at 856px and four on a phone (about 130px instead of 330px). Min, max and loss show under the chips when a single line is selected, and as the chip tooltip.
+- Latency plot 20px taller (320 / 280 / 220px).
+
 ## 1.0.0+zhdsmy.16 — 2026-11-12
 
 - Latency chart takes most of the card: taller plot (300 / 260 / 200px on desktop / tablet / phone), legend in two columns from 640px and three from 1280px, each row showing average and min–max.
