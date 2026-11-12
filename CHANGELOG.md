@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.0+zhdsmy.15 — 2026-11-12
+
+- Detail page on foldable inner screens and portrait tablets (768–1023px): the five stats share one row with full-width instruments; system, network and billing sit in three columns, and long values wrap instead of ending in "…"; charts go three to a row with compact axes and shorter plots; smaller header. At 856px the page is about 1.4 screens tall.
+- Cards: the spec line aligns with the readings instead of indenting under the name; titles keep two lines of height when cards are side by side, so readings line up across a row; narrow cards below 1024px drop the network sparkline and give the rates the full width.
+- Overview: the sub line wraps to two lines on tablets instead of ending in "…".
+
 ## 1.0.0+zhdsmy.14 — 2026-11-12
 
 - Card names wrap to two lines instead of sliding; past two lines they end in "…", with the full name as the tooltip.
