@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.0+zhdsmy.13 — 2026-11-12
+
+- Card titles that do not fit slide back and forth instead of ending in "…"; names that fit stay still, and reduced motion keeps the ellipsis.
+
 ## 1.0.0+zhdsmy.12 — 2026-11-12
 
 - Cards go three to a row from 800px instead of 880px: the iPhone Duo inner screen is about 856px wide and still showed two. 768px tablets keep two.
