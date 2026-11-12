@@ -296,6 +296,7 @@ function PingChart({ data, hours, height, shave }: { data: PingData; hours: numb
       if (!next.delete(id)) next.add(id)
       return next.size === 0 || next.size === data.tasks.length ? null : next
     })
+  const solo = shown?.size === 1 ? data.tasks.find((task) => shown.has(task.id)) : undefined
   const series: ChartSeries[] = data.tasks.flatMap((task, i) => {
     if (!visible(task.id)) return []
     let points = data.points.filter((p) => p.task === task.id).map((p) => ({ t: p.at, v: p.value >= 0 ? p.value : null }))
@@ -319,38 +320,43 @@ function PingChart({ data, hours, height, shave }: { data: PingData; hours: numb
         formatTooltipTime={fmt.tooltip}
         label={t('node.tabPing')}
       />
-      <ul className="node-ping-list mt-3 grid sm:grid-cols-2 sm:gap-x-6 xl:grid-cols-3" onPointerLeave={() => setFocus(null)}>
+      {/* chips, not a table: a line's colour, name and average; the full figures show when it is the only line */}
+      <div className="node-ping-list -mx-1.5 mt-2 flex flex-wrap gap-x-0.5" onPointerLeave={() => setFocus(null)}>
         {data.tasks.map((task, i) => (
-          <li key={task.id} className="border-t border-line">
-            <button
-              type="button"
-              aria-pressed={visible(task.id)}
-              onClick={() => toggle(task.id)}
-              onPointerEnter={(e) => e.pointerType === 'mouse' && setFocus(task.id)}
-              className={`node-ping-row grid w-full grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-3 py-2 text-left text-[13px] transition-opacity ${visible(task.id) ? '' : 'opacity-40'}`}
-            >
-              <span className="flex min-w-0 items-center gap-2">
-                <span
-                  className="h-[3px] w-3.5 shrink-0 rounded-full"
-                  style={visible(task.id) ? { background: color(i) } : { boxShadow: `inset 0 0 0 1px ${color(i)}` }}
-                />
-                <span className="truncate" title={task.name}>{task.name}</span>
-              </span>
-              <span className="num min-w-[58px] text-right">{formatNumber(task.avg, 1)} ms</span>
-              <span className="num min-w-[52px] text-right text-[12px] text-muted" title={`${t('node.min')} – ${t('node.max')}`}>
-                {formatNumber(task.min, 0)}–{formatNumber(task.max, 0)}
-                {task.loss !== undefined && (
-                  <span className={`ml-2 ${task.loss > 5 ? 'text-danger' : ''}`} title={t('node.loss')}>{formatNumber(task.loss, 1)}%</span>
-                )}
-              </span>
-            </button>
-          </li>
+          <button
+            key={task.id}
+            type="button"
+            aria-pressed={visible(task.id)}
+            onClick={() => toggle(task.id)}
+            onPointerEnter={(e) => e.pointerType === 'mouse' && setFocus(task.id)}
+            title={`${task.name} · ${t('node.min')} ${formatNumber(task.min, 0)} · ${t('node.max')} ${formatNumber(task.max, 0)} ms`}
+            className={`node-ping-row inline-flex max-w-full min-h-7 items-center gap-1.5 rounded-full px-1.5 text-[12px] transition-opacity hover:bg-surface-2 ${visible(task.id) ? '' : 'opacity-40'}`}
+          >
+            <span
+              className="size-2 shrink-0 rounded-full"
+              style={visible(task.id) ? { background: color(i) } : { boxShadow: `inset 0 0 0 1.5px ${color(i)}` }}
+            />
+            <span className="truncate">{task.name}</span>
+            <span className="num text-muted">{formatNumber(task.avg, task.avg < 10 ? 1 : 0)}</span>
+          </button>
         ))}
-      </ul>
-      {shown !== null && (
-        <button type="button" className="pill mt-2 min-h-7 px-3 text-[12px]" onClick={() => setShown(null)}>
-          {t('node.showAllLines')}
-        </button>
+        {shown !== null && (
+          <button type="button" className="min-h-7 rounded-full px-1.5 text-[12px] text-accent-text hover:bg-surface-2" onClick={() => setShown(null)}>
+            {t('node.showAllLines')}
+          </button>
+        )}
+      </div>
+      {solo && (
+        <p className="node-ping-detail num mt-1 text-[12px] text-muted">
+          {t('node.avg')} <span className="text-ink">{formatNumber(solo.avg, 1)} ms</span> · {t('node.min')} {formatNumber(solo.min, 0)} · {t('node.max')}{' '}
+          {formatNumber(solo.max, 0)}
+          {solo.loss !== undefined && (
+            <span className={solo.loss > 5 ? 'text-danger' : ''}>
+              {' '}
+              · {t('node.loss')} {formatNumber(solo.loss, 1)}%
+            </span>
+          )}
+        </p>
       )}
     </div>
   )
@@ -410,7 +416,7 @@ function NodeCharts({ node, snap }: { node: NodeInfo; snap?: Snapshot }) {
   const rangeLabel = (h: number) => (h === 0 ? t('node.rangeLive') : h < 24 ? t('node.rangeHours', { count: h }) : t('node.rangeDays', { count: h / 24 }))
   const activeRanges = tab === 'load' ? ranges : pingRanges
   const activeRange = tab === 'load' ? range : pingRange
-  const chartHeight = tab === 'load' ? (isMobile ? 87 : isNarrow ? 110 : 150) : isMobile ? 200 : isNarrow ? 260 : 300
+  const chartHeight = tab === 'load' ? (isMobile ? 87 : isNarrow ? 110 : 150) : isMobile ? 220 : isNarrow ? 280 : 320
 
   return (
     <section className="node-charts mt-16 md:mt-8 lg:mt-16">

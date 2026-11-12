@@ -1054,13 +1054,9 @@
     padding: 12px;
     border-radius: 14px;
   }
-  .node-ping-list {
-    margin-top: 10px;
-  }
   .node-ping-row {
-    min-height: 40px;
-    padding-block: 8px;
-    font-size: 12.5px;
+    /* chips wrap tightly; 32px stays a comfortable tap target */
+    min-height: 32px;
   }
 
   /* Compact mobile footer */
