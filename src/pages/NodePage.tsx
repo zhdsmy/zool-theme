@@ -64,7 +64,7 @@ function InfoList({ title, rows }: { title: string; rows: InfoRow[] }) {
           <div
             key={k}
             data-wide={wideFlags[i] ? '' : undefined}
-            className="node-info-row flex items-baseline justify-between gap-6 border-b border-line py-3 text-[14px]"
+            className="node-info-row flex items-baseline justify-between gap-6 border-b border-line py-3 text-[14px] md:py-2 lg:py-3"
           >
             <dt className="node-info-dt shrink-0 text-muted">{k}</dt>
             <dd className="node-info-dd min-w-0 truncate text-right" title={typeof v === 'string' ? v : undefined}>
@@ -215,7 +215,7 @@ function LoadCharts({ node, points, hours, height, snap }: { node: NodeInfo; poi
   const last = points[points.length - 1]
 
   return (
-    <div className="node-chart-grid grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+    <div className="node-chart-grid grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
       <ChartCard title={t('metric.cpu')} value={last ? `${formatPercent(last.cpu)}%` : undefined}>
         <Chart {...common} label={t('metric.cpu')} yMax={100} format={(v) => `${formatNumber(v, 0)}%`} series={[s('cpu', t('metric.cpu'), 'var(--chart-1)', (p) => p.cpu, true)]} />
       </ChartCard>
@@ -389,7 +389,7 @@ function NodeCharts({ node, snap }: { node: NodeInfo; snap?: Snapshot }) {
   const chartHeight = tab === 'load' ? (isMobile ? 87 : 150) : isMobile ? 140 : 240
 
   return (
-    <section className="node-charts mt-16">
+    <section className="node-charts mt-16 md:mt-10 lg:mt-16">
       <div className="node-charts-bar flex flex-wrap items-center gap-3">
         <h2 className="node-charts-title mr-auto text-[24px] font-light tracking-[-0.02em]">{t('node.charts')}</h2>
         {adapter.capabilities.ping && (
@@ -457,7 +457,7 @@ function NodeCharts({ node, snap }: { node: NodeInfo; snap?: Snapshot }) {
 
 function ChartSkeleton({ single = false, height }: { single?: boolean; height: number }) {
   return (
-    <div className={single ? '' : 'node-chart-grid grid gap-4 md:grid-cols-2 xl:grid-cols-3'}>
+    <div className={single ? '' : 'node-chart-grid grid gap-4 sm:grid-cols-2 xl:grid-cols-3'}>
       {Array.from({ length: single ? 1 : 6 }, (_, i) => (
         <div key={i} className="node-chart-card card p-5">
           <div className="skeleton h-3 w-20" />
@@ -532,7 +532,7 @@ export function NodePage({ id }: { id: string }) {
   const clock = (at: number) => formatClock(at, false, i18n.language)
 
   return (
-    <div className="node-page wrap pt-8 md:pt-12">
+    <div className="node-page wrap pt-8 md:pt-6 lg:pt-12">
       <div className="node-topbar flex items-center justify-between gap-3">
         <Link href="/" className="inline-flex min-h-10 items-center gap-2 rounded-md text-[13px] text-muted transition-colors hover:text-accent-text">
           <ArrowLeft size={15} strokeWidth={1.7} aria-hidden />
@@ -541,13 +541,13 @@ export function NodePage({ id }: { id: string }) {
         <NodeSwitcher current={node} />
       </div>
 
-      <header className="node-header fade-in mt-8 md:mt-10">
+      <header className="node-header fade-in mt-8 md:mt-5 lg:mt-10">
         <p className="eyebrow flex flex-wrap items-center gap-x-2 gap-y-1">
           {node.region && <span>{region}</span>}
           {node.region && node.groups[0] && <span className="text-faint">/</span>}
           {node.groups[0] && <span className="normal-case tracking-normal">{node.groups.join(' · ')}</span>}
         </p>
-        <h1 className="node-title mt-4 text-[34px] leading-[1.1] font-light tracking-[-0.035em] break-words md:text-[50px]">{stripFlag(node.name)}</h1>
+        <h1 className="node-title mt-4 text-[34px] leading-[1.1] font-light tracking-[-0.035em] break-words md:text-[38px] lg:text-[50px]">{stripFlag(node.name)}</h1>
         <p className="node-meta mt-4 flex flex-wrap items-center gap-x-3 gap-y-1 text-[14px] text-muted">
           <span
             data-status={pending ? 'pending' : online ? 'online' : 'offline'}
@@ -573,7 +573,7 @@ export function NodePage({ id }: { id: string }) {
         </p>
       </header>
 
-      <section className={`node-stats mt-10 grid grid-cols-2 border-y border-line md:grid-cols-3 md:divide-x md:divide-line xl:grid-cols-6 ${online ? '' : 'opacity-50'}`}>
+      <section className={`node-stats mt-10 md:mt-6 lg:mt-10 grid grid-cols-2 border-y border-line md:grid-cols-3 md:divide-x md:divide-line xl:grid-cols-6 ${online ? '' : 'opacity-50'}`}>
         <Stat
           label={t('metric.cpu')}
           sub={node.cpuCores ? t('metric.cores', { count: node.cpuCores }) : undefined}
@@ -658,7 +658,7 @@ export function NodePage({ id }: { id: string }) {
         </Stat>
       </section>
 
-      <div className="node-info-grid mt-14 grid grid-cols-1 gap-10 md:grid-cols-2 xl:grid-cols-3">
+      <div className="node-info-grid mt-14 grid grid-cols-1 gap-10 md:mt-8 md:grid-cols-2 lg:mt-14 xl:grid-cols-3">
         <InfoList
           title={t('node.system')}
           rows={[
@@ -757,7 +757,7 @@ export function NodePage({ id }: { id: string }) {
       </div>
 
       {week && week.length > 0 && (
-        <div className="node-week mt-14">
+        <div className="node-week mt-14 md:mt-8 lg:mt-14">
           <HourGrid points={week} />
         </div>
       )}

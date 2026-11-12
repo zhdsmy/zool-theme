@@ -138,11 +138,11 @@ function Metric({
   // alarm; the band waits with dashes in the same places instead.
   const fed = useStore((s) => s.fed)
   return (
-    <div className={`home-metric min-w-0 py-3 md:py-4 lg:px-5 lg:py-5 lg:first:pl-0 ${className}`}>
+    <div className={`home-metric min-w-0 py-3 md:px-3 md:py-3 md:first:pl-0 lg:px-5 lg:py-5 ${className}`}>
       <div className={inlineOnPhone ? 'flex items-baseline justify-between gap-1.5 md:block' : ''}>
         <p className="truncate text-[10.5px] leading-tight text-muted md:text-[12px] md:leading-normal">{label}</p>
         <p
-          className={`num truncate text-[16px] leading-none font-medium tracking-[-0.025em] md:mt-1.5 md:text-[24px] md:font-light ${
+          className={`num truncate text-[16px] leading-none font-medium tracking-[-0.025em] md:mt-1.5 md:text-[21px] md:font-light lg:text-[24px] ${
             inlineOnPhone ? 'shrink-0' : 'mt-1'
           } ${fed ? tone : 'text-faint'}`}
         >
@@ -322,7 +322,7 @@ export function HomePage() {
   const shown = sections.reduce((n, s) => n + s.rows.length, 0)
 
   return (
-    <div className="wrap pt-3.5 md:pt-16">
+    <div className="wrap pt-3.5 md:pt-6 lg:pt-16">
       {/* headline */}
       <section className="fade-in">
         <p className="eyebrow flex flex-wrap items-center gap-x-2 gap-y-1">
@@ -356,9 +356,7 @@ export function HomePage() {
             it — but a band of figures, not one 52px sentence. */}
         {settings.showOverview && (
           <div
-            className={`home-overview mt-2.5 grid grid-cols-6 border-y border-line md:mt-4 md:grid-cols-3 md:gap-x-4 lg:gap-x-0 lg:divide-x lg:divide-line ${
-              settings.showCost ? 'lg:grid-cols-5' : 'lg:grid-cols-4'
-            }`}
+            className={`home-overview mt-2.5 grid grid-cols-6 border-y border-line md:mt-3 md:divide-x md:divide-line lg:mt-4 ${settings.showCost ? 'md:grid-cols-5' : 'md:grid-cols-4'}`}
           >
             <Metric
               label={t('overview.nodes')}
@@ -409,7 +407,7 @@ export function HomePage() {
                 warning line, which is the question a summary actually owes the reader. */}
             <Metric
               label={t('overview.attention')}
-              className={settings.showCost ? 'col-span-3 md:col-span-2 lg:col-span-1' : 'col-span-6 md:col-span-3 lg:col-span-1'}
+              className={settings.showCost ? 'col-span-3 md:col-span-1' : 'col-span-6 md:col-span-1'}
               subOnPhone
               inlineOnPhone
               tone={totals.worst?.level === 'danger' ? 'text-danger' : totals.worst ? 'text-warn' : ''}
@@ -449,7 +447,7 @@ export function HomePage() {
       </section>
 
       {/* toolbar: one row from tablet width up — groups, regions, then how to sort and draw */}
-      <section className="home-toolbar mt-2.5 flex flex-wrap items-center gap-x-1.5 gap-y-0.5 md:mt-8 md:flex-nowrap md:gap-2">
+      <section className="home-toolbar mt-2.5 flex flex-wrap items-center gap-x-1.5 gap-y-0.5 md:mt-5 lg:mt-8 md:flex-nowrap md:gap-2">
         {offerGroups && (
           <div className="segmented flex items-center rounded-full border border-line bg-surface p-0.5 md:bg-transparent">
             <Popover
@@ -688,7 +686,7 @@ export function HomePage() {
                 />
               )}
               {view === 'cards' ? (
-                <div data-grid="cards" className="mt-2.5 grid gap-2.5 sm:grid-cols-2 md:mt-4 md:gap-3 lg:grid-cols-3 xl:grid-cols-4">
+                <div data-grid="cards" className="mt-2.5 grid gap-2.5 sm:grid-cols-2 md:mt-4 md:gap-3 min-[55rem]:grid-cols-3 xl:grid-cols-4">
                   {section.rows.map((node) => (
                     <NodeCard key={node.id} node={node} snap={snapshots[node.id]} tick={tick} pending={!fed && !snapshots[node.id]} />
                   ))}
