@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.0+zhdsmy.14 — 2026-11-12
+
+- Card names wrap to two lines instead of sliding; past two lines they end in "…", with the full name as the tooltip.
+- Every narrow card (under 320px, including four-up desktop) shows the region tag on the spec line, giving the name the full width. At 856px and 1280px only one of 23 names is still shortened.
+
 ## 1.0.0+zhdsmy.13 — 2026-11-12
 
 - Card titles that do not fit slide back and forth instead of ending in "…"; names that fit stay still, and reduced motion keeps the ellipsis.
