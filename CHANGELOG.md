@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.0+zhdsmy.11 — 2026-11-12
+
+`v1.0.0+zhdsmy.10` was tagged but never deployed; this release carries its changes plus:
+
+- Three-up cards on foldable inner screens: the region tag moves to the spec line so the node name gets the whole first row, and page margins drop to 32px. At 910px, truncated names fall from 22 to 13 of 23 and truncated memory figures from 13 to 1.
+
 ## 1.0.0+zhdsmy.10 — 2026-11-12
 
 - Foldable inner screens and portrait tablets (768–1023px): cards three to a row from 880px, using the compact phone card (about 270px tall instead of about 450px); the overview fits on one row; less top spacing.
