@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.0+zhdsmy.18 — 2026-11-14
+
+- Bills: the overview's fee/cost label opens a menu with **period** (original, monthly, yearly) and **currency** (original, CNY, USD, HKD, EUR, JPY, GBP, TWD, SGD, AUD, CAD, KRW, plus any a node uses). The choice applies to the total and to every node's fee and cost on cards, the list and the detail page, and is kept per browser. "Original" leaves each node's own currency or cycle; an original-currency total adds up in the currency the nodes share, otherwise in the locale's. One-time, free and pay-as-you-go bills are never restated.
+- Fix: exchange rates showed as unavailable because the rate feed now also lists crypto assets with four-letter codes, which rejected the whole response. Those rows are skipped.
+- Money shows thousands separators (¥1,888.00); JPY and KRW have no decimals.
+
 ## 1.0.0+zhdsmy.17 — 2026-11-12
 
 - Latency legend becomes a row of wrapping chips (colour dot, name, average) instead of a table: eight lines take two rows at 856px and four on a phone (about 130px instead of 330px). Min, max and loss show under the chips when a single line is selected, and as the chip tooltip.
