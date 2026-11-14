@@ -1,11 +1,12 @@
 import { useTranslation } from 'react-i18next'
 import { Globe } from 'lucide-react'
 import { useStore } from '@/app/store'
-import { convertAmount, displayCurrency } from '@/core/cost'
+import { convertAmount } from '@/core/cost'
+import { useMoney } from '@/app/money'
 import type { NodeInfo } from '@/core/model'
 import { FLAG_CODES } from '@/core/flags.manifest'
 import { regionFlagCode } from '@/core/region'
-import { daysUntil, duration, formatBytes, formatMoney, formatPercent, splitBytes, splitSpeed, type Parts } from '@/core/format'
+import { daysUntil, duration, formatBytes, formatMoney, monthlyCost, formatPercent, splitBytes, splitSpeed, type Parts } from '@/core/format'
 
 export function StatusDot({ online, pending, className = '' }: { online: boolean; pending?: boolean; className?: string }) {
   const { t } = useTranslation()
@@ -53,11 +54,11 @@ export function useUptime() {
 }
 
 export function useBilling() {
-  const { t, i18n } = useTranslation()
+  const { t } = useTranslation()
   const loggedIn = useStore((s) => s.session.loggedIn)
   const actualCosts = useStore((s) => s.actualCosts)
   const rates = useStore((s) => s.exchangeRates)
-  const currency = displayCurrency(i18n.resolvedLanguage)
+  const { currency, period } = useMoney()
   const cycle = (days: number) => {
     if (days <= 0) return days === -1 ? ` ${t('unit.oneTime')}` : ''
     if (days >= 28 && days <= 31) return t('unit.perMonth')
@@ -71,8 +72,13 @@ export function useBilling() {
     return money(n.price, n.currency, n.billingCycle)
   }
   const money = (amount: number, source: string, days: number) => {
-    const converted = convertAmount(amount, source, currency, rates?.rates)
-    return converted === null ? '—' : `${formatMoney(converted, currency)}${cycle(days)}`
+    // a recurring bill is restated per month or year; one-time and unset cycles stay as they are
+    const restate = period !== 'original' && days > 0
+    const value = restate ? monthlyCost(amount, days) * (period === 'year' ? 12 : 1) : amount
+    const suffix = restate ? t(period === 'year' ? 'unit.perYear' : 'unit.perMonth') : cycle(days)
+    if (currency === 'original') return `${formatMoney(value, source)}${suffix}`
+    const converted = convertAmount(value, source, currency, rates?.rates)
+    return converted === null ? '—' : `${formatMoney(converted, currency)}${suffix}`
   }
   return {
     price,

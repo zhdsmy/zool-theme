@@ -30,6 +30,7 @@
     "bandwidth": "帯域幅",
     "traffic": "累計トラフィック",
     "cost": "月額料金",
+    "costYear": "年額料金",
     "attention": "要注意",
     "allClear": "上限に近いものなし",
     "costNodes_other": "オンライン有料ノード {{count}} 台",
@@ -39,6 +40,7 @@
     "costUnavailable": "為替レートを取得できません",
     "regions_other": "{{count}} 地域",
     "actualCost": "月額コスト",
+    "actualCostYear": "年額コスト",
     "actualCostUnavailable": "実際のコストを取得できません"
   },
   "toolbar": {
@@ -187,5 +189,12 @@
     "dark": "ダーク",
     "system": "システム",
     "language": "言語"
+  },
+  "money": {
+    "period": "期間",
+    "currency": "通貨",
+    "original": "元のまま",
+    "month": "月額",
+    "year": "年額"
   }
 }

@@ -33,6 +33,7 @@
     "bandwidth": "Bandwidth",
     "traffic": "Total traffic",
     "cost": "Monthly fees",
+    "costYear": "Yearly fees",
     "attention": "Needs attention",
     "allClear": "Nothing near a limit",
     "costNodes_one": "across {{count}} online paid node",
@@ -44,6 +45,7 @@
     "regions_one": "{{count}} region",
     "regions_other": "{{count}} regions",
     "actualCost": "Monthly cost",
+    "actualCostYear": "Yearly cost",
     "actualCostUnavailable": "Actual costs are unavailable"
   },
   "toolbar": {
@@ -196,5 +198,12 @@
     "dark": "Dark",
     "system": "System",
     "language": "Language"
+  },
+  "money": {
+    "period": "Period",
+    "currency": "Currency",
+    "original": "Original",
+    "month": "Monthly",
+    "year": "Yearly"
   }
 }

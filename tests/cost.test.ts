@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { convertAmount, displayCurrency, loadExchangeRates, onlineMonthlyCost } from '../src/core/cost'
+import { convertAmount, displayCurrency, loadExchangeRates, onlineMonthlyCost, sharedCurrency } from '../src/core/cost'
 import { currencyCode, formatMoney } from '../src/core/format'
 import type { NodeInfo, Snapshot } from '../src/core/model'
 
@@ -45,6 +45,11 @@ describe('monthly fleet cost', () => {
     expect(onlineMonthlyCost(nodes, snapshots, 'CNY', rates)).toEqual({ amount: 280, paid: 4 })
   })
 
+  it('finds the one currency online paid nodes share', () => {
+    expect(sharedCurrency(nodes, snapshots)).toBeNull()
+    expect(sharedCurrency([node('a', '￥', 70), node('b', 'CNY', 10), node('c', '$', -1)], { a: online, b: online, c: online })).toBe('CNY')
+  })
+
   it('does not misrepresent missing rates as a partial total', () => {
     expect(onlineMonthlyCost(nodes, snapshots, 'USD')).toEqual({ amount: null, paid: 4 })
     expect(onlineMonthlyCost([node('x', 'XYZ', 1)], { x: online }, 'USD', rates).amount).toBeNull()
@@ -54,7 +59,9 @@ describe('monthly fleet cost', () => {
 
   it('uses ISO currency codes and unambiguous two-decimal prices', () => {
     for (const alias of ['¥', '￥', 'RMB', 'cny']) expect(currencyCode(alias)).toBe('CNY')
-    expect(formatMoney(1888, 'CNY')).toBe('¥1888.00')
+    expect(formatMoney(1888, 'CNY')).toBe('¥1,888.00')
+    expect(formatMoney(1234.5, 'JPY')).toBe('JP¥1,235')
+    expect(formatMoney(12, 'HKD')).toBe('HK$12.00')
     expect(formatMoney(36, 'USD')).toBe('$36.00')
     expect(formatMoney(30.48, 'AUD$')).toBe('A$30.48')
     expect(formatMoney(19.98, 'EUR')).toBe('€19.98')
@@ -78,6 +85,13 @@ describe('exchange rates', () => {
     expect(fetch).toHaveBeenCalledTimes(1)
     expect(fetch.mock.calls[0][1].credentials).toBe('omit')
     expect(store.setItem).toHaveBeenCalledOnce()
+  })
+
+  it('skips crypto assets the feed lists beside currencies', async () => {
+    storage()
+    const withCrypto = [{ base: 'USD', quote: 'AAVE', rate: 0.009, date: '2026-11-03' }, ...wire]
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(JSON.stringify(withCrypto))))
+    expect(await loadExchangeRates()).toEqual({ date: '2026-11-03', rates })
   })
 
   it('uses a fresh cache without requesting rates', async () => {

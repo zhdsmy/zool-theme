@@ -16,13 +16,13 @@ function parseRates(data: unknown): ExchangeRates {
   const rates: Record<string, number> = { USD: 1 }
   let date = ''
   for (const row of data) {
-    if (!row || row.base !== 'USD' || !/^[A-Z]{3}$/.test(row.quote) ||
-      !Number.isFinite(row.rate) || row.rate <= 0 || !/^\d{4}-\d{2}-\d{2}$/.test(row.date)) {
-      throw new Error('Invalid exchange rates')
-    }
+    if (!row || row.base !== 'USD' || !/^\d{4}-\d{2}-\d{2}$/.test(row.date)) throw new Error('Invalid exchange rates')
+    // the feed also lists crypto assets (AAVE, …); keep ISO currencies and skip the rest
+    if (!/^[A-Z]{3}$/.test(row.quote) || !Number.isFinite(row.rate) || row.rate <= 0) continue
     if (row.quote !== 'USD') rates[row.quote] = row.rate
     if (row.date > date) date = row.date
   }
+  if (!rates.CNY) throw new Error('Missing exchange rates')
   return { date, rates }
 }
 
@@ -59,7 +59,7 @@ export function loadExchangeRates() {
 
 export const displayCurrency = (locale?: string) => locale === 'zh-CN' ? 'CNY' : 'USD'
 
-export function convertAmount(amount: number, source: string, target: 'CNY' | 'USD', rates: Record<string, number> = { USD: 1 }): number | null {
+export function convertAmount(amount: number, source: string, target: string, rates: Record<string, number> = { USD: 1 }): number | null {
   if (!Number.isFinite(amount) || amount < 0) return null
   if (amount === 0) return 0
   const code = currencyCode(source)
@@ -72,7 +72,7 @@ export function convertAmount(amount: number, source: string, target: 'CNY' | 'U
 export function onlineMonthlyCost(
   nodes: readonly NodeInfo[],
   snapshots: Record<string, Snapshot>,
-  currency: 'CNY' | 'USD',
+  currency: string,
   rates: Record<string, number> = { USD: 1 },
   actualCosts?: Record<string, ActualCost>,
 ) {
@@ -90,4 +90,16 @@ export function onlineMonthlyCost(
     else amount += converted
   }
   return { amount: complete ? amount : null, paid }
+}
+
+/** The one currency every online paid node bills in, or null when they differ. */
+export function sharedCurrency(nodes: readonly NodeInfo[], snapshots: Record<string, Snapshot>, actualCosts?: Record<string, ActualCost>) {
+  const codes = new Set<string | null>()
+  for (const node of nodes) {
+    const actual = actualCosts?.[node.id]
+    if (!snapshots[node.id]?.online || monthlyCost(actual?.amount ?? node.price, node.billingCycle) <= 0) continue
+    codes.add(currencyCode(actual?.currency ?? node.currency))
+  }
+  const [only] = codes
+  return codes.size === 1 ? only : null
 }

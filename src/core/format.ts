@@ -107,9 +107,13 @@ export function currencyCode(currency: string): string | null {
     ?? (/^[A-Z]{3}$/.test(code) ? code : null)
 }
 
+const SYMBOLS: Record<string, string> = {
+  USD: '$', CNY: '¥', EUR: '€', AUD: 'A$', HKD: 'HK$', JPY: 'JP¥', GBP: '£', TWD: 'NT$', SGD: 'S$', CAD: 'C$', KRW: '₩',
+}
+
 export function formatMoney(amount: number, currency: string) {
   const code = currencyCode(currency)
-  const symbol = ({ USD: '$', CNY: '¥', EUR: '€', AUD: 'A$' } as Record<string, string>)[code ?? '']
-    ?? (code ? `${code} ` : currency)
-  return `${symbol}${amount.toFixed(2)}`
+  const symbol = SYMBOLS[code ?? ''] ?? (code ? `${code} ` : currency)
+  const digits = code === 'JPY' || code === 'KRW' ? 0 : 2
+  return `${symbol}${amount.toLocaleString('en-US', { minimumFractionDigits: digits, maximumFractionDigits: digits })}`
 }

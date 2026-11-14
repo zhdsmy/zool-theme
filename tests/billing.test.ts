@@ -85,4 +85,22 @@ describe('Nezha billing display', () => {
     privateBilling.loggedIn = false
     privateBilling.actualCosts = null
   })
+
+  it('restates recurring bills per month or year and keeps the original currency on request', async () => {
+    await i18n.changeLanguage('zh-CN')
+    privateBilling.exchangeRates = { date: '2026-11-04', rates: { USD: 1, CNY: 7, EUR: 0.9, AUD: 1.5 } }
+    const saved: Record<string, string> = {}
+    vi.stubGlobal('localStorage', { getItem: (k: string) => saved[k] ?? null, setItem: (k: string, v: string) => { saved[k] = v } })
+    const yearly = { billingDataMod: { amount: 'EUR 9.00', cycle: 'Year' } }
+    saved['zool:period'] = 'month'
+    expect(render(yearly)).toContain('¥5.83/月')
+    saved['zool:currency'] = 'USD'
+    saved['zool:period'] = 'year'
+    expect(render(yearly)).toContain('$10.00/年')
+    saved['zool:currency'] = 'original'
+    expect(render(yearly)).toContain('€9.00/年')
+    saved['zool:period'] = 'original'
+    expect(render({ billingDataMod: { amount: 'USD 100', cycle: '-1' } })).not.toContain('/年')
+    vi.unstubAllGlobals()
+  })
 })

@@ -5,8 +5,9 @@ import { adapter, useStore, useVisibleNodes } from '@/app/store'
 import { setDensity, setGrouping, setView, useDensity, useGrouping, useView } from '@/app/prefs'
 import type { Density, View } from '@/core/settings'
 import type { NodeInfo, Snapshot } from '@/core/model'
-import { formatMoney, formatPercent, ratio, splitBytes, splitSpeed } from '@/core/format'
-import { displayCurrency, onlineMonthlyCost } from '@/core/cost'
+import { currencyCode, formatMoney, formatPercent, ratio, splitBytes, splitSpeed } from '@/core/format'
+import { displayCurrency, onlineMonthlyCost, sharedCurrency } from '@/core/cost'
+import { setMoneyCurrency, setMoneyPeriod, useMoney, type MoneyPeriod } from '@/app/money'
 import { regionName, stripFlag } from '@/core/region'
 import { Popover } from '@/components/Popover'
 import { GroupHeading, NodeCard, NodeStrip } from '@/components/ledger'
@@ -124,7 +125,7 @@ function Metric({
   subOnPhone = false,
   inlineOnPhone = false,
 }: {
-  label: string
+  label: ReactNode
   value: ReactNode
   sub?: ReactNode
   tone?: string
@@ -140,7 +141,7 @@ function Metric({
   return (
     <div className={`home-metric min-w-0 py-3 md:px-3 md:py-3 md:first:pl-0 lg:px-5 lg:py-5 ${className}`}>
       <div className={inlineOnPhone ? 'flex items-baseline justify-between gap-1.5 md:block' : ''}>
-        <p className="truncate text-[10.5px] leading-tight text-muted md:text-[12px] md:leading-normal">{label}</p>
+        <div className={`${typeof label === 'string' ? 'truncate' : 'min-w-0'} text-[10.5px] leading-tight text-muted md:text-[12px] md:leading-normal`}>{label}</div>
         <p
           className={`num truncate text-[16px] leading-none font-medium tracking-[-0.025em] md:mt-1.5 md:text-[21px] md:font-light lg:text-[24px] ${
             inlineOnPhone ? 'shrink-0' : 'mt-1'
@@ -168,6 +169,57 @@ const Pair = ({ up, down }: { up: string; down: string }) => (
 
 const anchorId = (group: string) => `group-${encodeURIComponent(group).replace(/%/g, '')}`
 
+const MONEY_CURRENCIES = ['CNY', 'USD', 'HKD', 'EUR', 'JPY', 'GBP', 'TWD', 'SGD', 'AUD', 'CAD', 'KRW']
+
+/** The cost cell's label doubles as the switch for how every bill on the site is shown. */
+function MoneyMenu({ label, extra }: { label: string; extra: string[] }) {
+  const { t } = useTranslation()
+  const rates = useStore((s) => s.exchangeRates)
+  const { currency, period } = useMoney()
+  const codes = [...new Set([...MONEY_CURRENCIES, ...extra])].filter((c) => !rates || c === 'USD' || rates.rates[c] || extra.includes(c))
+  const option = (active: boolean) =>
+    `h-8 rounded-[9px] text-[12px] transition-colors ${active ? 'border border-line bg-surface font-medium text-ink' : 'text-muted hover:text-ink'}`
+  return (
+    <Popover
+      label={`${t('money.period')} · ${t('money.currency')}`}
+      align="end"
+      portal
+      buttonClassName="-my-1 inline-flex max-w-full items-center gap-0.5 rounded-md py-1 text-left hover:text-ink"
+      button={
+        <>
+          <span className="truncate">{label}</span>
+          <ChevronDown size={12} strokeWidth={1.8} className="shrink-0" aria-hidden />
+        </>
+      }
+      panelClassName="w-[248px] p-2 text-ink"
+    >
+      {() => (
+        <div>
+          <p className="eyebrow px-2 pt-1.5 pb-1.5">{t('money.period')}</p>
+          <div className="grid grid-cols-3 gap-1 rounded-[12px] bg-surface-2 p-1">
+            {(['original', 'month', 'year'] as MoneyPeriod[]).map((p) => (
+              <button key={p} type="button" aria-pressed={period === p} onClick={() => setMoneyPeriod(p)} className={option(period === p)}>
+                {t(`money.${p}`)}
+              </button>
+            ))}
+          </div>
+          <p className="eyebrow px-2 pt-3 pb-1.5">{t('money.currency')}</p>
+          <div className="grid grid-cols-4 gap-1 rounded-[12px] bg-surface-2 p-1">
+            <button type="button" aria-pressed={currency === 'original'} onClick={() => setMoneyCurrency('original')} className={`col-span-4 ${option(currency === 'original')}`}>
+              {t('money.original')}
+            </button>
+            {codes.map((c) => (
+              <button key={c} type="button" aria-pressed={currency === c} onClick={() => setMoneyCurrency(c)} className={`num ${option(currency === c)}`}>
+                {c}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+    </Popover>
+  )
+}
+
 export function HomePage() {
   const { t, i18n } = useTranslation()
   const nodes = useVisibleNodes()
@@ -190,10 +242,16 @@ export function HomePage() {
   const [sort, setSortState] = useState<Sort>(readSort)
   const rates = useStore((s) => s.exchangeRates)
   const rateError = useStore((s) => s.exchangeRateError)
-  const costCurrency = displayCurrency(i18n.resolvedLanguage)
+  const money = useMoney()
+  const privateCosts = loggedIn ? actualCosts ?? undefined : undefined
+  // "original" cannot add up mixed currencies: it totals in the one they share, else the locale's
+  const costCurrency = money.currency !== 'original' ? money.currency
+    : sharedCurrency(nodes, snapshots, privateCosts) ?? displayCurrency(i18n.resolvedLanguage)
+  const yearly = money.period === 'year'
   const cost = useMemo(() => loggedIn && actualCosts === null ? { amount: null, paid: 0 }
-    : onlineMonthlyCost(nodes, snapshots, costCurrency, rates?.rates, loggedIn ? actualCosts ?? undefined : undefined),
-  [nodes, snapshots, costCurrency, rates, loggedIn, actualCosts])
+    : onlineMonthlyCost(nodes, snapshots, costCurrency, rates?.rates, privateCosts),
+  [nodes, snapshots, costCurrency, rates, loggedIn, actualCosts, privateCosts])
+  const nodeCurrencies = useMemo(() => [...new Set(nodes.map((n) => currencyCode(n.currency)).filter((c): c is string => !!c))], [nodes])
 
   const setSort = (next: Sort) => {
     setSortState(next)
@@ -420,14 +478,14 @@ export function HomePage() {
             />
             {settings.showCost && (
               <Metric
-                label={t(loggedIn ? 'overview.actualCost' : 'overview.cost')}
+                label={<MoneyMenu label={t(loggedIn ? (yearly ? 'overview.actualCostYear' : 'overview.actualCost') : yearly ? 'overview.costYear' : 'overview.cost')} extra={nodeCurrencies} />}
                 className="col-span-3 md:col-span-1"
                 subOnPhone
                 inlineOnPhone
                 value={
                   <>
-                    {cost.amount === null ? '—' : formatMoney(cost.amount, costCurrency)}
-                    {cost.amount !== null && <span className="ml-1 text-[0.55em] text-muted">{t('unit.perMonth')}</span>}
+                    {cost.amount === null ? '—' : formatMoney(cost.amount * (yearly ? 12 : 1), costCurrency)}
+                    {cost.amount !== null && <span className="ml-1 text-[0.55em] text-muted">{t(yearly ? 'unit.perYear' : 'unit.perMonth')}</span>}
                   </>
                 }
                 sub={cost.amount === null ? t(loggedIn && actualCosts === null ? 'overview.actualCostUnavailable' : rateError ? 'overview.costUnavailable' : 'overview.costLoading') : <>

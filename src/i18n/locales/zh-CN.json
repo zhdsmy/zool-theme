@@ -30,6 +30,7 @@
     "bandwidth": "实时带宽",
     "traffic": "累计流量",
     "cost": "月度费用",
+    "costYear": "年度费用",
     "attention": "需要注意",
     "allClear": "均未接近上限",
     "costNodes_other": "{{count}} 台在线付费节点",
@@ -39,6 +40,7 @@
     "costUnavailable": "汇率不可用，暂无法合计",
     "regions_other": "{{count}} 个地区",
     "actualCost": "月度成本",
+    "actualCostYear": "年度成本",
     "actualCostUnavailable": "实际成本暂不可用"
   },
   "toolbar": {
@@ -187,5 +189,12 @@
     "dark": "深色",
     "system": "跟随系统",
     "language": "语言"
+  },
+  "money": {
+    "period": "周期",
+    "currency": "货币",
+    "original": "原始",
+    "month": "按月",
+    "year": "按年"
   }
 }
