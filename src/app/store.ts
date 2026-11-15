@@ -79,6 +79,17 @@ const live = new Map<string, HistoryPoint[]>()
 
 export const getLive = (id: string) => live.get(id) ?? []
 
+/** Network-only backfill for the ledger sparks; kept out of `live`, whose points are complete. */
+const sparkSeeds = new Map<string, HistoryPoint[]>()
+
+/** The live buffer led by whatever backfill predates it: what a 15-minute network spark draws. */
+export function getSpark(id: string) {
+  const buf = getLive(id)
+  const first = buf[0]?.at ?? Infinity
+  const seed = (sparkSeeds.get(id) ?? []).filter((p) => p.at < first)
+  return seed.length ? [...seed, ...buf] : buf
+}
+
 /**
  * Frames arrive about every two seconds. Four times that with nothing means we stopped
  * seeing the fleet — a closed socket, a backgrounded tab that stopped asking, a sleeping
@@ -161,6 +172,37 @@ function connect() {
   )
 }
 
+/**
+ * Backfill the ledger sparks from server history so they are full on arrival instead of
+ * drawing a sliver at the right edge for the first minutes.
+ */
+async function seedLive() {
+  const { site, nodes } = state
+  if (!adapter.loadRecent || !site?.recordHours) return
+  const queue = nodes.map((n) => n.id)
+  const worker = async () => {
+    for (let id = queue.shift(); id; id = queue.shift()) {
+      const seed = await adapter.loadRecent!(id, 15).catch(() => [])
+      if (!seed.length) continue
+      sparkSeeds.set(id, seed)
+      set({ liveVersion: state.liveVersion + 1 })
+    }
+  }
+  await Promise.all(Array.from({ length: 4 }, worker))
+}
+
+/** Fill the 15 minutes before the page opened with complete history points, for the node page. */
+export async function backfillLive(id: string) {
+  if (!adapter.capabilities.history || !state.site?.recordHours) return
+  const points = await adapter.loadHistory(id, 1).catch(() => [])
+  const buf = getLive(id)
+  const first = buf[0]?.at ?? Infinity
+  const older = points.filter((p) => p.at < first && p.at >= Date.now() - 15 * 60_000)
+  if (!older.length) return
+  live.set(id, [...older, ...buf].slice(-LIVE_CAPACITY))
+  set({ liveVersion: state.liveVersion + 1 })
+}
+
 export async function start() {
   set({ phase: 'loading' })
   try {
@@ -171,6 +213,7 @@ export async function start() {
     return
   }
   connect()
+  void seedLive()
 }
 
 /**

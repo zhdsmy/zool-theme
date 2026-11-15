@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ArrowLeft, ChevronDown, RefreshCw } from 'lucide-react'
-import { adapter, getLive, useStore, useVisibleNodes } from '@/app/store'
+import { adapter, backfillLive, getLive, getSpark, useStore, useVisibleNodes } from '@/app/store'
 import { Link, navigate } from '@/app/router'
 import { setShave, useShave } from '@/app/prefs'
 import type { HistoryPoint, NodeInfo, PingData, Snapshot } from '@/core/model'
@@ -36,7 +36,7 @@ function Stat({
   return (
     <div className="node-stat min-w-0 py-5 md:px-3 md:py-3.5 md:first:pl-0 lg:px-5 lg:py-5">
       <p className="node-stat-label text-[13px] text-muted md:text-[12px] lg:text-[13px]">{label}</p>
-      <div className="node-stat-value mt-2 truncate text-[26px] leading-none font-light tracking-[-0.03em] md:mt-1.5 md:text-[22px] lg:mt-2 lg:text-[26px]">{children}</div>
+      <div className="node-stat-value mt-2 truncate text-[26px] leading-none font-normal tracking-[-0.03em] md:mt-1.5 md:text-[22px] lg:mt-2 lg:text-[26px]">{children}</div>
       {instrument && <div className="node-stat-inst mt-3 md:mt-2 lg:mt-3">{instrument}</div>}
       {sub && <p className="node-stat-sub num mt-2 truncate text-[12px] text-muted md:mt-1.5 md:text-[11px] lg:mt-2 lg:text-[12px]">{sub}</p>}
     </div>
@@ -421,7 +421,7 @@ function NodeCharts({ node, snap }: { node: NodeInfo; snap?: Snapshot }) {
   return (
     <section className="node-charts mt-16 md:mt-8 lg:mt-16">
       <div className="node-charts-bar flex flex-wrap items-center gap-3">
-        <h2 className="node-charts-title mr-auto text-[24px] font-light md:text-[20px] lg:text-[24px] tracking-[-0.02em]">{t('node.charts')}</h2>
+        <h2 className="node-charts-title mr-auto text-[24px] font-normal md:text-[20px] lg:text-[24px] tracking-[-0.02em]">{t('node.charts')}</h2>
         {adapter.capabilities.ping && (
           <div className="node-tabs flex rounded-full border border-line bg-surface-2 p-0.5" role="tablist">
             {(['load', 'ping'] as const).map((k) => (
@@ -529,7 +529,7 @@ export function NodePage({ id }: { id: string }) {
   // The same fifteen-minute buffer the ledger draws, so the page opens on a familiar shape.
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const liveNet = useMemo(() => {
-    const points = getLive(nodeId)
+    const points = getSpark(nodeId)
     const span = liveSpanMinutes(points, 15)
     return {
       up: recentBuckets(points, (p) => p.netUp, 28, span),
@@ -537,6 +537,10 @@ export function NodePage({ id }: { id: string }) {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [nodeId, liveTick])
+
+  useEffect(() => {
+    void backfillLive(nodeId)
+  }, [nodeId])
 
   useEffect(() => {
     if (node) document.title = `${stripFlag(node.name)} · ${siteName}`
@@ -582,7 +586,7 @@ export function NodePage({ id }: { id: string }) {
           {node.region && node.groups[0] && <span className="text-faint">/</span>}
           {node.groups[0] && <span className="normal-case tracking-normal">{node.groups.join(' · ')}</span>}
         </p>
-        <h1 className="node-title mt-4 text-[34px] leading-[1.1] font-light tracking-[-0.035em] break-words md:mt-2 md:text-[30px] lg:mt-4 lg:text-[50px]">{stripFlag(node.name)}</h1>
+        <h1 className="node-title mt-4 text-[34px] leading-[1.1] font-normal tracking-[-0.035em] break-words md:mt-2 md:text-[30px] lg:mt-4 lg:text-[50px]">{stripFlag(node.name)}</h1>
         <p className="node-meta mt-4 flex flex-wrap items-center gap-x-3 gap-y-1 text-[14px] text-muted md:mt-2.5 md:text-[13px] lg:mt-4 lg:text-[14px]">
           <span
             data-status={pending ? 'pending' : online ? 'online' : 'offline'}

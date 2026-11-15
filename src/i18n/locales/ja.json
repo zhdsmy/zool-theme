@@ -11,6 +11,7 @@
   "status": {
     "allOnline": "すべてのノードが正常に稼働しています。",
     "someOffline_other": "{{count}} 台のノードがオフラインです。",
+    "attention_other": "すべてのノードがオンライン、{{count}} 台に注意が必要です。",
     "noNodes": "ノードはまだありません。",
     "summary_other": "{{count}} 台中 {{online}} 台がオンライン",
     "live": "ライブ",

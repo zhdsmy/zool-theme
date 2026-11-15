@@ -1,6 +1,5 @@
 import { Trans, useTranslation } from 'react-i18next'
 import { adapter, useStore } from '@/app/store'
-import { Wordmark } from './Brand'
 
 function GitHubMark({ className = '' }: { className?: string }) {
   return (
@@ -46,10 +45,6 @@ export function Footer() {
             }}
           />
         </p>
-      </div>
-      {/* The closing wordmark from the ZOOL site, cropped so it rises from the page edge. */}
-      <div className="site-footer-wordmark wrap h-[clamp(40px,9vw,112px)] overflow-hidden" aria-hidden="true">
-        <Wordmark className="h-auto w-full translate-y-[12%] text-wash" />
       </div>
     </footer>
   )

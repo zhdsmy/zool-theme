@@ -272,9 +272,12 @@ function seriesPath(buckets: readonly Bucket[], max: number, width: number, half
 
 const sampleCount = (buckets: readonly Bucket[]) => buckets.reduce((n, b) => (b.value === null ? n : n + 1), 0)
 
+/** The node page's network chart colours, so upload and download read the same everywhere. */
+const UP = 'var(--chart-1)'
+const DOWN = 'var(--chart-2)'
+
 /**
- * Upload above the line, download mirrored below it: direction carries the meaning, so the
- * two series stay apart without a second colour.
+ * Upload above the line, download mirrored below it, each in its node-page series colour.
  *
  * Both halves share one scale by default. Scaling each half to its own peak makes 100 KB/s
  * of upload look exactly like 10 MB/s of download, which is the kind of quiet lie a monitor
@@ -320,16 +323,16 @@ export function MirrorSpark({
   // only the quiet baseline rather than a flat rule with two stray dots at its end.
   const warming = sampleCount(up) < 2 && sampleCount(down) < 2
   const step = width / Math.max(1, up.length - 1)
-  const dot = (buckets: readonly Bucket[], focus: ReturnType<typeof focusPoints>, max: number, isDown: boolean) => {
+  const dot = (buckets: readonly Bucket[], focus: ReturnType<typeof focusPoints>, max: number, isDown: boolean, color: string) => {
     if (focus.lastIndex < 0 || sampleCount(buckets) < 2) return null
     const value = buckets[focus.lastIndex].value ?? 0
     const cy = isDown ? half + (value / max) * (half - 1) : half - (value / max) * (half - 1)
     const cx = (focus.lastIndex * step).toFixed(1)
     // A zero-length line with a round cap is a dot that survives a horizontal stretch.
     return stretch ? (
-      <line x1={cx} x2={cx} y1={cy.toFixed(1)} y2={cy.toFixed(1)} vectorEffect="non-scaling-stroke" strokeLinecap="round" strokeWidth={3.2} style={{ stroke: 'var(--ink)' }} />
+      <line x1={cx} x2={cx} y1={cy.toFixed(1)} y2={cy.toFixed(1)} vectorEffect="non-scaling-stroke" strokeLinecap="round" strokeWidth={3.2} style={{ stroke: color }} />
     ) : (
-      <circle cx={cx} cy={cy.toFixed(1)} r={1.6} style={{ fill: 'var(--ink)' }} />
+      <circle cx={cx} cy={cy.toFixed(1)} r={1.6} style={{ fill: color }} />
     )
   }
   const nonScaling = stretch ? 'non-scaling-stroke' : undefined
@@ -348,12 +351,12 @@ export function MirrorSpark({
       <line x1="0" x2={width} y1={half} y2={half} vectorEffect={nonScaling} style={{ stroke: 'var(--line)' }} shapeRendering="crispEdges" />
       {!warming && (
         <>
-          <path d={u.area} style={{ fill: 'var(--ink)', fillOpacity: 0.08 }} />
-          <path d={d.area} style={{ fill: 'var(--ink)', fillOpacity: 0.05 }} />
-          <path d={u.line} fill="none" vectorEffect={nonScaling} style={{ stroke: 'var(--ink)' }} strokeWidth={1} strokeLinejoin="round" id={`${id}-u`} />
-          <path d={d.line} fill="none" vectorEffect={nonScaling} style={{ stroke: 'var(--muted)' }} strokeWidth={1} strokeLinejoin="round" />
-          {dot(up, upFocus, upMax, false)}
-          {dot(down, downFocus, downMax, true)}
+          <path d={u.area} style={{ fill: UP, fillOpacity: 0.14 }} />
+          <path d={d.area} style={{ fill: DOWN, fillOpacity: 0.12 }} />
+          <path d={u.line} fill="none" vectorEffect={nonScaling} style={{ stroke: UP }} strokeWidth={1.25} strokeLinejoin="round" id={`${id}-u`} />
+          <path d={d.line} fill="none" vectorEffect={nonScaling} style={{ stroke: DOWN }} strokeWidth={1.25} strokeLinejoin="round" />
+          {dot(up, upFocus, upMax, false, UP)}
+          {dot(down, downFocus, downMax, true, DOWN)}
         </>
       )}
     </svg>

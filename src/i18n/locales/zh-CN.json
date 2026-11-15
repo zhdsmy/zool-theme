@@ -11,6 +11,7 @@
   "status": {
     "allOnline": "所有节点运行正常。",
     "someOffline_other": "{{count}} 个节点离线。",
+    "attention_other": "所有节点在线，{{count}} 个需要注意。",
     "noNodes": "还没有节点。",
     "summary_other": "{{online}} / {{count}} 个节点在线",
     "live": "实时",

@@ -1,5 +1,6 @@
 import { request, resilientSocket, wsUrl } from '@/core/http'
 import type {
+  HistoryPoint,
   LiveEvent,
   ActualCost,
   LoginResult,
@@ -406,18 +407,62 @@ const loadGroups = () =>
 
 const FIRST_FRAME_TIMEOUT_MS = 15_000
 
+/* ---------- history (TSDB, v2.6+) ---------- */
+
+interface NezhaMetricSeries {
+  data_points?: { ts: number; value: number }[] | null
+}
+
+/** TSDB metric name → HistoryPoint field. Nezha's `in` is download, `out` is upload. */
+const METRICS = {
+  cpu: 'cpu',
+  memory: 'memUsed',
+  swap: 'swapUsed',
+  disk: 'diskUsed',
+  net_out_speed: 'netUp',
+  net_in_speed: 'netDown',
+  load1: 'load1',
+  tcp_conn: 'tcp',
+  udp_conn: 'udp',
+  process_count: 'process',
+  net_out_transfer: 'totalUp',
+  net_in_transfer: 'totalDown',
+} as const satisfies Record<string, keyof HistoryPoint>
+
+/** The API only takes these periods; shorter ranges are cut from `1d` client-side. */
+const period = (hours: number) => (hours <= 24 ? '1d' : hours <= 168 ? '7d' : '30d')
+
+export function mergeMetrics(series: Partial<Record<keyof typeof METRICS, NezhaMetricSeries | null | undefined>>, since: number): HistoryPoint[] {
+  const byTs = new Map<number, HistoryPoint>()
+  for (const [metric, field] of Object.entries(METRICS) as [keyof typeof METRICS, keyof HistoryPoint][]) {
+    for (const { ts, value } of series[metric]?.data_points ?? []) {
+      if (ts < since || !Number.isFinite(value)) continue
+      let point = byTs.get(ts)
+      if (!point) {
+        point = { at: ts, cpu: 0, memUsed: 0, swapUsed: 0, diskUsed: 0, netUp: 0, netDown: 0, load1: 0, tcp: 0, udp: 0, process: 0 }
+        byTs.set(ts, point)
+      }
+      ;(point as unknown as Record<string, number>)[field] = value
+    }
+  }
+  return [...byTs.values()].sort((a, b) => a.at - b.at)
+}
+
 /* ---------- adapter ---------- */
 
 export const nezha: MonitorAdapter = {
   target: 'nezha',
-  capabilities: { billing: true, trafficLimit: true, history: false, ping: true },
+  capabilities: { billing: true, trafficLimit: true, history: true, ping: true },
   adminUrl: '/dashboard',
   poweredBy: { name: 'Nezha', url: 'https://github.com/nezhahq/nezha' },
-  historyRanges: [0],
+  historyRanges: [0, 1, 4, 24, 168, 720],
   supportsTwoFactor: false,
 
   async loadSite(): Promise<SiteInfo> {
-    const res = await request<Common<NezhaSetting>>('/api/v1/setting').catch(() => null)
+    const [res, loggedIn] = await Promise.all([
+      request<Common<NezhaSetting>>('/api/v1/setting').catch(() => null),
+      request<Common<unknown>>('/api/v1/profile').then((r) => r.success, () => false),
+    ])
     const cfg = res?.data?.config ?? {}
     const oauthProviders = (cfg.oauth2_providers ?? []).filter((provider) => typeof provider === 'string' && provider.trim())
     return {
@@ -425,7 +470,8 @@ export const nezha: MonitorAdapter = {
       description: '',
       language: cfg.language?.replace('_', '-'),
       settings: window.ZoolConfig ?? {},
-      recordHours: 0,
+      // Guests may only read one day of TSDB history; signed-in users get the full 30 days.
+      recordHours: res?.data?.tsdb_enabled ? (loggedIn ? 720 : 24) : 0,
       oauth: oauthProviders.length > 0,
       oauthProviders,
       passwordLogin: true,
@@ -467,8 +513,18 @@ export const nezha: MonitorAdapter = {
     groupsPromise = null
   },
 
-  async loadHistory() {
-    return []
+  async loadHistory(id, hours) {
+    const base = `/api/v1/server/${encodeURIComponent(id)}/metrics?period=${period(hours)}&metric=`
+    const names = Object.keys(METRICS) as (keyof typeof METRICS)[]
+    const results = await Promise.all(names.map((m) => request<Common<NezhaMetricSeries>>(base + m, {}, 60_000).catch(() => null)))
+    if (!results[0]?.success) throw new Error('Nezha history unavailable')
+    return mergeMetrics(Object.fromEntries(names.map((m, i) => [m, results[i]?.data])), Date.now() - hours * 3_600_000)
+  },
+
+  async loadRecent(id, minutes) {
+    const base = `/api/v1/server/${encodeURIComponent(id)}/metrics?period=1d&metric=`
+    const [up, down] = await Promise.all([request<Common<NezhaMetricSeries>>(base + 'net_out_speed'), request<Common<NezhaMetricSeries>>(base + 'net_in_speed')])
+    return mergeMetrics({ net_out_speed: up.data, net_in_speed: down.data }, Date.now() - minutes * 60_000)
   },
 
   async loadPing(id): Promise<PingData> {

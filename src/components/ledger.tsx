@@ -1,7 +1,7 @@
 import { useMemo, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ArrowDown, ArrowUp, CalendarClock, Clock3 } from 'lucide-react'
-import { adapter, getBlindWindows, getLive, useStore } from '@/app/store'
+import { adapter, getBlindWindows, getSpark, useStore } from '@/app/store'
 import { Link } from '@/app/router'
 import type { NodeInfo, Snapshot } from '@/core/model'
 import { formatPercent, splitBytes, splitSpeed, ratio, quotaUsage } from '@/core/format'
@@ -114,6 +114,22 @@ export function GroupHeading({ id, name, count, up, down }: { id: string; name: 
   )
 }
 
+const STRIP_GRID = 'md:grid md:grid-cols-[minmax(0,1fr)_126px_172px_62px_92px] md:items-center md:gap-x-4 lg:grid-cols-[minmax(0,1fr)_126px_172px_188px_92px] lg:gap-x-6 xl:grid-cols-[minmax(0,1fr)_126px_172px_228px_186px]'
+
+/** Desktop column heads for the ledger; a phone row labels its own figures. */
+export function StripHead() {
+  const { t } = useTranslation()
+  return (
+    <div className={`hidden border-b border-line px-2 pb-2 text-[11.5px] text-muted ${STRIP_GRID}`} aria-hidden="true">
+      <span className="pl-[22px]">{t('sort.name')}</span>
+      <span className="text-right">{t('metric.cpu')}</span>
+      <span className="text-right">{t('metric.memory')}</span>
+      <span className="text-right">{t('metric.network')}</span>
+      <span className="text-right">{t('sort.uptime')}</span>
+    </div>
+  )
+}
+
 export function NodeStrip({
   node,
   snap,
@@ -134,7 +150,7 @@ export function NodeStrip({
   const compact = density === 'compact'
 
   const live = useMemo(() => {
-    const points = getLive(node.id)
+    const points = getSpark(node.id)
     const span = liveSpanMinutes(points, WINDOW_MINUTES)
     return {
       up: recentBuckets(points, (p) => p.netUp, SPARK_BUCKETS, span),
@@ -168,7 +184,7 @@ export function NodeStrip({
       data-pending={pending ? '' : undefined}
       data-stale={shown && cond.kind !== 'online' ? '' : undefined}
       data-density={density}
-      className={`node-strip block border-b border-line transition-colors hover:bg-wash md:grid md:grid-cols-[minmax(0,1fr)_126px_172px_62px_92px] md:items-center md:gap-x-4 lg:grid-cols-[minmax(0,1fr)_126px_172px_188px_92px] lg:gap-x-6 xl:grid-cols-[minmax(0,1fr)_126px_172px_228px_186px] ${
+      className={`node-strip block border-b border-line transition-colors hover:bg-wash ${STRIP_GRID} ${
         compact ? 'px-1 py-1 md:px-2 md:py-1.5' : 'px-1 py-1.5 md:px-2 md:py-3'
       }`}
     >
@@ -368,7 +384,7 @@ function CardReading({
           in the quietest part of the reading. */}
       <Percent
         value={percent}
-        className={`mt-0.5 block text-[17px] leading-5 font-light tracking-[-0.02em] lg:mt-1 lg:text-[20px] lg:leading-tight lg:@max-xs:text-[18px] ${
+        className={`mt-0.5 block text-[17px] leading-5 font-normal tracking-[-0.02em] lg:mt-1 lg:text-[20px] lg:leading-tight lg:@max-xs:text-[18px] ${
           level === 'danger' ? 'text-danger' : level === 'warn' ? 'text-warn' : ''
         }`}
       />
@@ -420,7 +436,7 @@ export function NodeCard({ node, snap, tick, pending }: { node: NodeInfo; snap?:
   const actualPrice = showBilling ? billing.actualPrice(node) : ''
 
   const live = useMemo(() => {
-    const points = getLive(node.id)
+    const points = getSpark(node.id)
     const span = liveSpanMinutes(points, WINDOW_MINUTES)
     return {
       up: recentBuckets(points, (p) => p.netUp, SPARK_BUCKETS, span),
@@ -556,7 +572,7 @@ export function NodeCard({ node, snap, tick, pending }: { node: NodeInfo; snap?:
               <span className="hidden text-[12px] text-muted lg:block">{t('node.speed')}</span>
               <span className="grid grid-cols-3 items-center gap-3 lg:contents max-lg:@max-xs:grid-cols-1">
                 <MirrorSpark up={live.up} down={live.down} width={CARD_BOX} height={32} stretch label={t('metric.network')} className="h-[22px] lg:h-[32px] max-lg:@max-xs:hidden" />
-                <span className="col-span-2 grid grid-cols-2 gap-3 text-[15px] leading-5 max-lg:@max-xs:text-[14px] font-light tracking-[-0.02em] text-ink lg:text-[20px] lg:leading-6 lg:@max-xs:text-[18px]">
+                <span className="col-span-2 grid grid-cols-2 gap-3 text-[15px] leading-5 max-lg:@max-xs:text-[14px] font-normal tracking-[-0.02em] text-ink lg:text-[20px] lg:leading-6 lg:@max-xs:text-[18px]">
                   <span className="flex h-[22px] min-w-0 items-center gap-1 lg:h-[24px] lg:gap-1.5">
                     <ArrowUp size={14} className="shrink-0 text-muted" aria-hidden />
                     <Speed value={snap!.netUp} />

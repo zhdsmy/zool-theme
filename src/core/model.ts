@@ -188,6 +188,8 @@ export interface MonitorAdapter {
   /** Drop any cached connection or frame so the next load and subscribe start fresh. */
   reset?(): void
   loadHistory(id: string, hours: number): Promise<HistoryPoint[]>
+  /** Network speed for the last `minutes`, to fill the ledger sparks before live frames do. */
+  loadRecent?(id: string, minutes: number): Promise<HistoryPoint[]>
   loadPing(id: string, hours: number): Promise<PingData>
   login(username: string, password: string, code?: string): Promise<LoginResult>
   oauthUrl(site: SiteInfo, provider?: string): string | null | Promise<string | null>

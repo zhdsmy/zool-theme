@@ -12,6 +12,8 @@
     "allOnline": "All systems operational.",
     "someOffline_one": "{{count}} node is offline.",
     "someOffline_other": "{{count}} nodes are offline.",
+    "attention_one": "All nodes online, {{count}} needs attention.",
+    "attention_other": "All nodes online, {{count}} need attention.",
     "noNodes": "No nodes yet.",
     "summary_one": "{{online}} of {{count}} node online",
     "summary_other": "{{online}} of {{count}} nodes online",

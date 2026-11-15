@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { mapClientsFrame, mapNode, mapRecord, type KomariClientsFrame, type KomariNode, type KomariRecord } from '../src/adapters/komari'
-import { groupIndex, mapFrame, mapServices, mapState, parsePublicNote, type NezhaFrame, type NezhaGroup } from '../src/adapters/nezha'
+import { groupIndex, mapFrame, mapServices, mapState, mergeMetrics, parsePublicNote, type NezhaFrame, type NezhaGroup } from '../src/adapters/nezha'
 import komariNodes from './fixtures/komari-nodes.json'
 import komariFrame from './fixtures/komari-clients-frame.json'
 import komariRecords from './fixtures/komari-records.json'
@@ -168,5 +168,23 @@ describe('nezha mapServices', () => {
     expect(data.tasks.map((t) => [t.id, t.name, t.avg])).toEqual([[1, '广东联通', 6], [2, '广东移动', 4], [3, 'legacy', 9]])
     expect(new Set(data.points.map((p) => p.task))).toEqual(new Set([1, 2, 3]))
     expect(data.tasks.every((t) => t.loss === undefined)).toBe(true)
+  })
+})
+
+describe('nezha mergeMetrics', () => {
+  it('joins TSDB series by timestamp, maps in/out to down/up and drops points before `since`', () => {
+    const pts = mergeMetrics(
+      {
+        cpu: { data_points: [{ ts: 1000, value: 9 }, { ts: 2000, value: 3 }, { ts: 3000, value: 4 }] },
+        net_out_speed: { data_points: [{ ts: 3000, value: 50 }, { ts: 2000, value: 40 }] },
+        net_in_speed: { data_points: [{ ts: 2000, value: 7 }] },
+        net_in_transfer: null as never,
+      },
+      2000,
+    )
+    expect(pts.map((p) => p.at)).toEqual([2000, 3000])
+    expect(pts[0]).toMatchObject({ cpu: 3, netUp: 40, netDown: 7 })
+    expect(pts[1]).toMatchObject({ cpu: 4, netUp: 50, netDown: 0 })
+    expect(pts[0].totalDown).toBeUndefined()
   })
 })

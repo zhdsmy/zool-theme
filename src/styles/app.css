@@ -1068,9 +1068,6 @@
     padding-top: 18px;
     padding-bottom: 14px;
   }
-  .site-footer-wordmark {
-    height: 28px;
-  }
 }
 
 @media (pointer: coarse) and (width < 768px) {

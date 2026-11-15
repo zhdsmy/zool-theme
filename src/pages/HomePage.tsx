@@ -1,17 +1,18 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ArrowDownUp, Check, ChevronDown, LayoutGrid, List, ListTree, Rows2, Rows3 } from 'lucide-react'
-import { adapter, useStore, useVisibleNodes } from '@/app/store'
+import { adapter, getSpark, useStore, useVisibleNodes } from '@/app/store'
 import { setDensity, setGrouping, setView, useDensity, useGrouping, useView } from '@/app/prefs'
 import type { Density, View } from '@/core/settings'
-import type { NodeInfo, Snapshot } from '@/core/model'
+import type { HistoryPoint, NodeInfo, Snapshot } from '@/core/model'
+import { recentBuckets, type Bucket } from '@/core/live'
 import { currencyCode, formatMoney, formatPercent, ratio, splitBytes, splitSpeed } from '@/core/format'
 import { displayCurrency, onlineMonthlyCost, sharedCurrency } from '@/core/cost'
 import { setMoneyCurrency, setMoneyPeriod, useMoney, type MoneyPeriod } from '@/app/money'
 import { regionName, stripFlag } from '@/core/region'
 import { Popover } from '@/components/Popover'
-import { GroupHeading, NodeCard, NodeStrip } from '@/components/ledger'
-import { levelFor, type Level } from '@/components/instruments'
+import { GroupHeading, NodeCard, NodeStrip, StripHead } from '@/components/ledger'
+import { levelFor, MirrorSpark, type Level } from '@/components/instruments'
 import { RegionFlag, StatusDot } from '@/components/bits'
 import { groupCounts, parseFilterQuery, sectionize, serializeFilterQuery, type Filter } from '@/core/filter'
 
@@ -124,6 +125,7 @@ function Metric({
   className = '',
   subOnPhone = false,
   inlineOnPhone = false,
+  chart,
 }: {
   label: ReactNode
   value: ReactNode
@@ -134,6 +136,8 @@ function Metric({
   subOnPhone?: boolean
   /** On a phone, put the value beside its label on the first line so the sub line sits directly below. */
   inlineOnPhone?: boolean
+  /** A small trend under the figures, from md up. */
+  chart?: ReactNode
 }) {
   // Before the first live frame every total is zero, and "0 / 17 online" in red is a false
   // alarm; the band waits with dashes in the same places instead.
@@ -143,7 +147,7 @@ function Metric({
       <div className={inlineOnPhone ? 'flex items-baseline justify-between gap-1.5 md:block' : ''}>
         <div className={`${typeof label === 'string' ? 'truncate' : 'min-w-0'} text-[10.5px] leading-tight text-muted md:text-[12px] md:leading-normal`}>{label}</div>
         <p
-          className={`num truncate text-[16px] leading-none font-medium tracking-[-0.025em] md:mt-1.5 md:text-[21px] md:font-light lg:text-[24px] ${
+          className={`num truncate text-[16px] leading-none font-medium tracking-[-0.025em] md:mt-1.5 md:text-[21px] lg:text-[24px] ${
             inlineOnPhone ? 'shrink-0' : 'mt-1'
           } ${fed ? tone : 'text-faint'}`}
         >
@@ -155,6 +159,7 @@ function Metric({
           {fed ? sub : '—'}
         </p>
       ) : null}
+      {chart && fed ? <div className="mt-2.5 hidden md:block">{chart}</div> : null}
     </div>
   )
 }
@@ -379,6 +384,22 @@ export function HomePage() {
 
   const shown = sections.reduce((n, s) => n + s.rows.length, 0)
 
+  // The whole fleet's last 15 minutes: every node's buffer bucketed on one clock, then summed.
+  const fleet = useMemo(() => {
+    const sum = (pick: (p: HistoryPoint) => number) => {
+      const out: Bucket[] = []
+      for (const n of nodes) {
+        recentBuckets(getSpark(n.id), pick, 24, 15).forEach((b, i) => {
+          out[i] ??= { at: b.at, value: null }
+          if (b.value !== null) out[i].value = (out[i].value ?? 0) + b.value
+        })
+      }
+      return out
+    }
+    return { up: sum((p) => p.netUp), down: sum((p) => p.netDown) }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [nodes, tick])
+
   return (
     <div className="wrap pt-3.5 md:pt-6 lg:pt-16">
       {/* headline */}
@@ -388,20 +409,6 @@ export function HomePage() {
               connection that was working and dropped. */}
           <StatusDot online={connection === 'open' && fed} pending={!fed} />
           {connection === 'closed' && fed ? t('status.reconnecting') : connection === 'open' && fed ? t('status.live') : t('status.connecting')}
-          {nodes.length > 0 && fed && (
-            <>
-              <span className="text-faint">/</span>
-              {/* What used to be a 52px headline, at the size of a caption: it is one sentence,
-                  and the overview beside it is what the top of the page is actually for. */}
-              <span
-                className={`normal-case tracking-normal ${
-                  offline ? 'rounded-full bg-danger-wash px-2 py-0.5 font-medium text-danger md:rounded-none md:bg-transparent md:p-0 md:font-normal' : ''
-                }`}
-              >
-                {offline === 0 ? t('status.allOnline') : t('status.someOffline', { count: offline })}
-              </span>
-            </>
-          )}
           {nodes.length === 0 && (
             <>
               <span className="text-faint">/</span>
@@ -409,9 +416,18 @@ export function HomePage() {
             </>
           )}
         </p>
+        {/* The one sentence the page owes a visitor, in the colour of its answer. */}
+        {nodes.length > 0 && fed && (
+          <h2
+            className={`mt-1.5 text-[19px] leading-tight font-medium tracking-[-0.02em] md:mt-2 md:text-[24px] lg:text-[28px] ${
+              offline ? 'text-danger' : totals.attention ? 'text-warn' : 'text-good'
+            }`}
+          >
+            {offline ? t('status.someOffline', { count: offline }) : totals.attention ? t('status.attention', { count: totals.attention }) : t('status.allOnline')}
+          </h2>
+        )}
 
-        {/* The fleet at a glance. This is the top of the page, so it is the biggest type on
-            it — but a band of figures, not one 52px sentence. */}
+        {/* The fleet at a glance, under the sentence that sums it up. */}
         {settings.showOverview && (
           <div
             className={`home-overview mt-2.5 grid grid-cols-6 border-y border-line md:mt-3 md:divide-x md:divide-line lg:mt-4 ${settings.showCost ? 'md:grid-cols-5' : 'md:grid-cols-4'}`}
@@ -419,7 +435,7 @@ export function HomePage() {
             <Metric
               label={t('overview.nodes')}
               className="col-span-2 md:col-span-1"
-              tone={offline ? 'text-danger' : ''}
+              tone={offline ? 'text-danger' : 'text-good'}
               value={
                 <>
                   {online}
@@ -443,6 +459,7 @@ export function HomePage() {
                   down={`${splitSpeed(totals.down).value} ${splitSpeed(totals.down).unit}`}
                 />
               }
+              chart={<MirrorSpark up={fleet.up} down={fleet.down} width={160} height={24} stretch label={t('overview.bandwidth')} />}
             />
             <Metric
               label={t('overview.traffic')}
@@ -732,7 +749,9 @@ export function HomePage() {
         {shown === 0 ? (
           <p className="rounded-[20px] border border-dashed border-line py-16 text-center text-[14px] text-muted">{t('toolbar.empty')}</p>
         ) : (
-          sections.map((section) => (
+          <>
+            {view !== 'cards' && <StripHead />}
+            {sections.map((section) => (
             <div key={section.name || 'ungrouped'}>
               {section.titled && (
                 <GroupHeading
@@ -755,7 +774,8 @@ export function HomePage() {
                 ))
               )}
             </div>
-          ))
+            ))}
+          </>
         )}
         {shown > 0 && (
           <p className="num mt-3 text-[12px] text-muted md:mt-4">
