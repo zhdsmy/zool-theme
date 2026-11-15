@@ -168,6 +168,9 @@ describe('nezha mapServices', () => {
     expect(data.tasks.map((t) => [t.id, t.name, t.avg])).toEqual([[1, '广东联通', 6], [2, '广东移动', 4], [3, 'legacy', 9]])
     expect(new Set(data.points.map((p) => p.task))).toEqual(new Set([1, 2, 3]))
     expect(data.tasks.every((t) => t.loss === undefined)).toBe(true)
+    const recent = mapServices([{ monitor_id: 1, monitor_name: 'a', created_at: [1, 2, 3], avg_delay: [10, 4, 6] }], 2)
+    expect(recent.points.map((p) => p.at)).toEqual([2, 3])
+    expect(recent.tasks[0].avg).toBe(5)
   })
 })
 

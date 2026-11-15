@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.0+zhdsmy.20 — 2026-11-15
+
+- Nezha latency follows the chart ranges: 1 hour, 4 hours and 1 day for guests, plus 7 and 30 days when signed in (`/api/v1/server/:id/service?period=`). Before, latency always showed the last day.
+
 ## 1.0.0+zhdsmy.19 — 2026-11-15
 
 - Nezha history: Nezha v2.6+ keeps server metrics in its TSDB, and the adapter now reads them (`/api/v1/server/:id/metrics`). The node page gets 1 hour, 4 hours and 1 day ranges for guests, plus 7 and 30 days when signed in; today's traffic, the 24-hour peak speed and the week view work on Nezha. The "this panel keeps no server history" note is gone when the TSDB is on.

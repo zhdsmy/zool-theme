@@ -371,7 +371,7 @@ function NodeCharts({ node, snap }: { node: NodeInfo; snap?: Snapshot }) {
   // Only the live range needs to follow the socket; history ranges stay put.
   const liveVersion = useStore((s) => (range === 0 ? s.liveVersion : -1))
   const ranges = adapter.historyRanges.filter((h) => h === 0 || h <= Math.max(recordHours, 1))
-  const pingRanges = adapter.target === 'nezha' ? [24] : ranges.filter((h) => h > 0)
+  const pingRanges = ranges.filter((h) => h > 0)
   const [tab, setTab] = useState<Tab>('load')
   const shave = useShave()
   const [pingRange, setPingRange] = useState(pingRanges.includes(24) ? 24 : (pingRanges[0] ?? 24))

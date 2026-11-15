@@ -86,13 +86,14 @@ export interface NezhaServiceInfo {
 }
 
 /** Nezha reports average delay per probe window and no loss, so `loss` stays unset. */
-export function mapServices(services: NezhaServiceInfo[]): PingData {
+export function mapServices(services: NezhaServiceInfo[], since = 0): PingData {
   const tasks: PingData['tasks'] = []
   const points: PingData['points'] = []
   for (const s of services) {
     const id = s.monitor_id ?? s.service_id ?? 0
-    const at = s.created_at ?? []
-    const delay = s.avg_delay ?? []
+    const keep = (s.created_at ?? []).map((t, i) => [t, s.avg_delay?.[i] ?? -1] as const).filter(([t]) => t >= since)
+    const at = keep.map(([t]) => t)
+    const delay = keep.map(([, v]) => v)
     const values = delay.filter((v) => v > 0)
     tasks.push({
       id,
@@ -527,9 +528,9 @@ export const nezha: MonitorAdapter = {
     return mergeMetrics({ net_out_speed: up.data, net_in_speed: down.data }, Date.now() - minutes * 60_000)
   },
 
-  async loadPing(id): Promise<PingData> {
-    const res = await request<Common<NezhaServiceInfo[]>>(`/api/v1/server/${encodeURIComponent(id)}/service`)
-    return mapServices(res.data ?? [])
+  async loadPing(id, hours): Promise<PingData> {
+    const res = await request<Common<NezhaServiceInfo[]>>(`/api/v1/server/${encodeURIComponent(id)}/service?period=${period(hours)}`)
+    return mapServices(res.data ?? [], Date.now() - hours * 3_600_000)
   },
 
   async login(username, password): Promise<LoginResult> {
