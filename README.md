@@ -1,3 +1,7 @@
+> [!IMPORTANT]
+> **Archived / 已归档：** This fork has been merged into [**zhdsmy/nezha-zool-theme**](https://github.com/zhdsmy/nezha-zool-theme) (`apps/frontend`), which combines the ZOOL public status frontend and reskinned Nezha admin panel in a single repository.
+> 本仓库已合并入 [**zhdsmy/nezha-zool-theme**](https://github.com/zhdsmy/nezha-zool-theme)（`apps/frontend` 目录），后续更新请前往新仓库。
+
 <p align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="docs/brand/zool-wordmark-white.svg" />

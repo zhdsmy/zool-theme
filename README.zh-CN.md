@@ -1,3 +1,6 @@
+> [!IMPORTANT]
+> **已归档：** 本仓库已合并入 [**zhdsmy/nezha-zool-theme**](https://github.com/zhdsmy/nezha-zool-theme)（`apps/frontend` 目录），新仓库已将公共状态页前端与管理后台整合维护，后续更新请前往新仓库。
+
 <p align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="docs/brand/zool-wordmark-white.svg" />
